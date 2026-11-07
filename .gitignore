@@ -20,3 +20,6 @@ indexes/
 
 # VS Code
 .vscode/
+.env
+.env.*
+.streamlit/secrets.toml

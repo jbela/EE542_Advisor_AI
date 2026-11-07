@@ -1,0 +1,22 @@
+# Python
+.venv/
+venv/
+__pycache__/
+*.pyc
+
+# Credentials
+.env
+.env.*
+!.env.example
+
+# Generated data
+data/raw/
+data/processed/
+data/versions/
+data/courses/
+
+# Generated indexes
+indexes/
+
+# VS Code
+.vscode/

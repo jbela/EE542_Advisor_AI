@@ -1,0 +1,62 @@
+[
+  {
+    "id": "ece_undergraduate",
+    "title": "USC ECE Undergraduate Program",
+    "url": "https://minghsiehece.usc.edu/academics/bs/",
+    "category": "undergraduate"
+  },
+  {
+    "id": "ece_graduate",
+    "title": "USC ECE Graduate Program",
+    "url": "https://minghsiehece.usc.edu/academics/ms/master-of-science-electrical-engineering-program-details/",
+    "category": "graduate"
+  },
+  {
+    "id": "ois_international",
+    "title": "USC Office of International Services",
+    "url": "https://ois.usc.edu/",
+    "category": "international"
+  },
+  {
+    "id": "usc_registration",
+    "title": "USC Registration Services",
+    "url": "https://arr.usc.edu/registration-services/",
+    "category": "shared"
+  },
+  {
+    "id": "ece_bs_details",
+    "title": "USC ECE Undergraduate Degree Details",
+    "url": "https://minghsiehece.usc.edu/academics/bs/program-details-abet/",
+    "category": "undergraduate"
+  },
+  {
+    "id": "ece_ms_registration",
+    "title": "USC ECE Master's Registration",
+    "url": "https://minghsiehece.usc.edu/students/registration/master-of-science/",
+    "category": "graduate"
+  },
+  {
+    "id": "ois_maintaining_status",
+    "title": "USC OIS Maintaining Status",
+    "url": "https://ois.usc.edu/maintaining-status/guidelines-maintaining-status/",
+    "category": "international"
+  },
+  {
+    "id": "ois_reduced_course_load",
+    "title": "USC OIS Reduced Course Load",
+    "url": "https://ois.usc.edu/maintaining-status/reduced-course-load/",
+    "category": "international"
+  },
+  {
+    "id": "usc_degree_progress",
+    "title": "USC Degree Progress",
+    "url": "https://arr.usc.edu/degree-progress/",
+    "category": "shared"
+  },
+  {
+    "id": "usc_registration_calendar",
+    "title": "USC Registration Calendar",
+    "url": "https://arr.usc.edu/registration-calendar/",
+    "category": "shared"
+ }
+]

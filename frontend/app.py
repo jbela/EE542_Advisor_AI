@@ -1,6 +1,7 @@
 import uuid
 from pathlib import Path
 
+import requests
 import streamlit as st
 
 
@@ -245,6 +246,50 @@ def get_mock_response(question: str) -> str:
         "with supporting citations."
     )
 
+# ----------------------------------
+# FastAPI Integration
+# ----------------------------------
+API_URL = "http://127.0.0.1:8000/ask"
+
+
+def get_api_response(question: str) -> dict:
+    try:
+        response = requests.post(
+            API_URL,
+            json={"question": question},
+            timeout=130,
+        )
+        response.raise_for_status()
+
+        data = response.json()
+
+        if not isinstance(data, dict) or not isinstance(
+            data.get("answer"), str
+        ):
+            raise ValueError("Invalid API response format")
+
+        sources = data.get("sources", [])
+
+        if not isinstance(sources, list):
+            sources = []
+
+        return {
+            "answer": data["answer"],
+            "sources": sources,
+            "status": data.get("status", "unknown"),
+        }
+
+    except (requests.exceptions.RequestException, ValueError) as e:
+        return {
+            "answer": (
+                "⚠️ Unable to get an AI response from the backend.\n\n"
+                f"Error: {type(e).__name__}: {e}\n\n"
+                "Please check whether FastAPI and Ollama "
+                "are running."
+            ),
+            "sources": [],
+            "status": "error",
+        }
 
 # ----------------------------------
 # Sidebar
@@ -278,9 +323,20 @@ with st.sidebar:
             st.rerun()
 
     st.divider()
+
+    st.markdown("**Response Mode**")
+
+    response_mode = st.radio(
+        "Select response mode",
+        ["Demo", "API"],
+        horizontal=True,
+        label_visibility="collapsed",
+    )
+
+    st.divider()
     st.caption("EE542 Final Project · Fall 2026")
     st.caption("Jia, Ellie, Isabel")
-    st.caption("Demo mode")
+    st.caption("Prototype version")
 
 
 # ----------------------------------
@@ -313,10 +369,16 @@ with button_col:
         st.rerun()
 
 
-st.caption(
-    "⚠️ Demo mode — Responses are simulated, "
-    "not official academic advice."
-)
+if response_mode == "Demo":
+    st.caption(
+        "⚠️ Demo mode — Responses are simulated, "
+        "not official academic advice."
+    )
+else:
+    st.caption(
+        "⚠️ API mode — AI responses are not yet "
+        "verified against official USC sources."
+    )
 
 
 # ----------------------------------
@@ -408,11 +470,22 @@ if prompt:
         "content": prompt,
     })
 
-    response = get_mock_response(prompt)
+    # Select response source
+    if response_mode == "API":
+        with st.spinner("USC Advisor AI is thinking..."):
+            result = get_api_response(prompt)
+    else:
+        result = {
+            "answer": get_mock_response(prompt),
+            "sources": [],
+            "status": "demo",
+        }
 
     messages.append({
         "role": "assistant",
-        "content": response,
+        "content": result["answer"],
+        "sources": result["sources"],
+        "status": result["status"],
     })
 
     st.rerun()

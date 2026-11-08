@@ -1,6 +1,9 @@
 import uuid
+from html import escape
 from pathlib import Path
+from urllib.parse import urlparse
 
+import requests
 import streamlit as st
 
 
@@ -82,6 +85,47 @@ st.markdown(
         button[kind="primary"]:hover,
         button[data-testid="stBaseButton-primary"]:hover {
             background-color: #750000 !important;
+        }
+
+        /* Inline citation chips */
+        .usc-sources-row {
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 0.4rem;
+            margin-top: 0.65rem;
+            padding-bottom: 0.7rem;
+            min-height: 2.5rem;
+        }
+
+        .usc-sources-label {
+            font-size: 0.78rem;
+            color: #990000;
+            font-weight: 600;
+            margin-right: 0.15rem;
+        }
+
+        .usc-source-chip {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.2rem 0.55rem;
+            font-size: 0.74rem;
+            line-height: 1.2;
+            background-color: #FFFFFF;
+            border: 1px solid #E8E0D7;
+            border-radius: 999px;
+            color: #990000 !important;
+            text-decoration: none !important;
+            max-width: 190px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .usc-source-chip:hover {
+            background-color: #FFF5F0;
+            border-color: #990000;
+            color: #990000 !important;
         }
 
         /* Align chat headings with avatar */
@@ -245,6 +289,50 @@ def get_mock_response(question: str) -> str:
         "with supporting citations."
     )
 
+# ----------------------------------
+# FastAPI Integration
+# ----------------------------------
+API_URL = "http://127.0.0.1:8000/ask"
+
+
+def get_api_response(question: str) -> dict:
+    try:
+        response = requests.post(
+            API_URL,
+            json={"question": question},
+            timeout=130,
+        )
+        response.raise_for_status()
+
+        data = response.json()
+
+        if not isinstance(data, dict) or not isinstance(
+            data.get("answer"), str
+        ):
+            raise ValueError("Invalid API response format")
+
+        sources = data.get("sources", [])
+
+        if not isinstance(sources, list):
+            sources = []
+
+        return {
+            "answer": data["answer"],
+            "sources": sources,
+            "status": data.get("status", "unknown"),
+        }
+
+    except (requests.exceptions.RequestException, ValueError) as e:
+        return {
+            "answer": (
+                "⚠️ Unable to get an AI response from the backend.\n\n"
+                f"Error: {type(e).__name__}: {e}\n\n"
+                "Please check whether FastAPI and Ollama "
+                "are running."
+            ),
+            "sources": [],
+            "status": "error",
+        }
 
 # ----------------------------------
 # Sidebar
@@ -278,9 +366,20 @@ with st.sidebar:
             st.rerun()
 
     st.divider()
+
+    st.markdown("**Response Mode**")
+
+    response_mode = st.radio(
+        "Select response mode",
+        ["Demo", "API"],
+        horizontal=True,
+        label_visibility="collapsed",
+    )
+
+    st.divider()
     st.caption("EE542 Final Project · Fall 2026")
     st.caption("Jia, Ellie, Isabel")
-    st.caption("Demo mode")
+    st.caption("Prototype version")
 
 
 # ----------------------------------
@@ -313,10 +412,16 @@ with button_col:
         st.rerun()
 
 
-st.caption(
-    "⚠️ Demo mode — Responses are simulated, "
-    "not official academic advice."
-)
+if response_mode == "Demo":
+    st.caption(
+        "⚠️ Demo mode — Responses are simulated, "
+        "not official academic advice."
+    )
+else:
+    st.caption(
+        "⚠️ API mode — AI responses are not yet "
+        "verified against official USC sources."
+    )
 
 
 # ----------------------------------
@@ -370,7 +475,7 @@ if not messages:
 
 
 # ----------------------------------
-# Display Chat History
+# Display Chat History + Source Chips
 # ----------------------------------
 for message in messages:
     avatar = (
@@ -385,6 +490,74 @@ for message in messages:
     ):
         st.markdown(message["content"])
 
+        # Display citation chips for assistant messages
+        if message["role"] == "assistant":
+            sources = message.get("sources") or []
+            status = message.get("status", "unknown")
+
+            if not isinstance(sources, list):
+                sources = []
+
+            source_chips = []
+
+            for i, source in enumerate(sources, start=1):
+                if not isinstance(source, dict):
+                    continue
+
+                url = source.get("url")
+
+                if not isinstance(url, str):
+                    continue
+
+                try:
+                    parsed = urlparse(url)
+
+                    if (
+                        parsed.scheme not in ("http", "https")
+                        or not parsed.hostname
+                    ):
+                        continue
+
+                except ValueError:
+                    continue
+
+                title = str(
+                    source.get("title") or f"Source {i}"
+                )
+
+                # Short label, full title on hover
+                label = (
+                    title[:21] + "…"
+                    if len(title) > 22
+                    else title
+                )
+
+                source_chips.append(
+                    f'<a class="usc-source-chip" '
+                    f'href="{escape(url, quote=True)}" '
+                    f'title="{escape(title, quote=True)}" '
+                    f'target="_blank" '
+                    f'rel="noopener noreferrer">'
+                    f'↗ {escape(label)}</a>'
+                )
+
+            if source_chips:
+                chips_html = "".join(source_chips)
+
+                st.markdown(
+                    '<div class="usc-sources-row">'
+                    '<span class="usc-sources-label">'
+                    'Sources'
+                    '</span>'
+                    f'{chips_html}'
+                    '</div>',
+                    unsafe_allow_html=True,
+                )
+
+            elif status not in ("demo", "error"):
+                st.caption(
+                    "No supporting sources available yet."
+                )
 
 # ----------------------------------
 # Chat Input
@@ -408,11 +581,22 @@ if prompt:
         "content": prompt,
     })
 
-    response = get_mock_response(prompt)
+    # Select response source
+    if response_mode == "API":
+        with st.spinner("USC Advisor AI is thinking..."):
+            result = get_api_response(prompt)
+    else:
+        result = {
+            "answer": get_mock_response(prompt),
+            "sources": [],
+            "status": "demo",
+        }
 
     messages.append({
         "role": "assistant",
-        "content": response,
+        "content": result["answer"],
+        "sources": result["sources"],
+        "status": result["status"],
     })
 
     st.rerun()

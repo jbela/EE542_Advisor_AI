@@ -1,5 +1,7 @@
 import uuid
+from html import escape
 from pathlib import Path
+from urllib.parse import urlparse
 
 import requests
 import streamlit as st
@@ -83,6 +85,47 @@ st.markdown(
         button[kind="primary"]:hover,
         button[data-testid="stBaseButton-primary"]:hover {
             background-color: #750000 !important;
+        }
+
+        /* Inline citation chips */
+        .usc-sources-row {
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 0.4rem;
+            margin-top: 0.65rem;
+            padding-bottom: 0.7rem;
+            min-height: 2.5rem;
+        }
+
+        .usc-sources-label {
+            font-size: 0.78rem;
+            color: #990000;
+            font-weight: 600;
+            margin-right: 0.15rem;
+        }
+
+        .usc-source-chip {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.2rem 0.55rem;
+            font-size: 0.74rem;
+            line-height: 1.2;
+            background-color: #FFFFFF;
+            border: 1px solid #E8E0D7;
+            border-radius: 999px;
+            color: #990000 !important;
+            text-decoration: none !important;
+            max-width: 190px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .usc-source-chip:hover {
+            background-color: #FFF5F0;
+            border-color: #990000;
+            color: #990000 !important;
         }
 
         /* Align chat headings with avatar */
@@ -432,7 +475,7 @@ if not messages:
 
 
 # ----------------------------------
-# Display Chat History
+# Display Chat History + Source Chips
 # ----------------------------------
 for message in messages:
     avatar = (
@@ -447,6 +490,74 @@ for message in messages:
     ):
         st.markdown(message["content"])
 
+        # Display citation chips for assistant messages
+        if message["role"] == "assistant":
+            sources = message.get("sources") or []
+            status = message.get("status", "unknown")
+
+            if not isinstance(sources, list):
+                sources = []
+
+            source_chips = []
+
+            for i, source in enumerate(sources, start=1):
+                if not isinstance(source, dict):
+                    continue
+
+                url = source.get("url")
+
+                if not isinstance(url, str):
+                    continue
+
+                try:
+                    parsed = urlparse(url)
+
+                    if (
+                        parsed.scheme not in ("http", "https")
+                        or not parsed.hostname
+                    ):
+                        continue
+
+                except ValueError:
+                    continue
+
+                title = str(
+                    source.get("title") or f"Source {i}"
+                )
+
+                # Short label, full title on hover
+                label = (
+                    title[:21] + "…"
+                    if len(title) > 22
+                    else title
+                )
+
+                source_chips.append(
+                    f'<a class="usc-source-chip" '
+                    f'href="{escape(url, quote=True)}" '
+                    f'title="{escape(title, quote=True)}" '
+                    f'target="_blank" '
+                    f'rel="noopener noreferrer">'
+                    f'↗ {escape(label)}</a>'
+                )
+
+            if source_chips:
+                chips_html = "".join(source_chips)
+
+                st.markdown(
+                    '<div class="usc-sources-row">'
+                    '<span class="usc-sources-label">'
+                    'Sources'
+                    '</span>'
+                    f'{chips_html}'
+                    '</div>',
+                    unsafe_allow_html=True,
+                )
+
+            elif status not in ("demo", "error"):
+                st.caption(
+                    "No supporting sources available yet."
+                )
 
 # ----------------------------------
 # Chat Input

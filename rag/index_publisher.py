@@ -7,7 +7,7 @@ from pathlib import Path
 import faiss
 
 
-def publish_index(index, documents, model_name, index_dir):
+def publish_index(index, documents, model_name, index_dir, knowledge_fingerprint=None):
     """Validate and atomically publish a new FAISS index."""
 
     index_dir = Path(index_dir)
@@ -51,7 +51,8 @@ def publish_index(index, documents, model_name, index_dir):
         "version": version_id,
         "created_at": datetime.now(timezone.utc).isoformat(),
         "chunk_count": len(verified_documents),
-        "embedding_model": model_name
+        "embedding_model": model_name,
+        "knowledge_fingerprint": knowledge_fingerprint
     }
 
     temporary_manifest = index_dir / f".current_{version_id}.tmp"

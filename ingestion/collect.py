@@ -91,7 +91,7 @@ def collect_source(source):
 
     if old_data and old_data["content_hash"] == content_hash:
         print("No changes detected.")
-        return
+        return False
 
     if old_data:
         timestamp = datetime.now(
@@ -129,6 +129,8 @@ def collect_source(source):
     )
 
     print(f"Saved: {output_file.name}")
+    return True
+
 
 
 def main():
@@ -136,14 +138,34 @@ def main():
         SOURCES_FILE.read_text(encoding="utf-8")
     )
 
-    for source in sources:
-        try:
-            collect_source(source)
-        except Exception as error:
-            print(f"Error: {error}")
+    changed_sources = []
+    failed_sources = []
 
-        time.sleep(10)
+    for source in sources:
+        if not source.get("enabled", True):
+            continue
+
+        try:
+            changed = collect_source(source)
+
+            if changed:
+                changed_sources.append(source["id"])
+
+        except Exception as error:
+            print(f"Error collecting {source['id']}: {error}")
+            failed_sources.append(source["id"])
+
+    print("\nPolicy collection summary:")
+    print(f"Changed sources: {len(changed_sources)}")
+    print(f"Failed sources: {len(failed_sources)}")
+
+    return {
+        "academic_updates": bool(changed_sources),
+        "changed_sources": changed_sources,
+        "failed_sources": failed_sources
+    }
 
 
 if __name__ == "__main__":
     main()
+

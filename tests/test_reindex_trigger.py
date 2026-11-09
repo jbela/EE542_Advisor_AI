@@ -1,3 +1,4 @@
+import json
 import unittest
 from unittest.mock import patch
 
@@ -6,51 +7,78 @@ from ingestion import run_sync
 
 class TestReindexTrigger(unittest.TestCase):
 
-    @patch.object(run_sync, "subprocess")
-    @patch.object(run_sync, "sync_courses")
-    @patch.object(run_sync, "discover_terms")
-    @patch.object(run_sync, "CURRENT_FILE")
-    def test_rebuild_when_academic_changes(
-        self, mock_current, mock_discover, 
-        mock_sync, mock_subprocess
-    ):
-        mock_current.exists.return_value = True
+    def setUp(self):
+        self.patchers = [
+            patch.object(run_sync, "discover_terms"),
+            patch.object(run_sync, "sync_courses"),
+            patch.object(run_sync, "sync_policies"),
+            patch.object(run_sync, "calculate_fingerprint"),
+            patch.object(run_sync, "subprocess"),
+            patch.object(run_sync, "CURRENT_FILE")
+        ]
 
-        mock_sync.return_value = {
-            "academic_updates": True,
-            "failed_terms": []
-        }
+        mocks = [p.start() for p in self.patchers]
 
-        run_sync.main()
+        for p in self.patchers:
+            self.addCleanup(p.stop)
 
-        mock_subprocess.run.assert_called_once()
+        (
+            self.mock_discover,
+            self.mock_courses,
+            self.mock_policies,
+            self.mock_fingerprint,
+            self.mock_subprocess,
+            self.mock_current
+        ) = mocks
 
-    @patch.object(run_sync, "subprocess")
-    @patch.object(run_sync, "sync_courses")
-    @patch.object(run_sync, "discover_terms")
-    @patch.object(run_sync, "CURRENT_FILE")
-    def test_skip_when_only_operational_changes(
-        self, mock_current,
-        mock_discover, mock_sync, mock_subprocess
-    ):
-        mock_current.exists.return_value = True
-
-        mock_sync.return_value = {
+        self.mock_courses.return_value = {
             "academic_updates": False,
             "failed_terms": []
         }
 
+        self.mock_policies.return_value = {
+            "academic_updates": False,
+            "changed_sources": [],
+            "failed_sources": []
+        }
+
+        self.mock_fingerprint.return_value = "fingerprint_123"
+
+        self.mock_current.exists.return_value = True
+        self.mock_current.read_text.return_value = json.dumps({
+            "version": "working_version",
+            "knowledge_fingerprint": "fingerprint_123"
+        })
+
+    def test_matching_fingerprint_skips_rebuild(self):
+        run_sync.main()
+        self.mock_subprocess.run.assert_not_called()
+
+    def test_different_fingerprint_triggers_rebuild(self):
+        self.mock_fingerprint.return_value = "fingerprint_456"
+
         run_sync.main()
 
-        mock_subprocess.run.assert_not_called()
+        self.mock_subprocess.run.assert_called_once()
 
-    @patch.object(run_sync, "subprocess")
-    @patch.object(run_sync, "sync_courses")
-    @patch.object(run_sync, "discover_terms")
-    def test_failed_sync_does_not_rebuild(
-        self, mock_discover, mock_sync, mock_subprocess
-    ):
-        mock_sync.return_value = {
+    def test_missing_fingerprint_triggers_rebuild(self):
+        self.mock_current.read_text.return_value = json.dumps({
+            "version": "old_version"
+        })
+
+        run_sync.main()
+
+        self.mock_subprocess.run.assert_called_once()
+
+    def test_missing_index_triggers_rebuild(self):
+        self.mock_current.exists.return_value = False
+
+        run_sync.main()
+
+        self.mock_subprocess.run.assert_called_once()
+
+    def test_failed_course_sync_does_not_rebuild(self):
+        self.mock_courses.return_value = {
             "academic_updates": True,
             "failed_terms": ["20271"]
         }
@@ -58,7 +86,19 @@ class TestReindexTrigger(unittest.TestCase):
         with self.assertRaises(RuntimeError):
             run_sync.main()
 
-        mock_subprocess.run.assert_not_called()
+        self.mock_subprocess.run.assert_not_called()
+
+    def test_failed_policy_sync_does_not_rebuild(self):
+        self.mock_policies.return_value = {
+            "academic_updates": True,
+            "changed_sources": [],
+            "failed_sources": ["ois_maintaining_status"]
+        }
+
+        with self.assertRaises(RuntimeError):
+            run_sync.main()
+
+        self.mock_subprocess.run.assert_not_called()
 
 
 if __name__ == "__main__":

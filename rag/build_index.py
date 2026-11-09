@@ -1,37 +1,48 @@
-import os
-import uuid
-from datetime import datetime, timezone
+
 import json
 from pathlib import Path
 
 import faiss
 import numpy as np
 from sentence_transformers import SentenceTransformer
+
 from rag.index_publisher import publish_index
+from rag.knowledge_fingerprint import calculate_fingerprint
+
+# --------------------------------------------------
+# Project configuration
+# --------------------------------------------------
 
 ROOT = Path(__file__).resolve().parents[1]
 
 RAW_DIR = ROOT / "data" / "raw"
-INDEX_DIR = ROOT / "indexes"
-VERSIONS_DIR = INDEX_DIR / "versions"
-CURRENT_FILE = INDEX_DIR / "current.json"
-
-VERSIONS_DIR.mkdir(parents=True, exist_ok=True)
 COURSES_DIR = ROOT / "data" / "courses"
+INDEX_DIR = ROOT / "indexes"
 
 MODEL_NAME = "sentence-transformers/all-MiniLM-L6-v2"
 
 INDEX_DIR.mkdir(parents=True, exist_ok=True)
 
 
+# --------------------------------------------------
+# Text chunking
+# --------------------------------------------------
+
 def chunk_text(text, chunk_size=180, overlap=30):
+    """Split academic documents into overlapping chunks."""
+
+    if chunk_size <= 0 or overlap < 0 or overlap >= chunk_size:
+        raise ValueError("Invalid chunk size or overlap")
+
     words = text.split()
     chunks = []
 
     step = chunk_size - overlap
 
     for start in range(0, len(words), step):
-        chunk = " ".join(words[start:start + chunk_size])
+        chunk = " ".join(
+            words[start:start + chunk_size]
+        )
 
         if chunk.strip():
             chunks.append(chunk)
@@ -39,14 +50,19 @@ def chunk_text(text, chunk_size=180, overlap=30):
     return chunks
 
 
-def main():
-    print("Loading embedding model...")
-    model = SentenceTransformer(MODEL_NAME)
+# --------------------------------------------------
+# Process USC academic and policy documents
+# --------------------------------------------------
+
+def load_policy_documents():
+    """Load previously collected USC academic documents."""
 
     documents = []
 
     for file in sorted(RAW_DIR.glob("*.json")):
-        data = json.loads(file.read_text(encoding="utf-8"))
+        data = json.loads(
+            file.read_text(encoding="utf-8")
+        )
 
         chunks = chunk_text(data["text"])
 
@@ -61,10 +77,22 @@ def main():
                 "retrieved_at": data.get("retrieved_at")
             })
 
-        print(f"{data['title']}: {len(chunks)} chunks")
+        print(
+            f"{data['title']}: {len(chunks)} chunks"
+        )
 
-    
-    # Add structured EE courses to the RAG index
+    return documents
+
+
+# --------------------------------------------------
+# Process structured USC EE courses
+# --------------------------------------------------
+
+def load_course_documents():
+    """Convert semester-specific EE courses into searchable text."""
+
+    documents = []
+
     for file in sorted(COURSES_DIR.glob("ee_*.json")):
         dataset = json.loads(
             file.read_text(encoding="utf-8")
@@ -72,6 +100,8 @@ def main():
 
         term_code = str(dataset["term_code"])
         source_url = dataset["source_url"]
+
+        count = 0
 
         for course in dataset["courses"]:
             course_code = course.get("course_code")
@@ -97,61 +127,121 @@ def main():
                     f"Units: {course['units']}"
                 )
 
-            # Prerequisites
-            prerequisites = course.get("prerequisites_display")
+            # Readable prerequisite information
+            prerequisites = course.get(
+                "prerequisites_display"
+            )
 
             if prerequisites:
                 parts.append(
                     "Prerequisite information: "
-                    + json.dumps(prerequisites, ensure_ascii=False)
+                    + json.dumps(
+                        prerequisites,
+                        ensure_ascii=False
+                    )
                 )
 
-            # Corequisites
-            corequisites = course.get("corequisites_display")
+            # Readable corequisite information
+            corequisites = course.get(
+                "corequisites_display"
+            )
 
             if corequisites:
                 parts.append(
                     "Corequisite information: "
-                    + json.dumps(corequisites, ensure_ascii=False)
+                    + json.dumps(
+                        corequisites,
+                        ensure_ascii=False
+                    )
                 )
 
             if course.get("recommended_preparation"):
                 parts.append(
-                    f"Recommended preparation: "
-                    f"{course['recommended_preparation']}"
+                    "Recommended preparation: "
+                    + str(
+                        course["recommended_preparation"]
+                    )
                 )
 
             if course.get("restrictions"):
                 parts.append(
-                    f"Restrictions: {course['restrictions']}"
+                    "Restrictions: "
+                    + json.dumps(
+                        course["restrictions"],
+                        ensure_ascii=False
+                    )
                 )
 
             text = "\n".join(parts)
 
+            course_id = course.get("course_id")
+
+            if course_id is None:
+                raise ValueError(
+                    f"Missing course ID for {course_code}"
+                )
+
+            document_id = (
+                f"course_{term_code}_{course_id}"
+            )
+
             documents.append({
-                "chunk_id": (
-                    f"course_{term_code}_"
-                    f"{course['course_id']}"
-                ),
-                "document_id": (
-                    f"course_{term_code}_"
-                    f"{course['course_id']}"
-                ),
+                "chunk_id": document_id,
+                "document_id": document_id,
                 "text": text,
                 "title": f"{course_code} - {title}",
                 "url": source_url,
                 "category": "course",
                 "term_code": term_code,
                 "course_code": course_code,
-                "retrieved_at": dataset.get("collected_at")
+                "retrieved_at": dataset.get(
+                    "collected_at"
+                )
             })
 
+            count += 1
+
         print(
-            f"Added EE courses from term {term_code}"
+            f"Added {count} EE courses from term {term_code}"
         )
 
+    return documents
+
+
+# --------------------------------------------------
+# Build and publish FAISS index
+# --------------------------------------------------
+
+def main():
+    # Record the academic data state before indexing.
+    starting_fingerprint = calculate_fingerprint()
+
+    print("Loading USC academic documents...")
+
+    policy_documents = load_policy_documents()
+    course_documents = load_course_documents()
+
+    documents = policy_documents + course_documents
+
     if not documents:
-        raise ValueError("No documents found.")
+        raise ValueError(
+            "No academic documents found to index."
+        )
+
+    chunk_ids = [doc["chunk_id"] for doc in documents]
+
+    if len(chunk_ids) != len(set(chunk_ids)):
+        raise ValueError(
+            "Duplicate chunk IDs detected."
+        )
+
+    print(
+        f"\nTotal searchable chunks: {len(documents)}"
+    )
+
+    print("\nLoading embedding model...")
+
+    model = SentenceTransformer(MODEL_NAME)
 
     print("\nGenerating embeddings...")
 
@@ -162,77 +252,80 @@ def main():
         show_progress_bar=True
     )
 
-    embeddings = np.asarray(embeddings, dtype=np.float32)
-
-    index = faiss.IndexFlatIP(embeddings.shape[1])
-    index.add(embeddings)
-
-    # Create a unique version for this index
-    version_id = (
-        datetime.now(timezone.utc).strftime("%Y%m%d_%H%M%S")
-        + "_"
-        + uuid.uuid4().hex[:8]
+    embeddings = np.asarray(
+        embeddings,
+        dtype=np.float32
     )
 
-    version_dir = VERSIONS_DIR / version_id
-    version_dir.mkdir(parents=True, exist_ok=False)
-
-    # Write the new index and its matching metadata
-    index_path = version_dir / "faiss.index"
-    chunks_path = version_dir / "chunks.json"
-
-    faiss.write_index(index, str(index_path))
-
-    chunks_path.write_text(
-        json.dumps(documents, indent=2, ensure_ascii=False),
-        encoding="utf-8"
-    )
-
-    # Validate the saved index before publishing
-    verified_index = faiss.read_index(str(index_path))
-
-    verified_chunks = json.loads(
-        chunks_path.read_text(encoding="utf-8")
-    )
-
-    if verified_index.ntotal != len(verified_chunks):
-        raise RuntimeError(
-            "Index validation failed: "
-            "vector count does not match chunk count"
+    if embeddings.ndim != 2:
+        raise ValueError(
+            "Embedding output must be a 2D matrix."
         )
 
-    if verified_index.d != embeddings.shape[1]:
+    if embeddings.shape[0] != len(documents):
+        raise ValueError(
+            "Embedding count does not match document count."
+        )
+
+    if not np.isfinite(embeddings).all():
+        raise ValueError(
+            "Embeddings contain invalid numeric values."
+        )
+
+    print("\nBuilding FAISS index...")
+
+    index = faiss.IndexFlatIP(
+        embeddings.shape[1]
+    )
+
+    index.add(embeddings)
+
+    if index.ntotal != len(documents):
         raise RuntimeError(
-            "Index validation failed: "
-            "embedding dimensions do not match"
+            "FAISS vector count does not match documents."
+        )
+
+    # Publish exactly once using the separate publisher.
+    # The publisher writes and validates a complete version
+    # before atomically updating indexes/current.json.
+
+    # Confirm academic source data did not change during indexing.
+    ending_fingerprint = calculate_fingerprint()
+
+    if starting_fingerprint != ending_fingerprint:
+        raise RuntimeError(
+            "Academic source data changed during indexing. "
+            "The new index will not be published. "
+            "Retry after synchronization finishes."
         )
 
     manifest = publish_index(
         index=index,
         documents=documents,
         model_name=MODEL_NAME,
-        index_dir=INDEX_DIR
+        index_dir=INDEX_DIR,
+        knowledge_fingerprint=starting_fingerprint
     )
 
-    print(f"Published version: {manifest['version']}")
-    print(f"Validated {manifest['chunk_count']} chunks.")
+    print("\n" + "=" * 50)
+    print("USC ADVISOR AI - INDEX BUILD COMPLETE")
+    print("=" * 50)
 
-    temporary_manifest = INDEX_DIR / (
-        f".current_{version_id}.tmp"
+    print(
+        f"Policy chunks: {len(policy_documents)}"
     )
 
-    temporary_manifest.write_text(
-        json.dumps(manifest, indent=2),
-        encoding="utf-8"
+    print(
+        f"Course records: {len(course_documents)}"
     )
 
-    os.replace(temporary_manifest, CURRENT_FILE)
+    print(
+        f"Total indexed chunks: {manifest['chunk_count']}"
+    )
 
-    print(f"Published index version: {version_id}")
-    print(f"Validated {len(verified_chunks)} chunks.")
-
-
-    print(f"\nSuccessfully indexed {len(documents)} chunks.")
+    print(
+        f"Published index version: {manifest['version']}"
+    )
 
 
 if __name__ == "__main__":

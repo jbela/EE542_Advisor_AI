@@ -8,6 +8,7 @@ __pycache__/
 .env
 .env.*
 !.env.example
+.streamlit/secrets.toml
 
 # Generated data
 data/raw/
@@ -18,8 +19,8 @@ data/courses/
 # Generated indexes
 indexes/
 
+# Synchronization logs
+logs/
+
 # VS Code
 .vscode/
-.env
-.env.*
-.streamlit/secrets.toml

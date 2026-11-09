@@ -1,0 +1,58 @@
+[
+  {
+    "id": "Q01",
+    "question": "Which EE courses cover wireless networks?",
+    "category": "course",
+    "term_code": "20271",
+    "relevant_course_codes": ["EE 597", "EE 450"]
+  },
+  {
+    "id": "Q02",
+    "question": "Which course teaches foundations of computer networks?",
+    "category": "course",
+    "term_code": "20271",
+    "relevant_course_codes": ["EE 450"]
+  },
+  {
+    "id": "Q03",
+    "question": "Which EE courses teach wireless communications?",
+    "category": "course",
+    "term_code": "20271",
+    "relevant_course_codes": ["EE 535"]
+  },
+  {
+    "id": "Q04",
+    "question": "What course covers computer systems architecture?",
+    "category": "course",
+    "term_code": "20271",
+    "relevant_course_codes": ["EE 557"]
+  },
+  {
+    "id": "Q05",
+    "question": "Which EE course covers power systems analysis and design?",
+    "category": "course",
+    "term_code": "20271",
+    "relevant_course_codes": ["EE 521"]
+  },
+  {
+    "id": "Q06",
+    "question": "Which EE course introduces deep learning using Python and GPUs?",
+    "category": "course",
+    "term_code": "20271",
+    "relevant_course_codes": ["EE 541"]
+  },
+  {
+    "id": "Q07",
+    "question": "What are the prerequisites for EE 597?",
+    "category": "course",
+    "term_code": "20271",
+    "relevant_course_codes": ["EE 597"]
+  },
+  {
+    "id": "Q08",
+    "question": "What course covers integrated circuits for wireless communications?",
+    "category": "course",
+    "term_code": "20271",
+    "relevant_course_codes": ["EE 632A"]
+  }
+]

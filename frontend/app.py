@@ -1,4 +1,5 @@
 import uuid
+import os
 from html import escape
 from pathlib import Path
 from urllib.parse import urlparse
@@ -292,7 +293,10 @@ def get_mock_response(question: str) -> str:
 # ----------------------------------
 # FastAPI Integration
 # ----------------------------------
-API_URL = "http://127.0.0.1:8000/ask"
+API_URL = os.getenv(
+    "USC_ADVISOR_API_URL",
+    "http://127.0.0.1:8000/ask",
+)
 
 
 def get_api_response(question: str) -> dict:

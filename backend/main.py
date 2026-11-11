@@ -53,9 +53,44 @@ async def ask(data: Question):
                 "Do not invent course rules, requirements, deadlines, waivers, "
                 "or approvals. If the passages don't establish an answer, "
                 "say that the answer cannot be verified from these sources. "
+                "Historical course records do NOT establish a current or future "
+                "offering or current prerequisite requirement. Mention the "
+                "source term when describing historical requirements. "
                 "If prerequisite logic is marked UNVERIFIED, do not interpret "
                 "it as definite AND/OR logic. Refer exceptions and approvals "
                 "to an authorized USC advisor or office."
+                "Distinguish explicitly empty prerequisite lists from missing data. "
+                "If the source states 'None listed in source record', say that no "
+                "prerequisites are listed. Do not claim that other requirements "
+                "or registration restrictions are absent. "
+                "If the source states 'Not specified in source record', explain "
+                "that prerequisite information is unavailable and do not assume none. "
+                "For academic policy questions, distinguish university-wide "
+                "requirements from department-specific procedures. "
+                "Do not generalize an individual department's rules to all USC departments. "
+                "State which department or office a policy applies to when the source specifies one. "
+                "If the sources do not establish a university-wide rule, "
+                "say that procedures may vary and direct the student to the responsible office. "
+                "For course recommendations, briefly explain why each course matches "
+                "the student's interests, using only information supported by its "
+                "retrieved course description. "
+                "Include the source number for each recommended course. "
+                "Do not recommend courses solely because their titles sound related. "
+                "If the retrieved description does not support a specific claim, omit it. "
+                "Use retrieved sources as evidence, but do not reproduce source headers "
+                "or internal metadata verbatim. "
+                "Present course names, prerequisites, and source terms naturally. "
+                "When using a historical course record, state the semester clearly "
+                "and explain that the information may have changed. "
+                "Do not claim the course will be offered in a future semester "
+                "unless a current official source confirms it. "
+                "Answer the student's question directly and naturally. "
+                "Do not reproduce JSON, dictionaries, or internal source metadata. "
+                "For simple prerequisites, state the required course by its code and name "
+                "when the source provides that information. "
+                "When using historical course information, identify the semester "
+                "and briefly explain that requirements may have changed. "
+                "Use source numbers for citations, but do not copy source headers. "
             ),
         },
         {
@@ -83,7 +118,9 @@ async def ask(data: Question):
 
     sources = [
         {"id": doc["id"], "title": doc["title"], "url": doc["url"],
-         "category": doc["category"], "retrieval_method": doc["retrieval_method"]}
+         "category": doc["category"], "retrieval_method": doc["retrieval_method"],
+         "term_code": doc.get("term_code"), "historical": doc.get("historical", False),
+         "requested_term": doc.get("requested_term") }
         for doc in docs
     ]
     return {

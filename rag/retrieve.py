@@ -74,7 +74,7 @@ tokenized_corpus = [
 bm25 = BM25Okapi(tokenized_corpus)
 
 
-def retrieve(question, top_k=5, category=None, term_code=None):
+def retrieve(question, top_k=5, category=None, term_code=None, exclude_category=None):
     query_vector = model.encode(
         [question],
         normalize_embeddings=True,
@@ -128,6 +128,10 @@ def retrieve(question, top_k=5, category=None, term_code=None):
 
     for idx, score in ranked:
         doc = documents[idx]
+
+        # Optionally exclude a category (e.g., courses for policy questions).
+        if exclude_category and doc.get("category") == exclude_category:
+            continue
 
         # Filter by category
         if category and doc["category"] not in (

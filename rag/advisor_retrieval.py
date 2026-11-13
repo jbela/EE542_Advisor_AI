@@ -5,6 +5,8 @@ should use retrieve_for_advisor() instead of deciding routes independently.
 """
 import re
 from rag.course_lookup import get_term_collection_status
+from rag.syllabus_lookup import find_syllabus_term
+from rag.syllabus_grading import lookup_grading_fact
 
 from rag.course_lookup import (
     extract_course_codes,
@@ -16,6 +18,14 @@ from rag.course_lookup import (
 
 DEFAULT_TERM = "20271"
 
+SYLLABUS_CONTENT_PATTERN = re.compile(
+    r"\b(grading|grades?|percent(?:age)?|weight(?:ing)?|worth|"
+    r"final project|gold version|assignments?|late policy|"
+    r"late submissions?|attendance|quizzes|"
+    r"learning objectives|topics?|textbooks?|"
+    r"office hours|ai policy)\b",
+    re.IGNORECASE,
+)
 
 HISTORICAL_CATALOG_PATTERN = re.compile(
     r"\b(what|which|list|show|find)\b.*"
@@ -392,6 +402,69 @@ def retrieve_for_advisor(question, term_code=DEFAULT_TERM, top_k=5):
 
 
     codes = extract_course_codes(question)
+
+    # Explicit syllabus questions use imported course documents.
+    if (
+        len(codes) == 1
+        and (
+            re.search(
+                r"\bsyllab(?:us|i)\b",
+                question,
+                re.IGNORECASE,
+            )
+            or (
+                SYLLABUS_CONTENT_PATTERN.search(question)
+                and find_syllabus_term(codes[0]) is not None
+            )
+        )
+        and method not in (
+            "availability",
+            "history",
+            "comparison",
+        )
+    ):
+        explicit_term = extract_semester(question)
+
+        selected_term = find_syllabus_term(
+            codes[0],
+            requested_term=explicit_term,
+            max_term=term_code,
+        )
+
+        if selected_term is None:
+            return []
+
+        grading = lookup_grading_fact(question, codes[0], selected_term)
+        if grading is not None:
+            return [{
+                **grading,
+                "retrieval_method": "hybrid",
+                "requested_term": explicit_term or term_code,
+                "historical": selected_term != (explicit_term or term_code),
+            }]
+
+        from rag.retrieve import retrieve
+
+        results = retrieve(
+            question,
+            top_k=top_k,
+            category="course",
+            term_code=selected_term,
+            source_type="syllabus",
+            course_codes=codes,
+        )
+
+        return [
+            {
+                **result,
+                "retrieval_method": "hybrid",
+                "requested_term": explicit_term or term_code,
+                "historical": (
+                    selected_term != (explicit_term or term_code)
+                ),
+            }
+            for result in results
+        ]
 
     if method == "availability":
         return [

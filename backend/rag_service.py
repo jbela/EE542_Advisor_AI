@@ -112,26 +112,54 @@ def _course_record(doc, method="exact"):
         "prerequisite_verification": verification,
     }
 
-
 def normalize(doc):
-    """Normalize exact and hybrid retrieval results."""
+    """Preserve source provenance for exact and hybrid results."""
     method = doc.get("retrieval_method", "hybrid")
+
     if method == "exact":
         return _course_record(doc, "exact")
 
+    term = str(doc.get("term_code") or "")
+    requested = str(doc.get("requested_term") or term)
+    historical = bool(doc.get("historical", False))
+    text = str(doc.get("text", ""))
+
+    if doc.get("source_type") == "syllabus":
+        notice = (
+            f"Syllabus source semester: {format_term(term)}. "
+            f"Section: {doc.get('section_label') or 'unspecified'}. "
+            "This evidence applies to this course, semester, "
+            "and section; it does not establish current or "
+            "future course availability."
+        )
+
+        if historical:
+            notice += (
+                f" The requested semester is "
+                f"{format_term(requested)}; this older syllabus "
+                "does not verify requirements for that semester."
+            )
+
+        text = notice + "\n\n" + text
+
     return {
         "id": doc.get("chunk_id") or doc.get("document_id"),
+        "document_id": doc.get("document_id"),
         "title": doc.get("title", "USC source"),
-        "text": str(doc.get("text", ""))[:MAX_CHARS],
+        "text": text[:MAX_CHARS],
         "url": doc.get("url"),
         "category": doc.get("category"),
         "course_code": doc.get("course_code"),
-        "term_code": doc.get("term_code"),
-        "requested_term": doc.get("term_code"),
-        "historical": False,
+        "term_code": term or None,
+        "requested_term": requested or None,
+        "historical": historical,
         "retrieval_method": "hybrid",
+        "source_type": doc.get("source_type"),
+        "section_label": doc.get("section_label"),
+        "source_file": doc.get("source_file"),
+        "page_number": doc.get("page_number"),
+        "grading_fact": doc.get("grading_fact"),
     }
-
 
 def normalize_special(doc):
     """Present non-text retrieval outcomes without inventing course facts."""
@@ -237,7 +265,11 @@ def get_context(question, term_code=DEFAULT_TERM, top_k=5):
         if method in ("exact", "hybrid"):
             item = normalize(doc)
             if method == "hybrid":
-                item["requested_term"] = str(term_code or DEFAULT_TERM)
+                item["requested_term"] = str(
+                    doc.get("requested_term")
+                    or term_code
+                    or DEFAULT_TERM
+                )
         elif method in ("availability", "history", "comparison", "historical_catalog"):
             item = normalize_special(doc)
         else:

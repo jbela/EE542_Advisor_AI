@@ -21,10 +21,16 @@ st.set_page_config(
 BASE_DIR = Path(__file__).resolve().parent
 LOGO_PATH = BASE_DIR / "assets" / "usc-seal.png"
 TOMMY_PATH = BASE_DIR / "assets" / "tommy-avatar.png"
+TRAVELER_PATH = BASE_DIR / "assets" / "traveler.avif"
 
 ASSISTANT_AVATAR = (
     str(TOMMY_PATH) if TOMMY_PATH.is_file() else "🎓"
 )
+
+USER_AVATAR = (
+    str(TRAVELER_PATH) if TRAVELER_PATH.is_file() else "👤"
+)
+
 
 
 # ----------------------------------
@@ -46,7 +52,7 @@ st.markdown(
 
         /* Reduce excess space above content */
         .block-container {
-            padding-top: 1.2rem;
+            padding-top: 3rem;
             padding-bottom: 2rem;
             max-width: 1150px;
         }
@@ -423,7 +429,7 @@ for message in messages:
     avatar = (
         ASSISTANT_AVATAR
         if message["role"] == "assistant"
-        else "👤"
+        else USER_AVATAR
     )
 
     with st.chat_message(
@@ -467,7 +473,7 @@ for message in messages:
                 title = str(
                     source.get("title") or f"Source {i}"
                 )
-                
+
                 # Show repeated chunks from the same source only once.
                 source_key = (
                     parsed._replace(fragment="").geturl(),
@@ -534,6 +540,10 @@ if prompt:
         "role": "user",
         "content": prompt,
     })
+
+    # Display the question before waiting for the API.
+    with st.chat_message("user", avatar=USER_AVATAR):
+        st.markdown(prompt)
 
     with st.spinner("USC Advisor AI is thinking..."):
         result = get_api_response(prompt)

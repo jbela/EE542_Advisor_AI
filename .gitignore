@@ -22,5 +22,8 @@ indexes/
 # Synchronization logs
 logs/
 
+# Generated CSV results
+*.csv
+
 # VS Code
 .vscode/

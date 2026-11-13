@@ -78,11 +78,11 @@ def calculate_fingerprint(
             path.read_text(encoding="utf-8")
         )
 
-    sources.append({
-        "type": "verified_requirements",
-        "file": path.name,
-        "content_hash": hash_json(data)
-    })
+        sources.append({
+            "type": "verified_requirements",
+            "file": path.name,
+            "content_hash": hash_json(data)
+        })
 
     if not sources:
         raise ValueError(

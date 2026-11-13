@@ -39,6 +39,20 @@ async def ask(data: Question):
             "status": "review_required",
         }
 
+    if len(docs) == 1:
+        doc = docs[0]
+
+        if (
+            doc.get("retrieval_method") == "historical_catalog"
+            and not doc.get("url")
+            and "have not been collected" in doc.get("text", "")
+        ):
+            return {
+                "answer": doc["text"],
+                "sources": [],
+                "status": "review_required",
+            }
+
     context = "\n\n".join(
         f"[{i}] {doc['title']}\n{doc['text']}"
         for i, doc in enumerate(docs, start=1)
@@ -58,7 +72,7 @@ async def ask(data: Question):
                 "source term when describing historical requirements. "
                 "If prerequisite logic is marked UNVERIFIED, do not interpret "
                 "it as definite AND/OR logic. Refer exceptions and approvals "
-                "to an authorized USC advisor or office."
+                "to an authorized USC advisor or office. "
                 "Distinguish explicitly empty prerequisite lists from missing data. "
                 "If the source states 'None listed in source record', say that no "
                 "prerequisites are listed. Do not claim that other requirements "
@@ -91,6 +105,18 @@ async def ask(data: Question):
                 "When using historical course information, identify the semester "
                 "and briefly explain that requirements may have changed. "
                 "Use source numbers for citations, but do not copy source headers. "
+                "For course availability, distinguish listed, not listed in a collected term, "
+                "and term not collected. A course listing does not establish open seats. "
+                "For comparisons, use both term records before saying what changed. "
+                "If only a partial historical catalog is shown, do not call it a full list. "
+                "When the evidence says a requirement is 'Not specified in source record', "
+                "never conclude that the requirement is absent, waived, or not required. "
+                "Say only that the available record does not establish it. "
+                "Do not infer the absence of any requirement from missing data. "
+                "For questions asking about a specific course field, answer that field "
+                "directly. Do not add unrelated course requirements, corequisites, "
+                "recommended preparation, or restrictions unless needed to clarify "
+                "the requested information. "
             ),
         },
         {
@@ -120,7 +146,8 @@ async def ask(data: Question):
         {"id": doc["id"], "title": doc["title"], "url": doc["url"],
          "category": doc["category"], "retrieval_method": doc["retrieval_method"],
          "term_code": doc.get("term_code"), "historical": doc.get("historical", False),
-         "requested_term": doc.get("requested_term") }
+         "requested_term": doc.get("requested_term"),
+         "prerequisite_verification": doc.get("prerequisite_verification") }
         for doc in docs
     ]
     return {

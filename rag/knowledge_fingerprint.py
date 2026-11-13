@@ -6,6 +6,7 @@ ROOT = Path(__file__).resolve().parents[1]
 
 RAW_DIR = ROOT / "data" / "raw"
 COURSES_DIR = ROOT / "data" / "courses"
+VERIFIED_DIR = ROOT / "data" / "verified_requirements"
 
 MODEL_NAME = "sentence-transformers/all-MiniLM-L6-v2"
 
@@ -71,6 +72,17 @@ def calculate_fingerprint(
                 data["courses"]
             )
         })
+
+    for path in sorted(VERIFIED_DIR.glob("*.json")):
+        data = json.loads(
+            path.read_text(encoding="utf-8")
+        )
+
+    sources.append({
+        "type": "verified_requirements",
+        "file": path.name,
+        "content_hash": hash_json(data)
+    })
 
     if not sources:
         raise ValueError(

@@ -1,38 +1,32 @@
-import json
-import subprocess
-import sys
+"""Automated USC academic data synchronization."""
+
 from pathlib import Path
+
+from filelock import FileLock, Timeout
 
 from ingestion.discover_terms import main as discover_terms
 from ingestion.sync_courses import main as sync_courses
 from ingestion.collect import main as sync_policies
-from rag.knowledge_fingerprint import calculate_fingerprint
-from filelock import FileLock, Timeout
+from rag.sync_index import sync_index
 
 ROOT = Path(__file__).resolve().parents[1]
-
-CURRENT_FILE = ROOT / "indexes" / "current.json"
-
 LOCK_FILE = ROOT / "data" / ".academic_sync.lock"
+
 
 def main():
     print("=" * 50)
     print("USC ADVISOR AI - AUTOMATED DATA SYNC")
     print("=" * 50)
 
-    # Step 1: Discover academic semesters
     print("\nSTEP 1: Discovering semesters...")
     discover_terms()
 
-    # Step 2: Synchronize EE courses
     print("\nSTEP 2: Synchronizing EE courses...")
     course_result = sync_courses()
 
-    # Step 3: Synchronize USC academic policies
     print("\nSTEP 3: Synchronizing USC policies...")
     policy_result = sync_policies()
 
-    # Stop if any source failed
     failed_terms = course_result["failed_terms"]
     failed_sources = policy_result["failed_sources"]
 
@@ -43,68 +37,16 @@ def main():
             f"Failed policy sources: {failed_sources}"
         )
 
-
-    # Compare the latest academic data with the active index.
-    latest_fingerprint = calculate_fingerprint()
-
-    active_fingerprint = None
-
-    if CURRENT_FILE.exists():
-        try:
-            manifest = json.loads(
-                CURRENT_FILE.read_text(encoding="utf-8")
-            )
-
-            active_fingerprint = manifest.get(
-                "knowledge_fingerprint"
-            )
-
-        except (OSError, ValueError, TypeError):
-            print("WARNING: Could not read active index manifest.")
-
-
-    # Compare saved academic information against the active index.
-    latest_fingerprint = calculate_fingerprint()
-
-    active_fingerprint = None
-
-    if CURRENT_FILE.exists():
-        try:
-            manifest = json.loads(
-                CURRENT_FILE.read_text(encoding="utf-8")
-            )
-
-            active_fingerprint = manifest.get(
-                "knowledge_fingerprint"
-            )
-
-        except (OSError, ValueError, TypeError):
-            print(
-                "WARNING: Could not read the active index manifest."
-            )
-
-    needs_rebuild = (
-        active_fingerprint != latest_fingerprint
-    )
-
-    if needs_rebuild:
-        print("\nSTEP 4: Rebuilding RAG index...")
-
-        subprocess.run(
-            [sys.executable, "-m", "rag.build_index"],
-            check=True,
-            cwd=ROOT
-        )
-
-        print("RAG index updated successfully.")
-
-    else:
-        print(
-            "\nSTEP 4: No academic changes. "
-            "Skipping RAG rebuild."
-        )
+    print("\nSTEP 4: Synchronizing RAG index...")
+    index_result = sync_index()
 
     print("\nSynchronization finished successfully.")
+
+    return {
+        "course_result": course_result,
+        "policy_result": policy_result,
+        "index_result": index_result
+    }
 
 
 if __name__ == "__main__":

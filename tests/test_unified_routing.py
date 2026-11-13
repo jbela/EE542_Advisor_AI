@@ -19,7 +19,7 @@ class TestUnifiedRouting(unittest.TestCase):
         cases = {
             "What are the prerequisites for EE 542?": "exact",
             "What are the requirements for EE 542?": "exact",
-            "Is EE 542 offered in Spring 2027?": "exact",
+            "Is EE 542 offered in Spring 2027?": "availability",
             "Which courses cover machine learning?": "course",
             "What does EE 542 cover in detail?": "course",
             "How does USC D-Clearance work?": "policy",
@@ -42,7 +42,8 @@ class TestUnifiedRouting(unittest.TestCase):
         self.assertEqual(result[0]["term_code"], "20263")
         self.assertTrue(result[0]["historical"])
         self.assertIn("UNVERIFIED", result[0]["text"])
-        self.assertIn("historical term 20263", result[0]["text"])
+        self.assertIn("Source semester: Fall 2026", result[0]["text"])
+        self.assertIn("Historical requirements may have changed", result[0]["text"])
         self.assertNotIn('"source_url":', result[0]["text"])
 
     def test_policy_search_does_not_substitute_course(self):

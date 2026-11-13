@@ -22,8 +22,9 @@ indexes/
 # Synchronization logs
 logs/
 
-# Generated CSV results
-*.csv
+# Generated evaluation results
+week2_results.csv
+reports/*.csv
 
 # VS Code
 .vscode/

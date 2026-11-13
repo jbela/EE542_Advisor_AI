@@ -8,6 +8,7 @@ from sentence_transformers import SentenceTransformer
 
 from rag.index_publisher import publish_index
 from rag.knowledge_fingerprint import calculate_fingerprint
+from ingestion.verified_requirements import apply_verified_requirements
 
 # --------------------------------------------------
 # Project configuration
@@ -104,6 +105,10 @@ def load_course_documents():
         count = 0
 
         for course in dataset["courses"]:
+            course = apply_verified_requirements(
+                course,
+                term_code
+            )
             course_code = course.get("course_code")
             title = course.get("title")
             description = course.get("description")

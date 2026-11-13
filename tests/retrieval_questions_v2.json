@@ -1,0 +1,47 @@
+
+[
+  {"id":"Q01","category":"course_discovery","question":"Which EE courses cover wireless networks?","term_code":"20271","expected_courses":["EE 597","EE 450"]},
+  {"id":"Q02","category":"course_discovery","question":"Which course teaches foundations of computer networks?","term_code":"20271","expected_courses":["EE 450"]},
+  {"id":"Q03","category":"course_discovery","question":"Which courses cover wireless communications?","term_code":"20271","expected_courses":["EE 535"]},
+  {"id":"Q04","category":"course_discovery","question":"What EE courses focus on deep learning?","term_code":"20271","expected_courses":["EE 541"]},
+  {"id":"Q05","category":"course_discovery","question":"Which EE course covers computer architecture?","term_code":"20271","expected_courses":["EE 557"]},
+  {"id":"Q06","category":"course_discovery","question":"What courses teach power systems analysis?","term_code":"20271","expected_courses":["EE 521"]},
+  {"id":"Q07","category":"course_discovery","question":"Which courses discuss cloud computing and Internet protocols?","term_code":"20263","expected_courses":["EE 542"]},
+  {"id":"Q08","category":"course_discovery","question":"Which courses involve integrated circuits for wireless communications?","term_code":"20271","expected_courses":["EE 632A"]},
+
+  {"id":"Q09","category":"prerequisites","question":"What are the prerequisites for EE 597?","term_code":"20271","expected_courses":["EE 597"]},
+  {"id":"Q10","category":"prerequisites","question":"Do I need both EE 450 and EE 503 for EE 597?","term_code":"20271","expected_courses":["EE 597"]},
+  {"id":"Q11","category":"prerequisites","question":"What are the prerequisites for EE 542?","term_code":"20263","expected_courses":["EE 542"]},
+  {"id":"Q12","category":"prerequisites","question":"What preparation is recommended before taking EE 542?","term_code":"20263","expected_courses":["EE 542"]},
+  {"id":"Q13","category":"prerequisites","question":"Does EE 535 have a corequisite?","term_code":"20271","expected_courses":["EE 535"]},
+  {"id":"Q14","category":"prerequisites","question":"What do I need to take before EE 557?","term_code":"20271","expected_courses":["EE 557"]},
+  {"id":"Q15","category":"prerequisites","question":"Can I enroll in EE 597 if I completed EE 450 but not EE 503?","term_code":"20271","expected_courses":["EE 597"]},
+  {"id":"Q16","category":"prerequisites","question":"What is the difference between a prerequisite and recommended preparation for EE 542?","term_code":"20263","expected_courses":["EE 542"]},
+
+  {"id":"Q17","category":"historical","question":"What are the prerequisites for EE 542 in Spring 2027?","term_code":"20271","expected_courses":["EE 542"],"expected_source_term":"20263","expected_historical":true},
+  {"id":"Q18","category":"historical","question":"Was EE 542 offered in Fall 2026?","term_code":"20263","expected_courses":["EE 542"],"expected_historical":false},
+  {"id":"Q19","category":"historical","question":"Is EE 542 listed in Spring 2027?","term_code":"20271","expected_courses":[],"expected_behavior":"availability_check"},
+  {"id":"Q20","category":"historical","question":"What was the course description of EE 542 in Fall 2026?","term_code":"20263","expected_courses":["EE 542"],"expected_historical":false},
+  {"id":"Q21","category":"historical","question":"What were the prerequisites for EE 450 in Summer 2026?","term_code":"20262","expected_courses":["EE 450"],"expected_behavior":"verify_historical_record"},
+  {"id":"Q22","category":"historical","question":"Which semester has the most recent listing for EE 542 as of Spring 2027?","term_code":"20271","expected_courses":["EE 542"],"expected_source_term":"20263"},
+  {"id":"Q23","category":"historical","question":"Can I take EE 542 in Spring 2027?","term_code":"20271","expected_courses":[],"expected_behavior":"availability_check"},
+  {"id":"Q24","category":"historical","question":"How did EE 450's title change between Summer 2026 and Fall 2026?","term_code":"20263","expected_courses":["EE 450"],"expected_behavior":"compare_terms"},
+  {"id":"Q25","category":"historical","question":"If EE 542 is not listed this semester, can you show me its last known requirements?","term_code":"20271","expected_courses":["EE 542"],"expected_source_term":"20263"},
+  {"id":"Q26","category":"historical","question":"What courses were offered in Fall 2025?","term_code":"20253","expected_courses":[],"expected_behavior":"historical_dataset_check"},
+
+  {"id":"Q27","category":"policy","question":"What are USC's reduced course load rules for international students?","expected_document_ids":["ois_reduced_course_load"]},
+  {"id":"Q28","category":"policy","question":"Can an international student take fewer units during their final semester?","expected_document_ids":["ois_reduced_course_load"]},
+  {"id":"Q29","category":"policy","question":"When must an international student request a reduced course load?","expected_document_ids":["ois_reduced_course_load"]},
+  {"id":"Q30","category":"policy","question":"What is USC's minimum full-time enrollment for international graduate students?","expected_document_ids":["ois_maintaining_status"]},
+  {"id":"Q31","category":"policy","question":"How do students check their USC degree progress?","expected_document_ids":["usc_degree_progress"]},
+  {"id":"Q32","category":"policy","question":"Where can I find USC registration deadlines?","expected_document_ids":["usc_registration_calendar","usc_registration"]},
+  {"id":"Q33","category":"policy","question":"Can students register after the third week of classes?","expected_document_ids":["usc_registration"]},
+  {"id":"Q34","category":"policy","question":"Where can I find the requirements for the USC master's degree in Electrical Engineering?","expected_document_ids":["ece_graduate","ece_ms_registration"]},
+
+  {"id":"Q35","category":"uncertainty","question":"Am I guaranteed admission into EE 597 if I completed its prerequisites?","expected_behavior":"avoid_guarantee"},
+  {"id":"Q36","category":"uncertainty","question":"Can I substitute EE 450 with a course from another university?","expected_behavior":"requires_advisor_verification"},
+  {"id":"Q37","category":"uncertainty","question":"Will EE 542 definitely be offered in Fall 2027?","term_code":"20273","expected_behavior":"avoid_future_prediction"},
+  {"id":"Q38","category":"uncertainty","question":"What are the prerequisites for EE 999?","term_code":"20271","expected_behavior":"missing_course"},
+  {"id":"Q39","category":"uncertainty","question":"Can USC waive my degree requirements?","expected_behavior":"requires_advisor_verification"},
+  {"id":"Q40","category":"uncertainty","question":"Which courses should I take next semester?","expected_behavior":"request_student_context"}
+]

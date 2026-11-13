@@ -1,15 +1,25 @@
 import requests
 import json
 import hashlib
+
 from pathlib import Path
 from datetime import datetime, timezone
 
+from requests.adapters import HTTPAdapter
+from urllib3.util.retry import Retry
+
 from ingestion.connectors.usc_courses import normalize_response
+
 
 ROOT = Path(__file__).resolve().parents[1]
 
 COURSES_DIR = ROOT / "data" / "courses"
 COURSES_DIR.mkdir(parents=True, exist_ok=True)
+
+COURSES_API = (
+    "https://classes.usc.edu/api/Courses/"
+    "CoursesByTermSchoolProgram"
+)
 
 
 def calculate_hash(data):
@@ -18,6 +28,7 @@ def calculate_hash(data):
         sort_keys=True,
         ensure_ascii=False
     )
+
     return hashlib.sha256(
         serialized.encode("utf-8")
     ).hexdigest()
@@ -34,10 +45,16 @@ def calculate_academic_hash(courses):
             "description": course.get("description"),
             "units": course.get("units"),
             "prerequisites": course.get("prerequisites"),
-            "prerequisites_display": course.get("prerequisites_display"),
+            "prerequisites_display": course.get(
+                "prerequisites_display"
+            ),
             "corequisites": course.get("corequisites"),
-            "corequisites_display": course.get("corequisites_display"),
-            "recommended_preparation": course.get("recommended_preparation"),
+            "corequisites_display": course.get(
+                "corequisites_display"
+            ),
+            "recommended_preparation": course.get(
+                "recommended_preparation"
+            ),
             "restrictions": course.get("restrictions")
         })
 
@@ -63,6 +80,7 @@ def calculate_operational_hash(courses):
 
     return calculate_hash(operational_data)
 
+
 def save_course_data(data):
     """Validate, normalize, and save course information."""
 
@@ -76,7 +94,7 @@ def save_course_data(data):
     academic_hash = calculate_academic_hash(courses)
     operational_hash = calculate_operational_hash(courses)
 
-    academic_changed =  True
+    academic_changed = True
     operational_changed = True
 
     output = {
@@ -114,7 +132,7 @@ def save_course_data(data):
 
         if old.get("content_hash") == output["content_hash"]:
             print(f"No changes detected for {term_code}")
-            
+
             return {
                 "term_code": term_code,
                 "academic_changed": False,
@@ -135,15 +153,31 @@ def save_course_data(data):
                 old["courses"]
             )
 
-        academic_changed = academic_hash != old_academic_hash
-        operational_changed = operational_hash != old_operational_hash
+        academic_changed = (
+            academic_hash != old_academic_hash
+        )
 
-        print(f"Academic content changed: {academic_changed}")
-        print(f"Operational data changed: {operational_changed}")
+        operational_changed = (
+            operational_hash != old_operational_hash
+        )
 
-        # Preserve the previous version before updating
-        versions_dir = ROOT / "data" / "versions" / "courses"
-        versions_dir.mkdir(parents=True, exist_ok=True)
+        print(
+            f"Academic content changed: {academic_changed}"
+        )
+
+        print(
+            f"Operational data changed: {operational_changed}"
+        )
+
+        # Preserve the previous version before updating.
+        versions_dir = (
+            ROOT / "data" / "versions" / "courses"
+        )
+
+        versions_dir.mkdir(
+            parents=True,
+            exist_ok=True
+        )
 
         timestamp = datetime.now(
             timezone.utc
@@ -154,18 +188,30 @@ def save_course_data(data):
         )
 
         backup_file.write_text(
-            json.dumps(old, indent=2, ensure_ascii=False),
+            json.dumps(
+                old,
+                indent=2,
+                ensure_ascii=False
+            ),
             encoding="utf-8"
         )
 
-        print(f"Previous version saved: {backup_file.name}")
+        print(
+            f"Previous version saved: {backup_file.name}"
+        )
 
     file_path.write_text(
-        json.dumps(output, indent=2, ensure_ascii=False),
+        json.dumps(
+            output,
+            indent=2,
+            ensure_ascii=False
+        ),
         encoding="utf-8"
     )
 
-    print(f"Saved {len(courses)} EE courses for {term_code}")
+    print(
+        f"Saved {len(courses)} EE courses for {term_code}"
+    )
 
     return {
         "term_code": term_code,
@@ -173,56 +219,100 @@ def save_course_data(data):
         "operational_changed": operational_changed,
         "saved": True
     }
-    
-
-COURSES_API = (
-    "https://classes.usc.edu/api/Courses/"
-    "CoursesByTermSchoolProgram"
-)
 
 
 def fetch_courses(term_code):
-    """Fetch publicly listed EE courses for one semester."""
+    """
+    Fetch publicly listed USC EE courses for one semester.
 
-    response = requests.get(
-        COURSES_API,
-        params={
-            "termCode": str(term_code),
-            "school": "ENGV",
-            "program": "EE"
-        },
-        headers={
-            "User-Agent": "USCAdvisorAI-StudentResearch/0.1",
-            "Accept": "application/json"
-        },
-        timeout=30
+    Retry temporary connection errors, timeouts,
+    and selected HTTP server errors.
+    """
+
+    term_code = str(term_code)
+
+    retry_policy = Retry(
+        total=2,
+        connect=2,
+        read=2,
+        status=2,
+        backoff_factor=2,
+        status_forcelist=[
+            429,
+            500,
+            502,
+            503,
+            504
+        ],
+        allowed_methods=["GET"],
+        respect_retry_after_header=True,
+        raise_on_status=False
     )
 
-    response.raise_for_status()
+    with requests.Session() as session:
+        adapter = HTTPAdapter(
+            max_retries=retry_policy
+        )
 
-    data = response.json()
+        session.mount(
+            "https://",
+            adapter
+        )
+
+        response = session.get(
+            COURSES_API,
+            params={
+                "termCode": term_code,
+                "school": "ENGV",
+                "program": "EE"
+            },
+            headers={
+                "User-Agent": (
+                    "USCAdvisorAI-StudentResearch/0.1"
+                ),
+                "Accept": "application/json"
+            },
+            timeout=(10, 30)
+        )
+
+        response.raise_for_status()
+
+        data = response.json()
 
     if not isinstance(data, dict):
-        raise ValueError("Unexpected course response format")
+        raise ValueError(
+            "Unexpected course response format"
+        )
 
     if not isinstance(data.get("courses"), list):
-        raise ValueError("Missing or invalid courses list")
+        raise ValueError(
+            "Missing or invalid courses list"
+        )
 
-    if str(data.get("termCode")) != str(term_code):
-        raise ValueError("Returned semester does not match request")
+    if str(data.get("termCode")) != term_code:
+        raise ValueError(
+            "Returned semester does not match request"
+        )
 
     if data.get("schoolPrefix") != "ENGV":
-        raise ValueError("Unexpected school")
+        raise ValueError(
+            "Unexpected school"
+        )
 
     if data.get("programPrefix") != "EE":
-        raise ValueError("Unexpected program")
+        raise ValueError(
+            "Unexpected program"
+        )
 
     return data
+
 
 if __name__ == "__main__":
     term_code = "20263"
 
-    print(f"Fetching EE courses for {term_code}...")
+    print(
+        f"Fetching EE courses for {term_code}..."
+    )
 
     data = fetch_courses(term_code)
 

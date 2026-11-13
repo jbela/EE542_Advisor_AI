@@ -1,0 +1,18 @@
+{
+  "term_code": "20271",
+  "courses": {
+    "EE 597": {
+      "prerequisites_display": {
+        "operator": "AND",
+        "courses": [
+          "EE 450",
+          "EE 503"
+        ]
+      },
+      "verification_status": "verified",
+      "verification_source": "official_course_listing",
+      "source_url": "https://classes.usc.edu/term/20271/course/EE597",
+      "source_text": "Prerequisites: EE 450 and EE 503"
+    }
+  }
+}

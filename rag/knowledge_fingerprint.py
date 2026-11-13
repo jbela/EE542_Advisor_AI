@@ -7,11 +7,12 @@ ROOT = Path(__file__).resolve().parents[1]
 RAW_DIR = ROOT / "data" / "raw"
 COURSES_DIR = ROOT / "data" / "courses"
 VERIFIED_DIR = ROOT / "data" / "verified_requirements"
+SYLLABI_DIR = ROOT / "data" / "processed" / "syllabi"
 
 MODEL_NAME = "sentence-transformers/all-MiniLM-L6-v2"
 
 # Increase this when changing chunking or indexed text formatting.
-INDEX_SCHEMA_VERSION = "1"
+INDEX_SCHEMA_VERSION = "2"
 
 
 def hash_json(value):
@@ -82,6 +83,17 @@ def calculate_fingerprint(
             "type": "verified_requirements",
             "file": path.name,
             "content_hash": hash_json(data)
+        })
+
+    for path in sorted(SYLLABI_DIR.glob("*.json")):
+        data = json.loads(
+            path.read_text(encoding="utf-8")
+        )
+
+        sources.append({
+            "type": "syllabus",
+            "file": path.name,
+            "content_hash": hash_json(data),
         })
 
     if not sources:

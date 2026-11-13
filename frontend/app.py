@@ -448,7 +448,46 @@ for message in messages:
             for i, source in enumerate(sources, start=1):
                 if not isinstance(source, dict):
                     continue
+                # Display local syllabus sources without a web link.
+                if (
+                    source.get("source_type") == "syllabus"
+                    and not source.get("url")
+                ):
+                    title = str(
+                        source.get("title") or "Course syllabus"
+                    )
+                    course = str(
+                        source.get("course_code") or "Syllabus"
+                    )
+                    page = source.get("page_number")
 
+                    source_key = (
+                        "syllabus",
+                        source.get("document_id")
+                        or source.get("source_file")
+                        or title,
+                        page,
+                    )
+
+                    if source_key in seen_sources:
+                        continue
+
+                    seen_sources.add(source_key)
+
+                    page_label = (
+                        f" · p. {page}"
+                        if isinstance(page, int) and page > 0
+                        else ""
+                    )
+                    label = course + page_label
+                    tooltip = title + page_label
+
+                    source_chips.append(
+                        f'<span class="usc-source-chip" '
+                        f'title="{escape(tooltip, quote=True)}">'
+                        f'{escape(label)}</span>'
+                    )
+                    continue
                 url = source.get("url")
 
                 if not isinstance(url, str):

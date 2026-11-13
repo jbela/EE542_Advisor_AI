@@ -247,49 +247,6 @@ def new_chat():
 def open_chat(chat_id):
     st.session_state.active_chat_id = chat_id
 
-
-# ----------------------------------
-# Mock Responses
-# TODO: Connect Jia's FastAPI backend
-# ----------------------------------
-def get_mock_response(question: str) -> str:
-    q = question.lower()
-
-    if "d-clearance" in q or "d clearance" in q:
-        return (
-            "### D-Clearance Guidance\n\n"
-            "**Demo response — not verified USC advice.**\n\n"
-            "The final assistant will retrieve current USC "
-            "D-Clearance procedures and provide official "
-            "source links."
-        )
-
-    if "prerequisite" in q or "corequisite" in q:
-        return (
-            "### Prerequisite Information\n\n"
-            "**Demo response — not verified USC advice.**\n\n"
-            "The final assistant will check the latest "
-            "USC Catalog and Schedule of Classes for "
-            "course requirements."
-        )
-
-    if "cloud" in q or "career" in q:
-        return (
-            "### Course Recommendations\n\n"
-            "**Demo response — not verified USC advice.**\n\n"
-            "The final assistant will analyze course "
-            "descriptions and syllabi to recommend "
-            "USC courses aligned with your career interests."
-        )
-
-    return (
-        "### Academic Advising Assistant\n\n"
-        "**This is a simulated AI response.**\n\n"
-        "Once the RAG backend is connected, responses "
-        "will be generated from USC academic sources "
-        "with supporting citations."
-    )
-
 # ----------------------------------
 # FastAPI Integration
 # ----------------------------------
@@ -370,17 +327,6 @@ with st.sidebar:
             st.rerun()
 
     st.divider()
-
-    st.markdown("**Response Mode**")
-
-    response_mode = st.radio(
-        "Select response mode",
-        ["Demo", "API"],
-        horizontal=True,
-        label_visibility="collapsed",
-    )
-
-    st.divider()
     st.caption("EE542 Final Project · Fall 2026")
     st.caption("Jia, Ellie, Isabel")
     st.caption("Prototype version")
@@ -415,18 +361,10 @@ with button_col:
         new_chat()
         st.rerun()
 
-
-if response_mode == "Demo":
-    st.caption(
-        "⚠️ Demo mode — Responses are simulated, "
-        "not official academic advice."
-    )
-else:
-    st.caption(
-        "⚠️ API mode — AI responses are not yet "
-        "verified against official USC sources."
-    )
-
+st.caption(
+    "⚠️ AI responses may be inaccurate. "
+    "Please confirm important information with official USC sources."
+)
 
 # ----------------------------------
 # Suggested Questions
@@ -435,10 +373,10 @@ else:
 st.markdown("**Suggested Questions**")
 
 example_questions = [
-    ("Cloud Engineering Courses",
-     "Which USC courses are relevant to cloud engineering?"),
-    ("EE 542 Prerequisites",
-     "What are the prerequisites for EE 542?"),
+    ("Computer Architecture",
+     "Which EE course covers computer architecture?"),
+    ("International Student Enrollment",
+     "What is USC's minimum full-time enrollment for international graduate students?"),
     ("D-Clearance Guidance",
      "How does D-Clearance work?"),
 ]
@@ -585,16 +523,8 @@ if prompt:
         "content": prompt,
     })
 
-    # Select response source
-    if response_mode == "API":
-        with st.spinner("USC Advisor AI is thinking..."):
-            result = get_api_response(prompt)
-    else:
-        result = {
-            "answer": get_mock_response(prompt),
-            "sources": [],
-            "status": "demo",
-        }
+    with st.spinner("USC Advisor AI is thinking..."):
+        result = get_api_response(prompt)
 
     messages.append({
         "role": "assistant",

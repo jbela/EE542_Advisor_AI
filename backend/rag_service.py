@@ -158,6 +158,7 @@ def normalize(doc):
         "section_label": doc.get("section_label"),
         "source_file": doc.get("source_file"),
         "page_number": doc.get("page_number"),
+        "grading_fact": doc.get("grading_fact"),
     }
 
 def normalize_special(doc):

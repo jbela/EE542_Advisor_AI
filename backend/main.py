@@ -117,6 +117,9 @@ async def ask(data: Question):
                 "directly. Do not add unrelated course requirements, corequisites, "
                 "recommended preparation, or restrictions unless needed to clarify "
                 "the requested information. "
+                "For syllabus evidence, identify the semester and section. "
+                "Do not generalize course-specific grading or policies "
+                "to other courses, semesters, sections, or all USC students. "
             ),
         },
         {
@@ -143,11 +146,25 @@ async def ask(data: Question):
         raise HTTPException(status_code=502, detail="LLM service failed") from exc
 
     sources = [
-        {"id": doc["id"], "title": doc["title"], "url": doc["url"],
-         "category": doc["category"], "retrieval_method": doc["retrieval_method"],
-         "term_code": doc.get("term_code"), "historical": doc.get("historical", False),
-         "requested_term": doc.get("requested_term"),
-         "prerequisite_verification": doc.get("prerequisite_verification") }
+        {
+            "id": doc["id"],
+            "title": doc["title"],
+            "url": doc["url"],
+            "category": doc["category"],
+            "retrieval_method": doc["retrieval_method"],
+            "term_code": doc.get("term_code"),
+            "historical": doc.get("historical", False),
+            "requested_term": doc.get("requested_term"),
+            "prerequisite_verification": doc.get(
+                "prerequisite_verification"
+            ),
+            "document_id": doc.get("document_id"),
+            "course_code": doc.get("course_code"),
+            "source_type": doc.get("source_type"),
+            "section_label": doc.get("section_label"),
+            "source_file": doc.get("source_file"),
+            "page_number": doc.get("page_number"),
+        }
         for doc in docs
     ]
     return {

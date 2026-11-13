@@ -7,7 +7,6 @@ from urllib.parse import urlparse
 import requests
 import streamlit as st
 
-
 # ----------------------------------
 # Page Configuration
 # ----------------------------------
@@ -30,8 +29,6 @@ ASSISTANT_AVATAR = (
 USER_AVATAR = (
     str(TRAVELER_PATH) if TRAVELER_PATH.is_file() else "👤"
 )
-
-
 
 # ----------------------------------
 # USC Theme
@@ -197,7 +194,6 @@ st.markdown(
     """,
     unsafe_allow_html=True,
 )
-
 
 # ----------------------------------
 # Session State

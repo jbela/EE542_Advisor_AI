@@ -441,6 +441,7 @@ for message in messages:
                 sources = []
 
             source_chips = []
+            seen_sources = set()
 
             for i, source in enumerate(sources, start=1):
                 if not isinstance(source, dict):
@@ -466,6 +467,17 @@ for message in messages:
                 title = str(
                     source.get("title") or f"Source {i}"
                 )
+                
+                # Show repeated chunks from the same source only once.
+                source_key = (
+                    parsed._replace(fragment="").geturl(),
+                    str(source.get("title") or "").strip(),
+                )
+
+                if source_key in seen_sources:
+                    continue
+
+                seen_sources.add(source_key)
 
                 # Short label, full title on hover
                 label = (

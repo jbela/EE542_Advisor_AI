@@ -201,7 +201,7 @@ def _course_evidence(course, requested_term, method="exact"):
         "restrictions": course.get("restrictions"),
         "recommended_preparation": course.get("recommended_preparation"),
         "source_url": course.get("source_url"),
-        "prerequisites_verified": course.get("prerequisites_verified"),
+        "prerequisite_verification": course.get("prerequisite_verification"),
     }
 
 def _availability_evidence(code, term_code):
@@ -442,6 +442,7 @@ def retrieve_for_advisor(question, term_code=DEFAULT_TERM, top_k=5):
                 "restrictions": course.get("restrictions"),
                 "recommended_preparation": course.get("recommended_preparation"),
                 "source_url": course.get("source_url"),
+                "prerequisite_verification": course.get("prerequisite_verification"),
             })
             if len(results) >= top_k:
                 break

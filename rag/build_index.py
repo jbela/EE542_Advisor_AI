@@ -17,6 +17,7 @@ from ingestion.verified_requirements import apply_verified_requirements
 ROOT = Path(__file__).resolve().parents[1]
 
 RAW_DIR = ROOT / "data" / "raw"
+SYLLABI_DIR = ROOT / "data" / "processed" / "syllabi"
 COURSES_DIR = ROOT / "data" / "courses"
 INDEX_DIR = ROOT / "indexes"
 
@@ -212,6 +213,50 @@ def load_course_documents():
 
     return documents
 
+def load_syllabus_documents():
+    """Turn imported syllabi into page-aware searchable chunks."""
+    documents = []
+
+    for file in sorted(SYLLABI_DIR.glob("*.json")):
+        data = json.loads(file.read_text(encoding="utf-8"))
+
+        for page in data["pages"]:
+            page_number = page["page_number"]
+            text = page["text"].strip()
+
+            if not text:
+                continue
+
+            for i, chunk in enumerate(chunk_text(text)):
+                documents.append({
+                    "chunk_id": (
+                        f"{data['id']}_p{page_number}_{i}"
+                    ),
+                    "document_id": data["id"],
+                    "title": data["title"],
+                    "text": (
+                        f"Course: {data['course_code']}\n"
+                        f"Source term: {data['term_code']}\n"
+                        f"Section: {data['section_label']}\n"
+                        f"Source: Syllabus, page {page_number}\n\n"
+                        f"{chunk}"
+                    ),
+                    "url": data.get("url"),
+                    "category": "course",
+                    "source_type": "syllabus",
+                    "course_code": data["course_code"],
+                    "term_code": data["term_code"],
+                    "section_label": data["section_label"],
+                    "source_file": data["source_file"],
+                    "page_number": page_number,
+                })
+
+        print(
+            f"{data['title']}: "
+            f"{len(data['pages'])} pages processed"
+        )
+
+    return documents
 
 # --------------------------------------------------
 # Build and publish FAISS index
@@ -225,8 +270,9 @@ def main():
 
     policy_documents = load_policy_documents()
     course_documents = load_course_documents()
+    syllabus_documents = load_syllabus_documents()
 
-    documents = policy_documents + course_documents
+    documents = policy_documents + course_documents + syllabus_documents
 
     if not documents:
         raise ValueError(

@@ -4,7 +4,7 @@ import httpx
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel, Field
 
-from backend.rag_service import get_context
+from backend.rag_service import get_context, format_term
 
 app = FastAPI(title="USC Advisor AI Backend")
 
@@ -22,6 +22,30 @@ def health():
     return {"status": "ok"}
 
 
+def _response_sources(docs):
+    return [
+        {
+            "id": doc["id"],
+            "title": doc["title"],
+            "url": doc["url"],
+            "category": doc["category"],
+            "retrieval_method": doc["retrieval_method"],
+            "term_code": doc.get("term_code"),
+            "historical": doc.get("historical", False),
+            "requested_term": doc.get("requested_term"),
+            "prerequisite_verification": doc.get(
+                "prerequisite_verification"
+            ),
+            "document_id": doc.get("document_id"),
+            "course_code": doc.get("course_code"),
+            "source_type": doc.get("source_type"),
+            "section_label": doc.get("section_label"),
+            "source_file": doc.get("source_file"),
+            "page_number": doc.get("page_number"),
+        }
+        for doc in docs
+    ]
+
 @app.post("/ask")
 async def ask(data: Question):
     try:
@@ -38,6 +62,40 @@ async def ask(data: Question):
             "sources": [],
             "status": "review_required",
         }
+
+    if len(docs) == 1:
+        doc = docs[0]
+
+        if (
+            doc.get("retrieval_method") == "historical_catalog"
+            and not doc.get("url")
+            and "have not been collected" in doc.get("text", "")
+        ):
+            return {
+                "answer": doc["text"],
+                "sources": [],
+                "status": "review_required",
+            }
+
+    # Reviewed grading facts are rendered directly, not reinterpreted by an LLM.
+    if len(docs) == 1:
+        doc = docs[0]
+        fact = doc.get("grading_fact")
+        if (
+            doc.get("source_type") == "syllabus"
+            and isinstance(fact, dict)
+            and fact.get("verified") is True
+        ):
+            answer = (
+                f"In {format_term(doc['term_code'])}, "
+                f"{fact['name']} is worth {fact['weight_percent']}% "
+                f"of the final grade in {doc['course_code']}. [1]"
+            )
+            return {
+                "answer": answer,
+                "sources": _response_sources(docs),
+                "status": "review_required",
+            }
 
     context = "\n\n".join(
         f"[{i}] {doc['title']}\n{doc['text']}"
@@ -58,7 +116,7 @@ async def ask(data: Question):
                 "source term when describing historical requirements. "
                 "If prerequisite logic is marked UNVERIFIED, do not interpret "
                 "it as definite AND/OR logic. Refer exceptions and approvals "
-                "to an authorized USC advisor or office."
+                "to an authorized USC advisor or office. "
                 "Distinguish explicitly empty prerequisite lists from missing data. "
                 "If the source states 'None listed in source record', say that no "
                 "prerequisites are listed. Do not claim that other requirements "
@@ -91,6 +149,30 @@ async def ask(data: Question):
                 "When using historical course information, identify the semester "
                 "and briefly explain that requirements may have changed. "
                 "Use source numbers for citations, but do not copy source headers. "
+                "For course availability, distinguish listed, not listed in a collected term, "
+                "and term not collected. A course listing does not establish open seats. "
+                "For comparisons, use both term records before saying what changed. "
+                "If only a partial historical catalog is shown, do not call it a full list. "
+                "When the evidence says a requirement is 'Not specified in source record', "
+                "never conclude that the requirement is absent, waived, or not required. "
+                "Say only that the available record does not establish it. "
+                "Do not infer the absence of any requirement from missing data. "
+                "For questions asking about a specific course field, answer that field "
+                "directly. Do not add unrelated course requirements, corequisites, "
+                "recommended preparation, or restrictions unless needed to clarify "
+                "the requested information. "
+                "For simple factual questions, answer directly in "
+                "one or two short sentences. "
+                "For syllabus answers, mention the source semester briefly once. "
+                "Mention the section only when it is meaningful to the question; "
+                "never print 'Unspecified' or internal metadata labels. "
+                "Do not add sentences beginning with 'This information'. "
+                "Do not reproduce document titles, filenames, source headers, "
+                "or page numbers in the answer. "
+                "Cite supporting passages using only their bracketed numbers, "
+                "such as [1]; the interface displays document and page details. "
+                "Do not generalize course-specific grading or policies "
+                "to other courses, semesters, sections, or all USC students. "
             ),
         },
         {
@@ -116,13 +198,7 @@ async def ask(data: Question):
     except (httpx.HTTPError, KeyError, ValueError) as exc:
         raise HTTPException(status_code=502, detail="LLM service failed") from exc
 
-    sources = [
-        {"id": doc["id"], "title": doc["title"], "url": doc["url"],
-         "category": doc["category"], "retrieval_method": doc["retrieval_method"],
-         "term_code": doc.get("term_code"), "historical": doc.get("historical", False),
-         "requested_term": doc.get("requested_term") }
-        for doc in docs
-    ]
+    sources = _response_sources(docs)
     return {
         "answer": answer,
         "sources": sources,

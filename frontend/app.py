@@ -7,7 +7,6 @@ from urllib.parse import urlparse
 import requests
 import streamlit as st
 
-
 # ----------------------------------
 # Page Configuration
 # ----------------------------------
@@ -21,11 +20,15 @@ st.set_page_config(
 BASE_DIR = Path(__file__).resolve().parent
 LOGO_PATH = BASE_DIR / "assets" / "usc-seal.png"
 TOMMY_PATH = BASE_DIR / "assets" / "tommy-avatar.png"
+TRAVELER_PATH = BASE_DIR / "assets" / "traveler.avif"
 
 ASSISTANT_AVATAR = (
     str(TOMMY_PATH) if TOMMY_PATH.is_file() else "🎓"
 )
 
+USER_AVATAR = (
+    str(TRAVELER_PATH) if TRAVELER_PATH.is_file() else "👤"
+)
 
 # ----------------------------------
 # USC Theme
@@ -46,7 +49,7 @@ st.markdown(
 
         /* Reduce excess space above content */
         .block-container {
-            padding-top: 1.2rem;
+            padding-top: 3rem;
             padding-bottom: 2rem;
             max-width: 1150px;
         }
@@ -192,7 +195,6 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
-
 # ----------------------------------
 # Session State
 # ----------------------------------
@@ -246,49 +248,6 @@ def new_chat():
 
 def open_chat(chat_id):
     st.session_state.active_chat_id = chat_id
-
-
-# ----------------------------------
-# Mock Responses
-# TODO: Connect Jia's FastAPI backend
-# ----------------------------------
-def get_mock_response(question: str) -> str:
-    q = question.lower()
-
-    if "d-clearance" in q or "d clearance" in q:
-        return (
-            "### D-Clearance Guidance\n\n"
-            "**Demo response — not verified USC advice.**\n\n"
-            "The final assistant will retrieve current USC "
-            "D-Clearance procedures and provide official "
-            "source links."
-        )
-
-    if "prerequisite" in q or "corequisite" in q:
-        return (
-            "### Prerequisite Information\n\n"
-            "**Demo response — not verified USC advice.**\n\n"
-            "The final assistant will check the latest "
-            "USC Catalog and Schedule of Classes for "
-            "course requirements."
-        )
-
-    if "cloud" in q or "career" in q:
-        return (
-            "### Course Recommendations\n\n"
-            "**Demo response — not verified USC advice.**\n\n"
-            "The final assistant will analyze course "
-            "descriptions and syllabi to recommend "
-            "USC courses aligned with your career interests."
-        )
-
-    return (
-        "### Academic Advising Assistant\n\n"
-        "**This is a simulated AI response.**\n\n"
-        "Once the RAG backend is connected, responses "
-        "will be generated from USC academic sources "
-        "with supporting citations."
-    )
 
 # ----------------------------------
 # FastAPI Integration
@@ -370,17 +329,6 @@ with st.sidebar:
             st.rerun()
 
     st.divider()
-
-    st.markdown("**Response Mode**")
-
-    response_mode = st.radio(
-        "Select response mode",
-        ["Demo", "API"],
-        horizontal=True,
-        label_visibility="collapsed",
-    )
-
-    st.divider()
     st.caption("EE542 Final Project · Fall 2026")
     st.caption("Jia, Ellie, Isabel")
     st.caption("Prototype version")
@@ -415,18 +363,10 @@ with button_col:
         new_chat()
         st.rerun()
 
-
-if response_mode == "Demo":
-    st.caption(
-        "⚠️ Demo mode — Responses are simulated, "
-        "not official academic advice."
-    )
-else:
-    st.caption(
-        "⚠️ API mode — AI responses are not yet "
-        "verified against official USC sources."
-    )
-
+st.caption(
+    "⚠️ AI responses may be inaccurate. "
+    "Please confirm important information with official USC sources."
+)
 
 # ----------------------------------
 # Suggested Questions
@@ -435,10 +375,10 @@ else:
 st.markdown("**Suggested Questions**")
 
 example_questions = [
-    ("Cloud Engineering Courses",
-     "Which USC courses are relevant to cloud engineering?"),
-    ("EE 542 Prerequisites",
-     "What are the prerequisites for EE 542?"),
+    ("Computer Architecture",
+     "Which EE course covers computer architecture?"),
+    ("International Student Enrollment",
+     "What is USC's minimum full-time enrollment for international graduate students?"),
     ("D-Clearance Guidance",
      "How does D-Clearance work?"),
 ]
@@ -485,7 +425,7 @@ for message in messages:
     avatar = (
         ASSISTANT_AVATAR
         if message["role"] == "assistant"
-        else "👤"
+        else USER_AVATAR
     )
 
     with st.chat_message(
@@ -503,11 +443,51 @@ for message in messages:
                 sources = []
 
             source_chips = []
+            seen_sources = set()
 
             for i, source in enumerate(sources, start=1):
                 if not isinstance(source, dict):
                     continue
+                # Display local syllabus sources without a web link.
+                if (
+                    source.get("source_type") == "syllabus"
+                    and not source.get("url")
+                ):
+                    title = str(
+                        source.get("title") or "Course syllabus"
+                    )
+                    course = str(
+                        source.get("course_code") or "Syllabus"
+                    )
+                    page = source.get("page_number")
 
+                    source_key = (
+                        "syllabus",
+                        source.get("document_id")
+                        or source.get("source_file")
+                        or title,
+                        page,
+                    )
+
+                    if source_key in seen_sources:
+                        continue
+
+                    seen_sources.add(source_key)
+
+                    page_label = (
+                        f" · p. {page}"
+                        if isinstance(page, int) and page > 0
+                        else ""
+                    )
+                    label = course + page_label
+                    tooltip = title + page_label
+
+                    source_chips.append(
+                        f'<span class="usc-source-chip" '
+                        f'title="{escape(tooltip, quote=True)}">'
+                        f'{escape(label)}</span>'
+                    )
+                    continue
                 url = source.get("url")
 
                 if not isinstance(url, str):
@@ -528,6 +508,17 @@ for message in messages:
                 title = str(
                     source.get("title") or f"Source {i}"
                 )
+
+                # Show repeated chunks from the same source only once.
+                source_key = (
+                    parsed._replace(fragment="").geturl(),
+                    str(source.get("title") or "").strip(),
+                )
+
+                if source_key in seen_sources:
+                    continue
+
+                seen_sources.add(source_key)
 
                 # Short label, full title on hover
                 label = (
@@ -585,16 +576,12 @@ if prompt:
         "content": prompt,
     })
 
-    # Select response source
-    if response_mode == "API":
-        with st.spinner("USC Advisor AI is thinking..."):
-            result = get_api_response(prompt)
-    else:
-        result = {
-            "answer": get_mock_response(prompt),
-            "sources": [],
-            "status": "demo",
-        }
+    # Display the question before waiting for the API.
+    with st.chat_message("user", avatar=USER_AVATAR):
+        st.markdown(prompt)
+
+    with st.spinner("USC Advisor AI is thinking..."):
+        result = get_api_response(prompt)
 
     messages.append({
         "role": "assistant",

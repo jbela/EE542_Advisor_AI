@@ -42,11 +42,16 @@ class TestIndexConsistency(unittest.TestCase):
             "changed_fingerprint"
         ]
 
-        with self.assertRaisesRegex(
-            RuntimeError,
-            "Academic source data changed"
+        with patch.object(
+            build_index,
+            "load_syllabus_documents",
+            return_value=[],
         ):
-            build_index.main()
+            with self.assertRaisesRegex(
+                RuntimeError,
+                "Academic source data changed"
+            ):
+                build_index.main()
 
         # No new index should be published.
         mock_publish.assert_not_called()

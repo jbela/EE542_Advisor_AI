@@ -5,3 +5,4 @@ faiss-cpu
 numpy
 rank-bm25
 filelock
+pypdf

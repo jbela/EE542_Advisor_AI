@@ -1,7 +1,7 @@
-
-"""Evaluate prerequisite evidence without guessing AND/OR relationships."""
+"""Evaluate factual prerequisite retrieval against benchmark labels."""
 
 import json
+import re
 from pathlib import Path
 
 from rag.advisor_retrieval import retrieve_for_advisor
@@ -9,39 +9,136 @@ from rag.advisor_retrieval import retrieve_for_advisor
 ROOT = Path(__file__).resolve().parents[1]
 QUESTIONS_FILE = ROOT / "tests" / "retrieval_questions_v2.json"
 
-EXPECTED_TARGETS = {
-    "Q09": "EE 597",
-    "Q10": "EE 597",
-    "Q11": "EE 542",
-    "Q12": "EE 542",
-    "Q13": "EE 535",
-    "Q14": "EE 557",
-    "Q15": "EE 597",
-    "Q16": "EE 542",
+EXPECTED = {
+    "Q09": {
+        "course": "EE 597",
+        "term": "20271",
+        "prerequisites": ("AND", {"EE 450", "EE 503"}),
+    },
+    "Q10": {
+        "course": "EE 597",
+        "term": "20271",
+        "prerequisites": ("AND", {"EE 450", "EE 503"}),
+    },
+    "Q11": {
+        "course": "EE 542",
+        "term": "20263",
+        "prerequisites": ("SINGLE", {"EE 450"}),
+    },
+    "Q12": {
+        "course": "EE 542",
+        "term": "20263",
+        "preparation_codes": {"EE 457"},
+        "preparation_terms": {"c++"},
+    },
+    "Q13": {
+        "course": "EE 535",
+        "term": "20271",
+        "corequisites": ("SINGLE", {"EE 503"}),
+    },
+    "Q14": {
+        "course": "EE 557",
+        "term": "20271",
+        "prerequisites": ("SINGLE", {"EE 457"}),
+    },
+    "Q15": {
+        "course": "EE 597",
+        "term": "20271",
+        "prerequisites": ("AND", {"EE 450", "EE 503"}),
+    },
+    "Q16": {
+        "course": "EE 542",
+        "term": "20263",
+        "prerequisites": ("SINGLE", {"EE 450"}),
+        "preparation_codes": {"EE 457"},
+        "preparation_terms": {"c++"},
+    },
 }
 
-EXPECTED_FIELDS = {
-    "Q09": "prerequisites",
-    "Q10": "prerequisites",
-    "Q11": "prerequisites",
-    "Q12": "recommended_preparation",
-    "Q13": "corequisites",
-    "Q14": "prerequisites",
-    "Q15": "prerequisites",
-    "Q16": "recommended_preparation",
-}
 
+def requirement_codes(value):
+    """Extract course codes from a structured requirement."""
 
-def extract_courses(value):
     if not isinstance(value, dict):
         return set()
 
-    courses = set(value.get("courses", []))
+    codes = set(value.get("courses") or [])
 
-    for group in value.get("groups", []):
-        courses.update(group.get("courses", []))
+    for group in value.get("groups") or []:
+        codes.update(requirement_codes(group))
 
-    return courses
+    return codes
+
+
+def check_requirement(value, expected):
+    operator, codes = expected
+
+    return (
+        isinstance(value, dict)
+        and value.get("operator") == operator
+        and requirement_codes(value) == codes
+    )
+
+
+def check_preparation(text, codes, terms):
+    if not isinstance(text, str):
+        return False
+
+    normalized = text.lower()
+
+    found_codes = {
+        f"{prefix.upper()} {number.upper()}"
+        for prefix, number in re.findall(
+            r"\b([A-Z]{2,5})[\s-]*(\d{3}[A-Z]?)\b",
+            text,
+            re.IGNORECASE,
+        )
+    }
+
+    return (
+        found_codes == codes
+        and all(term in normalized for term in terms)
+    )
+
+
+def evaluate_question(question, results):
+    expected = EXPECTED[question["id"]]
+    primary = results[0] if results else {}
+
+    checks = {
+        "target": primary.get("course_code") == expected["course"],
+        "term": str(primary.get("term_code")) == expected["term"],
+        "route": primary.get("retrieval_method") == "exact",
+    }
+
+    if "prerequisites" in expected:
+        checks["prerequisites"] = check_requirement(
+            primary.get("prerequisites"),
+            expected["prerequisites"],
+        )
+
+    if "corequisites" in expected:
+        checks["corequisites"] = check_requirement(
+            primary.get("corequisites"),
+            expected["corequisites"],
+        )
+
+    if "preparation_codes" in expected:
+        checks["preparation"] = check_preparation(
+            primary.get("recommended_preparation"),
+            expected["preparation_codes"],
+            expected["preparation_terms"],
+        )
+
+        # Recommended preparation must not be treated as mandatory.
+        prereq_codes = requirement_codes(
+            primary.get("prerequisites")
+        )
+        checks["preparation_separate"] = not bool(
+            prereq_codes & expected["preparation_codes"]
+        )
+
+    return checks
 
 
 def main():
@@ -55,54 +152,39 @@ def main():
     ]
 
     passed = 0
-    unverified = 0
 
     print("=" * 65)
-    print("USC ADVISOR AI - PREREQUISITE EVIDENCE EVALUATION")
+    print("USC ADVISOR AI - FACTUAL PREREQUISITE EVALUATION")
     print("=" * 65)
 
     for q in selected:
         results = retrieve_for_advisor(
             q["question"],
             term_code=q.get("term_code", "20271"),
-            top_k=5
+            top_k=5,
         )
 
-        target = EXPECTED_TARGETS[q["id"]]
-        field = EXPECTED_FIELDS[q["id"]]
-
-        primary = results[0] if results else {}
-
-        target_correct = primary.get("course_code") == target
-        value = primary.get(field)
-
-        field_present = value is not None and value != ""
-
-        operator = (
-            value.get("operator")
-            if isinstance(value, dict)
-            else None
-        )
-
-        relationship_unverified = operator == "UNVERIFIED"
-
-        success = target_correct and field_present
-
+        checks = evaluate_question(q, results)
+        success = all(checks.values())
         passed += int(success)
-        unverified += int(relationship_unverified)
+
+        failures = [
+            name for name, ok in checks.items()
+            if not ok
+        ]
 
         print(
-            f"{q['id']}: "
-            f"{'PASS' if success else 'FAIL'} "
-            f"target={primary.get('course_code')} "
-            f"field={field} "
-            f"operator={operator}"
+            f"{q['id']}: {'PASS' if success else 'FAIL'} "
+            f"checks={checks}"
         )
 
+        if failures:
+            print(f"  Failed checks: {failures}")
+
     print("\n" + "=" * 65)
-    print(f"Questions: {len(selected)}")
-    print(f"Target + field checks passed: {passed}/{len(selected)}")
-    print(f"Unverified relationships: {unverified}")
+    print(f"Questions evaluated: {len(selected)}")
+    print(f"Passed: {passed}/{len(selected)}")
+    print(f"Accuracy: {passed / len(selected):.3f}")
     print("=" * 65)
 
 

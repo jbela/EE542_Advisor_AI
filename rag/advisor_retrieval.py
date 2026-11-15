@@ -65,6 +65,8 @@ POLICY_PATTERN = re.compile(
     r"registration|register|d[- ]?clearance|waiver|exception|"
     r"degree requirements?|graduation requirements?|academic standing|"
     r"leave of absence|reduced course load|deadline|tuition|"
+    r"transfer credit|transfer course|course substitution|"
+    r"substitute|substitution|equivalency|equivalent course|"
     r"academic calendar|student services)\b",
     re.IGNORECASE,
 )
@@ -117,6 +119,14 @@ def choose_retrieval_method(question):
     """
 
     codes = extract_course_codes(question)
+
+    if re.search(
+        r"\b(substitute|substitution|transfer credit|"
+        r"transfer course|equivalency|equivalent course)\b",
+        question,
+        re.IGNORECASE
+    ):
+        return "policy"
 
     if (
         not codes

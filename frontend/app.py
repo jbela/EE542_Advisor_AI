@@ -1,8 +1,11 @@
 import uuid
 import os
+import base64
 from html import escape
 from pathlib import Path
 from urllib.parse import urlparse
+from datetime import datetime
+from zoneinfo import ZoneInfo
 
 import requests
 import streamlit as st
@@ -18,6 +21,7 @@ st.set_page_config(
 )
 
 BASE_DIR = Path(__file__).resolve().parent
+APP_TIMEZONE = ZoneInfo("America/Los_Angeles")
 LOGO_PATH = BASE_DIR / "assets" / "usc-seal.png"
 TOMMY_PATH = BASE_DIR / "assets" / "tommy-avatar.png"
 TRAVELER_PATH = BASE_DIR / "assets" / "traveler.avif"
@@ -190,10 +194,71 @@ st.markdown(
         hr {
             border-color: var(--usc-border);
         }
+        /* Inline Expand / Collapse control */
+        [class*="st-key-answer_toggle_"] button {
+            background: transparent !important;
+            border: none !important;
+            box-shadow: none !important;
+            color: var(--usc-cardinal) !important;
+            padding: 0 !important;
+            min-height: 2rem;
+        }
+
+        [class*="st-key-answer_toggle_"] button:hover {
+            background: transparent !important;
+            color: #750000 !important;
+        }
+
+        [class*="st-key-answer_toggle_"] button:hover p {
+            text-decoration: underline;
+            text-underline-offset: 3px;
+        }
+
+        [class*="st-key-answer_toggle_"] button:focus-visible {
+            outline: 2px solid var(--usc-gold) !important;
+            outline-offset: 3px;
+        }
     </style>
     """,
     unsafe_allow_html=True,
 )
+
+def toggle_answer(state_key):
+    st.session_state[state_key] = not st.session_state.get(
+        state_key, False
+    )
+
+
+def display_assistant_answer(answer: str, state_key: str):
+    is_long = (
+        len(answer) > 1200
+        or answer.count("\n") >= 18
+    )
+
+    if not is_long:
+        st.markdown(answer)
+        return
+
+    expanded = st.session_state.get(state_key, False)
+
+    if expanded:
+        st.markdown(answer)
+    else:
+        preview = answer[:400].rsplit(" ", 1)[0]
+        st.markdown(preview + "…")
+
+    st.button(
+        "Collapse" if expanded else "Expand",
+        icon=(
+            ":material/expand_less:"
+            if expanded
+            else ":material/expand_more:"
+        ),
+        key=f"answer_toggle_{state_key}",
+        type="tertiary",
+        on_click=toggle_answer,
+        args=(state_key,),
+    )
 
 # ----------------------------------
 # Session State
@@ -202,6 +267,7 @@ def make_chat():
     return {
         "title": "New conversation",
         "messages": [],
+        "created_at": datetime.now(APP_TIMEZONE).isoformat(),
     }
 
 
@@ -217,6 +283,11 @@ if "chats" not in st.session_state:
                 else "New conversation"
             ),
             "messages": list(old_messages),
+            "created_at": (
+                datetime.now(APP_TIMEZONE).isoformat()
+                if not old_messages
+                else None
+            ),
         }
     }
     st.session_state.active_chat_id = first_id
@@ -318,9 +389,19 @@ with st.sidebar:
 
         if len(title) > 23:
             title = title[:23] + "..."
+        created_at = chat_data.get("created_at")
+        date_prefix = ""
+
+        if created_at:
+            date_label = (
+                datetime.fromisoformat(created_at)
+                .astimezone(APP_TIMEZONE)
+                .strftime("%m/%d")
+            )
+            date_prefix = f"{date_label} · "
 
         if st.button(
-            f"💬 {title}",
+            f"💬{date_prefix} {title}",
             key=f"chat_{chat_id}",
             use_container_width=True,
             type="primary" if is_active else "secondary",
@@ -331,7 +412,6 @@ with st.sidebar:
     st.divider()
     st.caption("EE542 Final Project · Fall 2026")
     st.caption("Jia, Ellie, Isabel")
-    st.caption("Prototype version")
 
 
 # ----------------------------------
@@ -344,12 +424,20 @@ logo_col, title_col, button_col = st.columns(
 
 with logo_col:
     if LOGO_PATH.is_file():
-        st.image(str(LOGO_PATH), width=90)
+        logo_data = base64.b64encode(
+            LOGO_PATH.read_bytes()
+        ).decode("ascii")
+
+        st.html(
+            f'<img src="data:image/png;base64,{logo_data}" '
+            f'alt="USC logo" '
+            f'style="width:90px;height:auto;display:block;">'
+        )
     else:
         st.markdown("### USC")
 
 with title_col:
-    st.title("USC Advisor AI")
+    st.title("USC Advisor AI", anchor=False)
     st.caption(
         "Your AI-powered Academic Advising Assistant"
     )
@@ -363,11 +451,6 @@ with button_col:
         new_chat()
         st.rerun()
 
-st.caption(
-    "⚠️ AI responses may be inaccurate. "
-    "Please confirm important information with official USC sources."
-)
-
 # ----------------------------------
 # Suggested Questions
 # Always visible, even after chatting
@@ -375,8 +458,8 @@ st.caption(
 st.markdown("**Suggested Questions**")
 
 example_questions = [
-    ("Computer Architecture",
-     "Which EE course covers computer architecture?"),
+    ("Spring 2027 EE Courses",
+     "What EE courses are offered in Spring 2027?"),
     ("International Student Enrollment",
      "What is USC's minimum full-time enrollment for international graduate students?"),
     ("D-Clearance Guidance",
@@ -409,7 +492,10 @@ messages = chat["messages"]
 # Welcome Message for Empty Chats
 # ----------------------------------
 if not messages:
-    st.markdown("### How can I help you today?")
+    st.subheader(
+        "How can I help you today?",
+        anchor=False,
+    )
 
     st.write(
         "Explore USC courses, understand academic "
@@ -421,7 +507,7 @@ if not messages:
 # ----------------------------------
 # Display Chat History + Source Chips
 # ----------------------------------
-for message in messages:
+for message_index, message in enumerate(messages):
     avatar = (
         ASSISTANT_AVATAR
         if message["role"] == "assistant"
@@ -432,7 +518,18 @@ for message in messages:
         message["role"],
         avatar=avatar,
     ):
-        st.markdown(message["content"])
+        content = message["content"]
+
+        if message["role"] == "assistant":
+            display_assistant_answer(
+                content,
+                state_key=(
+                    f"{st.session_state.active_chat_id}"
+                    f"_{message_index}"
+                ),
+            )
+        else:
+            st.markdown(content)
 
         # Display citation chips for assistant messages
         if message["role"] == "assistant":
@@ -557,9 +654,15 @@ for message in messages:
 # ----------------------------------
 # Chat Input
 # ----------------------------------
-user_input = st.chat_input(
-    "Ask me anything about USC courses..."
-)
+with st.bottom:
+    user_input = st.chat_input(
+        "Ask me anything about USC courses..."
+    )
+
+    st.caption(
+        "⚠️ AI responses may be inaccurate. "
+        "Please confirm important information with official USC sources."
+    )
 
 prompt = user_input or selected_question
 

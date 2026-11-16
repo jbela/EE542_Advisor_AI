@@ -110,6 +110,7 @@ def _course_record(doc, method="exact"):
         "requested_term_checked": checked,
         "retrieval_method": method,
         "prerequisite_verification": verification,
+        "prerequisites_structured": doc.get("prerequisites"),
     }
 
 def normalize(doc):

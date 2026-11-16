@@ -5,6 +5,7 @@ from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel, Field
 
 from backend.rag_service import get_context, format_term
+from backend.prerequisite_service import answer_prerequisite_scenario
 
 app = FastAPI(title="USC Advisor AI Backend")
 
@@ -60,6 +61,18 @@ async def ask(data: Question):
         return {
             "answer": "I could not find a verified USC source for this question. Please check with an academic advisor or the relevant USC office.",
             "sources": [],
+            "status": "review_required",
+        }
+
+    prerequisite_answer = answer_prerequisite_scenario(
+        data.question,
+        docs,
+    )
+
+    if prerequisite_answer is not None:
+        return {
+            "answer": prerequisite_answer,
+            "sources": _response_sources(docs),
             "status": "review_required",
         }
 

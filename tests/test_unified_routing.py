@@ -93,6 +93,161 @@ class TestUnifiedRouting(unittest.TestCase):
             with patch.object(course_lookup, "COURSES_DIR", folder):
                 self.assertIsNone(course_lookup.lookup_course_history("EE 542", "20271"))
 
+    def test_sufficient_prerequisite_question_uses_exact_lookup(self):
+        from rag.advisor_retrieval import (
+            choose_retrieval_method,
+            prioritize_course_codes,
+        )
+
+        question = "Is EE 503 alone sufficient for EE 562?"
+
+        self.assertEqual(
+            choose_retrieval_method(question),
+            "exact"
+        )
+
+        self.assertEqual(
+            prioritize_course_codes(question)[0],
+            "EE 562"
+        )
+
+    def test_complete_catalog_questions(self):
+        from rag.advisor_retrieval import (
+            choose_retrieval_method,
+            retrieve_for_advisor,
+        )
+
+        questions = [
+            "Show me all EE courses offered in Spring 2027.",
+            "List every electrical engineering course in Spring 2027.",
+            "What EE courses are available in Spring 2027?",
+            "How many EE courses are offered in Spring 2027?",
+        ]
+
+        for question in questions:
+            with self.subTest(question=question):
+                self.assertEqual(
+                    choose_retrieval_method(question),
+                    "historical_catalog"
+                )
+
+                results = retrieve_for_advisor(
+                    question,
+                    term_code="20271"
+                )
+
+                self.assertEqual(
+                    results[0]["retrieval_method"],
+                    "historical_catalog"
+                )
+
+                self.assertEqual(
+                    results[0]["course_count"],
+                    len(results[0]["courses"])
+                )
+
+    def test_course_discovery_excludes_policy_documents(self):
+        from rag.advisor_retrieval import retrieve_for_advisor
+
+        question = (
+            "Which classes teach deploying applications "
+            "on remote servers?"
+        )
+
+        results = retrieve_for_advisor(
+            question,
+            term_code="20271",
+            top_k=5
+        )
+
+        self.assertTrue(results)
+
+        for result in results:
+            self.assertEqual(
+                result.get("category"),
+                "course"
+            )
+
+
+    def test_course_discovery_uses_bge(self):
+        from rag.advisor_retrieval import retrieve_for_advisor
+
+        fake_results = [{
+            "course_code": "EE 250",
+            "title": "EE 250 - Distributed Systems",
+            "term_code": "20271",
+            "category": "course",
+            "url": "https://classes.usc.edu/term/20271/course/EE250",
+            "retrieval_method": "semantic_bge",
+        }]
+
+        with patch(
+            "rag.discovery_retrieve.retrieve_discovery",
+            return_value=fake_results,
+        ) as mock_discovery:
+
+            results = retrieve_for_advisor(
+                "Which courses teach distributed systems?",
+                term_code="20271",
+                top_k=5,
+            )
+
+        mock_discovery.assert_called_once_with(
+            "Which courses teach distributed systems?",
+            term_code="20271",
+            top_k=5,
+        )
+
+        self.assertEqual(
+            results[0]["retrieval_method"],
+            "semantic_bge",
+        )
+
+        self.assertEqual(
+            results[0]["course_code"],
+            "EE 250",
+        )
+
+        self.assertEqual(
+            results[0]["source_url"],
+            fake_results[0]["url"],
+        )
+
+
+    def test_natural_language_course_discovery_routing(self):
+        from rag.advisor_retrieval import choose_retrieval_method
+
+        questions = [
+            "Which class teaches deploying software on cloud platforms?",
+            "Where can I learn about random processes and Markov chains?",
+            "Which courses teach distributed systems?",
+            "Which classes cover wireless communications?",
+        ]
+
+        for question in questions:
+            with self.subTest(question=question):
+                self.assertEqual(
+                    choose_retrieval_method(question),
+                    "course"
+                )
+
+    def test_policy_and_exact_routing_preserved(self):
+        from rag.advisor_retrieval import choose_retrieval_method
+
+        cases = {
+            "What are the prerequisites for EE 597?": "exact",
+            "Can I substitute EE 450 with another course?": "policy",
+            "What are USC's reduced course load rules?": "policy",
+            "Was EE 562 offered in Fall 2025?": "availability",
+            "Show all EE courses offered in Spring 2027.": "historical_catalog",
+        }
+
+        for question, expected in cases.items():
+            with self.subTest(question=question):
+                self.assertEqual(
+                    choose_retrieval_method(question),
+                    expected
+                )
 
 if __name__ == "__main__":
     unittest.main()

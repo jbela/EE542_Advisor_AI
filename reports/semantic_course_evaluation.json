@@ -1,0 +1,2103 @@
+{
+  "index_version": "20261115_225655_edb77741",
+  "question_count": 20,
+  "summary": [
+    {
+      "faiss_weight": 0.0,
+      "bm25_weight": 1.0,
+      "hit_at_5": 0.8,
+      "mrr_at_5": 0.6599999999999999,
+      "precision_at_5": 0.21000000000000005,
+      "ndcg_at_5": 0.6610781324381226
+    },
+    {
+      "faiss_weight": 0.5,
+      "bm25_weight": 0.5,
+      "hit_at_5": 0.95,
+      "mrr_at_5": 0.7916666666666667,
+      "precision_at_5": 0.27000000000000013,
+      "ndcg_at_5": 0.8009678841238278
+    },
+    {
+      "faiss_weight": 0.75,
+      "bm25_weight": 0.25,
+      "hit_at_5": 0.95,
+      "mrr_at_5": 0.8083333333333332,
+      "precision_at_5": 0.2600000000000001,
+      "ndcg_at_5": 0.8013421865364576
+    },
+    {
+      "faiss_weight": 0.85,
+      "bm25_weight": 0.15000000000000002,
+      "hit_at_5": 0.95,
+      "mrr_at_5": 0.85,
+      "precision_at_5": 0.2600000000000001,
+      "ndcg_at_5": 0.8280075016769228
+    },
+    {
+      "faiss_weight": 1.0,
+      "bm25_weight": 0.0,
+      "hit_at_5": 0.95,
+      "mrr_at_5": 0.825,
+      "precision_at_5": 0.25000000000000006,
+      "ndcg_at_5": 0.7848538679610131
+    }
+  ],
+  "details": [
+    {
+      "id": "S01",
+      "category": "machine_learning",
+      "question": "Which courses teach computers to recognize patterns in data?",
+      "weight": 0.0,
+      "expected_courses": [
+        "EE 460",
+        "EE 559"
+      ],
+      "retrieved_courses": [
+        "EE 105",
+        "EE 790",
+        "EE 590",
+        "EE 576",
+        "EE 370"
+      ],
+      "hit_at_5": 0,
+      "mrr_at_5": 0.0,
+      "precision_at_5": 0.0,
+      "ndcg_at_5": 0.0
+    },
+    {
+      "id": "S02",
+      "category": "machine_learning",
+      "question": "Where can I learn supervised classification and regression?",
+      "weight": 0.0,
+      "expected_courses": [
+        "EE 460",
+        "EE 559"
+      ],
+      "retrieved_courses": [
+        "EE 559",
+        "EE 460",
+        "EE 698",
+        "EE 109",
+        "EE 490"
+      ],
+      "hit_at_5": 1,
+      "mrr_at_5": 1.0,
+      "precision_at_5": 0.4,
+      "ndcg_at_5": 1.0
+    },
+    {
+      "id": "S03",
+      "category": "machine_learning",
+      "question": "Which class covers neural networks and learning algorithms?",
+      "weight": 0.0,
+      "expected_courses": [
+        "EE 460",
+        "EE 559"
+      ],
+      "retrieved_courses": [
+        "EE 559",
+        "EE 541",
+        "EE 460",
+        "EE 508",
+        "EE 563"
+      ],
+      "hit_at_5": 1,
+      "mrr_at_5": 1.0,
+      "precision_at_5": 0.4,
+      "ndcg_at_5": 0.9197207891481876
+    },
+    {
+      "id": "S04",
+      "category": "machine_learning",
+      "question": "I want to study how machines learn from examples.",
+      "weight": 0.0,
+      "expected_courses": [
+        "EE 460",
+        "EE 559"
+      ],
+      "retrieved_courses": [
+        "EE 690",
+        "EE 518",
+        "EE 512",
+        "EE 460",
+        "EE 496"
+      ],
+      "hit_at_5": 1,
+      "mrr_at_5": 0.25,
+      "precision_at_5": 0.2,
+      "ndcg_at_5": 0.2640681225725909
+    },
+    {
+      "id": "S05",
+      "category": "cloud_computing",
+      "question": "Which course teaches deploying software on cloud platforms?",
+      "weight": 0.0,
+      "expected_courses": [
+        "EE 547"
+      ],
+      "retrieved_courses": [
+        "EE 547",
+        "EE 455",
+        "EE 790",
+        "EE 355",
+        "EE 590"
+      ],
+      "hit_at_5": 1,
+      "mrr_at_5": 1.0,
+      "precision_at_5": 0.2,
+      "ndcg_at_5": 1.0
+    },
+    {
+      "id": "S06",
+      "category": "cloud_computing",
+      "question": "I want to learn about virtualization, APIs, and scalable applications.",
+      "weight": 0.0,
+      "expected_courses": [
+        "EE 547"
+      ],
+      "retrieved_courses": [
+        "EE 547",
+        "EE 698",
+        "EE 508",
+        "EE 510",
+        "EE 364"
+      ],
+      "hit_at_5": 1,
+      "mrr_at_5": 1.0,
+      "precision_at_5": 0.2,
+      "ndcg_at_5": 1.0
+    },
+    {
+      "id": "S07",
+      "category": "cloud_computing",
+      "question": "Which classes teach deploying applications on remote servers?",
+      "weight": 0.0,
+      "expected_courses": [
+        "EE 547"
+      ],
+      "retrieved_courses": [
+        "EE 510",
+        "EE 790",
+        "EE 590",
+        "EE 141",
+        "EE 524"
+      ],
+      "hit_at_5": 0,
+      "mrr_at_5": 0.0,
+      "precision_at_5": 0.0,
+      "ndcg_at_5": 0.0
+    },
+    {
+      "id": "S08",
+      "category": "networking",
+      "question": "Which courses explain how computers communicate across networks?",
+      "weight": 0.0,
+      "expected_courses": [
+        "EE 450",
+        "EE 597"
+      ],
+      "retrieved_courses": [
+        "EE 105",
+        "EE 521",
+        "EE 557",
+        "EE 450",
+        "EE 559"
+      ],
+      "hit_at_5": 1,
+      "mrr_at_5": 0.25,
+      "precision_at_5": 0.2,
+      "ndcg_at_5": 0.2640681225725909
+    },
+    {
+      "id": "S09",
+      "category": "networking",
+      "question": "I want to understand how connected devices exchange information.",
+      "weight": 0.0,
+      "expected_courses": [
+        "EE 250",
+        "EE 450",
+        "EE 535"
+      ],
+      "retrieved_courses": [
+        "EE 522",
+        "EE 576",
+        "EE 109",
+        "EE 105",
+        "EE 570A"
+      ],
+      "hit_at_5": 0,
+      "mrr_at_5": 0.0,
+      "precision_at_5": 0.0,
+      "ndcg_at_5": 0.0
+    },
+    {
+      "id": "S10",
+      "category": "networking",
+      "question": "Which course covers wireless network architecture and protocols?",
+      "weight": 0.0,
+      "expected_courses": [
+        "EE 597"
+      ],
+      "retrieved_courses": [
+        "EE 450",
+        "EE 557",
+        "EE 250",
+        "EE 533",
+        "EE 597"
+      ],
+      "hit_at_5": 1,
+      "mrr_at_5": 0.2,
+      "precision_at_5": 0.2,
+      "ndcg_at_5": 0.38685280723454163
+    },
+    {
+      "id": "S11",
+      "category": "distributed_systems",
+      "question": "Which course teaches distributed computing for connected devices?",
+      "weight": 0.0,
+      "expected_courses": [
+        "EE 250"
+      ],
+      "retrieved_courses": [
+        "EE 250",
+        "EE 576",
+        "EE 538",
+        "EE 549",
+        "EE 570A"
+      ],
+      "hit_at_5": 1,
+      "mrr_at_5": 1.0,
+      "precision_at_5": 0.2,
+      "ndcg_at_5": 1.0
+    },
+    {
+      "id": "S12",
+      "category": "distributed_systems",
+      "question": "I want to study systems where multiple computers coordinate tasks.",
+      "weight": 0.0,
+      "expected_courses": [
+        "EE 250"
+      ],
+      "retrieved_courses": [
+        "EE 105",
+        "EE 535",
+        "EE 690",
+        "EE 503",
+        "EE 109"
+      ],
+      "hit_at_5": 0,
+      "mrr_at_5": 0.0,
+      "precision_at_5": 0.0,
+      "ndcg_at_5": 0.0
+    },
+    {
+      "id": "S13",
+      "category": "probability",
+      "question": "Which courses cover probability, random variables, and uncertainty?",
+      "weight": 0.0,
+      "expected_courses": [
+        "EE 364",
+        "EE 503"
+      ],
+      "retrieved_courses": [
+        "EE 364",
+        "EE 503",
+        "EE 562",
+        "EE 460",
+        "EE 515"
+      ],
+      "hit_at_5": 1,
+      "mrr_at_5": 1.0,
+      "precision_at_5": 0.4,
+      "ndcg_at_5": 1.0
+    },
+    {
+      "id": "S14",
+      "category": "probability",
+      "question": "Where can I study random processes and Markov chains?",
+      "weight": 0.0,
+      "expected_courses": [
+        "EE 562"
+      ],
+      "retrieved_courses": [
+        "EE 562",
+        "EE 503",
+        "EE 512",
+        "EE 364",
+        "EE 690"
+      ],
+      "hit_at_5": 1,
+      "mrr_at_5": 1.0,
+      "precision_at_5": 0.2,
+      "ndcg_at_5": 1.0
+    },
+    {
+      "id": "S15",
+      "category": "probability",
+      "question": "I want to learn about stochastic processes and Brownian motion.",
+      "weight": 0.0,
+      "expected_courses": [
+        "EE 512"
+      ],
+      "retrieved_courses": [
+        "EE 512",
+        "EE 562",
+        "EE 698",
+        "EE 109",
+        "EE 559"
+      ],
+      "hit_at_5": 1,
+      "mrr_at_5": 1.0,
+      "precision_at_5": 0.2,
+      "ndcg_at_5": 1.0
+    },
+    {
+      "id": "S16",
+      "category": "computer_architecture",
+      "question": "Which course teaches computer organization and processor architecture?",
+      "weight": 0.0,
+      "expected_courses": [
+        "EE 457",
+        "EE 557"
+      ],
+      "retrieved_courses": [
+        "EE 557",
+        "EE 457",
+        "EE 533",
+        "EE 364",
+        "EE 524"
+      ],
+      "hit_at_5": 1,
+      "mrr_at_5": 1.0,
+      "precision_at_5": 0.4,
+      "ndcg_at_5": 1.0
+    },
+    {
+      "id": "S17",
+      "category": "digital_hardware",
+      "question": "Which class teaches digital circuit design using Verilog?",
+      "weight": 0.0,
+      "expected_courses": [
+        "EE 354"
+      ],
+      "retrieved_courses": [
+        "EE 354",
+        "EE 524",
+        "EE 477",
+        "EE 459",
+        "EE 467"
+      ],
+      "hit_at_5": 1,
+      "mrr_at_5": 1.0,
+      "precision_at_5": 0.2,
+      "ndcg_at_5": 1.0
+    },
+    {
+      "id": "S18",
+      "category": "wireless_communications",
+      "question": "Which course covers cellular communication and mobile channels?",
+      "weight": 0.0,
+      "expected_courses": [
+        "EE 535"
+      ],
+      "retrieved_courses": [
+        "EE 535",
+        "EE 467",
+        "EE 448",
+        "EE 632A",
+        "EE 510"
+      ],
+      "hit_at_5": 1,
+      "mrr_at_5": 1.0,
+      "precision_at_5": 0.2,
+      "ndcg_at_5": 1.0
+    },
+    {
+      "id": "S19",
+      "category": "robotics",
+      "question": "Which courses teach robotics and autonomous systems?",
+      "weight": 0.0,
+      "expected_courses": [
+        "EE 445",
+        "EE 545"
+      ],
+      "retrieved_courses": [
+        "EE 545",
+        "EE 445",
+        "EE 301",
+        "EE 443",
+        "EE 109"
+      ],
+      "hit_at_5": 1,
+      "mrr_at_5": 1.0,
+      "precision_at_5": 0.4,
+      "ndcg_at_5": 1.0
+    },
+    {
+      "id": "S20",
+      "category": "control_systems",
+      "question": "Where can I learn about feedback control and dynamic systems?",
+      "weight": 0.0,
+      "expected_courses": [
+        "EE 482",
+        "EE 587"
+      ],
+      "retrieved_courses": [
+        "EE 481",
+        "EE 587",
+        "EE 528",
+        "EE 545",
+        "EE 698"
+      ],
+      "hit_at_5": 1,
+      "mrr_at_5": 0.5,
+      "precision_at_5": 0.2,
+      "ndcg_at_5": 0.38685280723454163
+    },
+    {
+      "id": "S01",
+      "category": "machine_learning",
+      "question": "Which courses teach computers to recognize patterns in data?",
+      "weight": 0.5,
+      "expected_courses": [
+        "EE 460",
+        "EE 559"
+      ],
+      "retrieved_courses": [
+        "EE 105",
+        "EE 354",
+        "EE 364",
+        "EE 559",
+        "EE 457"
+      ],
+      "hit_at_5": 1,
+      "mrr_at_5": 0.25,
+      "precision_at_5": 0.2,
+      "ndcg_at_5": 0.2640681225725909
+    },
+    {
+      "id": "S02",
+      "category": "machine_learning",
+      "question": "Where can I learn supervised classification and regression?",
+      "weight": 0.5,
+      "expected_courses": [
+        "EE 460",
+        "EE 559"
+      ],
+      "retrieved_courses": [
+        "EE 559",
+        "EE 460",
+        "EE 563",
+        "EE 541",
+        "EE 508"
+      ],
+      "hit_at_5": 1,
+      "mrr_at_5": 1.0,
+      "precision_at_5": 0.4,
+      "ndcg_at_5": 1.0
+    },
+    {
+      "id": "S03",
+      "category": "machine_learning",
+      "question": "Which class covers neural networks and learning algorithms?",
+      "weight": 0.5,
+      "expected_courses": [
+        "EE 460",
+        "EE 559"
+      ],
+      "retrieved_courses": [
+        "EE 559",
+        "EE 508",
+        "EE 541",
+        "EE 460",
+        "EE 515"
+      ],
+      "hit_at_5": 1,
+      "mrr_at_5": 1.0,
+      "precision_at_5": 0.4,
+      "ndcg_at_5": 0.8772153153380493
+    },
+    {
+      "id": "S04",
+      "category": "machine_learning",
+      "question": "I want to study how machines learn from examples.",
+      "weight": 0.5,
+      "expected_courses": [
+        "EE 460",
+        "EE 559"
+      ],
+      "retrieved_courses": [
+        "EE 508",
+        "EE 690",
+        "EE 559",
+        "EE 518",
+        "EE 460"
+      ],
+      "hit_at_5": 1,
+      "mrr_at_5": 0.3333333333333333,
+      "precision_at_5": 0.4,
+      "ndcg_at_5": 0.5437713091520254
+    },
+    {
+      "id": "S05",
+      "category": "cloud_computing",
+      "question": "Which course teaches deploying software on cloud platforms?",
+      "weight": 0.5,
+      "expected_courses": [
+        "EE 547"
+      ],
+      "retrieved_courses": [
+        "EE 547",
+        "EE 455",
+        "EE 541",
+        "EE 250",
+        "EE 538"
+      ],
+      "hit_at_5": 1,
+      "mrr_at_5": 1.0,
+      "precision_at_5": 0.2,
+      "ndcg_at_5": 1.0
+    },
+    {
+      "id": "S06",
+      "category": "cloud_computing",
+      "question": "I want to learn about virtualization, APIs, and scalable applications.",
+      "weight": 0.5,
+      "expected_courses": [
+        "EE 547"
+      ],
+      "retrieved_courses": [
+        "EE 547",
+        "EE 508",
+        "EE 698",
+        "EE 510",
+        "EE 557"
+      ],
+      "hit_at_5": 1,
+      "mrr_at_5": 1.0,
+      "precision_at_5": 0.2,
+      "ndcg_at_5": 1.0
+    },
+    {
+      "id": "S07",
+      "category": "cloud_computing",
+      "question": "Which classes teach deploying applications on remote servers?",
+      "weight": 0.5,
+      "expected_courses": [
+        "EE 547"
+      ],
+      "retrieved_courses": [
+        "EE 547",
+        "EE 510",
+        "EE 250",
+        "EE 790",
+        "EE 457"
+      ],
+      "hit_at_5": 1,
+      "mrr_at_5": 1.0,
+      "precision_at_5": 0.2,
+      "ndcg_at_5": 1.0
+    },
+    {
+      "id": "S08",
+      "category": "networking",
+      "question": "Which courses explain how computers communicate across networks?",
+      "weight": 0.5,
+      "expected_courses": [
+        "EE 450",
+        "EE 597"
+      ],
+      "retrieved_courses": [
+        "EE 597",
+        "EE 105",
+        "EE 557",
+        "EE 450",
+        "EE 457"
+      ],
+      "hit_at_5": 1,
+      "mrr_at_5": 1.0,
+      "precision_at_5": 0.4,
+      "ndcg_at_5": 0.8772153153380493
+    },
+    {
+      "id": "S09",
+      "category": "networking",
+      "question": "I want to understand how connected devices exchange information.",
+      "weight": 0.5,
+      "expected_courses": [
+        "EE 250",
+        "EE 450",
+        "EE 535"
+      ],
+      "retrieved_courses": [
+        "EE 576",
+        "EE 105",
+        "EE 522",
+        "EE 535",
+        "EE 109"
+      ],
+      "hit_at_5": 1,
+      "mrr_at_5": 0.25,
+      "precision_at_5": 0.2,
+      "ndcg_at_5": 0.20210734650054757
+    },
+    {
+      "id": "S10",
+      "category": "networking",
+      "question": "Which course covers wireless network architecture and protocols?",
+      "weight": 0.5,
+      "expected_courses": [
+        "EE 597"
+      ],
+      "retrieved_courses": [
+        "EE 450",
+        "EE 597",
+        "EE 250",
+        "EE 632A",
+        "EE 535"
+      ],
+      "hit_at_5": 1,
+      "mrr_at_5": 0.5,
+      "precision_at_5": 0.2,
+      "ndcg_at_5": 0.6309297535714575
+    },
+    {
+      "id": "S11",
+      "category": "distributed_systems",
+      "question": "Which course teaches distributed computing for connected devices?",
+      "weight": 0.5,
+      "expected_courses": [
+        "EE 250"
+      ],
+      "retrieved_courses": [
+        "EE 250",
+        "EE 547",
+        "EE 538",
+        "EE 576",
+        "EE 354"
+      ],
+      "hit_at_5": 1,
+      "mrr_at_5": 1.0,
+      "precision_at_5": 0.2,
+      "ndcg_at_5": 1.0
+    },
+    {
+      "id": "S12",
+      "category": "distributed_systems",
+      "question": "I want to study systems where multiple computers coordinate tasks.",
+      "weight": 0.5,
+      "expected_courses": [
+        "EE 250"
+      ],
+      "retrieved_courses": [
+        "EE 105",
+        "EE 557",
+        "EE 535",
+        "EE 690",
+        "EE 455"
+      ],
+      "hit_at_5": 0,
+      "mrr_at_5": 0.0,
+      "precision_at_5": 0.0,
+      "ndcg_at_5": 0.0
+    },
+    {
+      "id": "S13",
+      "category": "probability",
+      "question": "Which courses cover probability, random variables, and uncertainty?",
+      "weight": 0.5,
+      "expected_courses": [
+        "EE 364",
+        "EE 503"
+      ],
+      "retrieved_courses": [
+        "EE 364",
+        "EE 503",
+        "EE 562",
+        "EE 460",
+        "EE 515"
+      ],
+      "hit_at_5": 1,
+      "mrr_at_5": 1.0,
+      "precision_at_5": 0.4,
+      "ndcg_at_5": 1.0
+    },
+    {
+      "id": "S14",
+      "category": "probability",
+      "question": "Where can I study random processes and Markov chains?",
+      "weight": 0.5,
+      "expected_courses": [
+        "EE 562"
+      ],
+      "retrieved_courses": [
+        "EE 562",
+        "EE 503",
+        "EE 512",
+        "EE 364",
+        "EE 563"
+      ],
+      "hit_at_5": 1,
+      "mrr_at_5": 1.0,
+      "precision_at_5": 0.2,
+      "ndcg_at_5": 1.0
+    },
+    {
+      "id": "S15",
+      "category": "probability",
+      "question": "I want to learn about stochastic processes and Brownian motion.",
+      "weight": 0.5,
+      "expected_courses": [
+        "EE 512"
+      ],
+      "retrieved_courses": [
+        "EE 512",
+        "EE 562",
+        "EE 364",
+        "EE 698",
+        "EE 559"
+      ],
+      "hit_at_5": 1,
+      "mrr_at_5": 1.0,
+      "precision_at_5": 0.2,
+      "ndcg_at_5": 1.0
+    },
+    {
+      "id": "S16",
+      "category": "computer_architecture",
+      "question": "Which course teaches computer organization and processor architecture?",
+      "weight": 0.5,
+      "expected_courses": [
+        "EE 457",
+        "EE 557"
+      ],
+      "retrieved_courses": [
+        "EE 557",
+        "EE 457",
+        "EE 533",
+        "EE 455",
+        "EE 538"
+      ],
+      "hit_at_5": 1,
+      "mrr_at_5": 1.0,
+      "precision_at_5": 0.4,
+      "ndcg_at_5": 1.0
+    },
+    {
+      "id": "S17",
+      "category": "digital_hardware",
+      "question": "Which class teaches digital circuit design using Verilog?",
+      "weight": 0.5,
+      "expected_courses": [
+        "EE 354"
+      ],
+      "retrieved_courses": [
+        "EE 354",
+        "EE 477",
+        "EE 577A",
+        "EE 524",
+        "EE 459"
+      ],
+      "hit_at_5": 1,
+      "mrr_at_5": 1.0,
+      "precision_at_5": 0.2,
+      "ndcg_at_5": 1.0
+    },
+    {
+      "id": "S18",
+      "category": "wireless_communications",
+      "question": "Which course covers cellular communication and mobile channels?",
+      "weight": 0.5,
+      "expected_courses": [
+        "EE 535"
+      ],
+      "retrieved_courses": [
+        "EE 535",
+        "EE 632A",
+        "EE 448",
+        "EE 467",
+        "EE 597"
+      ],
+      "hit_at_5": 1,
+      "mrr_at_5": 1.0,
+      "precision_at_5": 0.2,
+      "ndcg_at_5": 1.0
+    },
+    {
+      "id": "S19",
+      "category": "robotics",
+      "question": "Which courses teach robotics and autonomous systems?",
+      "weight": 0.5,
+      "expected_courses": [
+        "EE 445",
+        "EE 545"
+      ],
+      "retrieved_courses": [
+        "EE 545",
+        "EE 445",
+        "EE 109",
+        "EE 301",
+        "EE 561"
+      ],
+      "hit_at_5": 1,
+      "mrr_at_5": 1.0,
+      "precision_at_5": 0.4,
+      "ndcg_at_5": 1.0
+    },
+    {
+      "id": "S20",
+      "category": "control_systems",
+      "question": "Where can I learn about feedback control and dynamic systems?",
+      "weight": 0.5,
+      "expected_courses": [
+        "EE 482",
+        "EE 587"
+      ],
+      "retrieved_courses": [
+        "EE 481",
+        "EE 587",
+        "EE 545",
+        "EE 528",
+        "EE 482"
+      ],
+      "hit_at_5": 1,
+      "mrr_at_5": 0.5,
+      "precision_at_5": 0.4,
+      "ndcg_at_5": 0.6240505200038379
+    },
+    {
+      "id": "S01",
+      "category": "machine_learning",
+      "question": "Which courses teach computers to recognize patterns in data?",
+      "weight": 0.75,
+      "expected_courses": [
+        "EE 460",
+        "EE 559"
+      ],
+      "retrieved_courses": [
+        "EE 354",
+        "EE 364",
+        "EE 559",
+        "EE 457",
+        "EE 561"
+      ],
+      "hit_at_5": 1,
+      "mrr_at_5": 0.3333333333333333,
+      "precision_at_5": 0.2,
+      "ndcg_at_5": 0.3065735963827292
+    },
+    {
+      "id": "S02",
+      "category": "machine_learning",
+      "question": "Where can I learn supervised classification and regression?",
+      "weight": 0.75,
+      "expected_courses": [
+        "EE 460",
+        "EE 559"
+      ],
+      "retrieved_courses": [
+        "EE 559",
+        "EE 563",
+        "EE 460",
+        "EE 541",
+        "EE 508"
+      ],
+      "hit_at_5": 1,
+      "mrr_at_5": 1.0,
+      "precision_at_5": 0.4,
+      "ndcg_at_5": 0.9197207891481876
+    },
+    {
+      "id": "S03",
+      "category": "machine_learning",
+      "question": "Which class covers neural networks and learning algorithms?",
+      "weight": 0.75,
+      "expected_courses": [
+        "EE 460",
+        "EE 559"
+      ],
+      "retrieved_courses": [
+        "EE 508",
+        "EE 559",
+        "EE 541",
+        "EE 460",
+        "EE 515"
+      ],
+      "hit_at_5": 1,
+      "mrr_at_5": 0.5,
+      "precision_at_5": 0.4,
+      "ndcg_at_5": 0.6509209298071326
+    },
+    {
+      "id": "S04",
+      "category": "machine_learning",
+      "question": "I want to study how machines learn from examples.",
+      "weight": 0.75,
+      "expected_courses": [
+        "EE 460",
+        "EE 559"
+      ],
+      "retrieved_courses": [
+        "EE 508",
+        "EE 559",
+        "EE 541",
+        "EE 561",
+        "EE 457"
+      ],
+      "hit_at_5": 1,
+      "mrr_at_5": 0.5,
+      "precision_at_5": 0.2,
+      "ndcg_at_5": 0.38685280723454163
+    },
+    {
+      "id": "S05",
+      "category": "cloud_computing",
+      "question": "Which course teaches deploying software on cloud platforms?",
+      "weight": 0.75,
+      "expected_courses": [
+        "EE 547"
+      ],
+      "retrieved_courses": [
+        "EE 547",
+        "EE 541",
+        "EE 250",
+        "EE 455",
+        "EE 457"
+      ],
+      "hit_at_5": 1,
+      "mrr_at_5": 1.0,
+      "precision_at_5": 0.2,
+      "ndcg_at_5": 1.0
+    },
+    {
+      "id": "S06",
+      "category": "cloud_computing",
+      "question": "I want to learn about virtualization, APIs, and scalable applications.",
+      "weight": 0.75,
+      "expected_courses": [
+        "EE 547"
+      ],
+      "retrieved_courses": [
+        "EE 547",
+        "EE 557",
+        "EE 508",
+        "EE 455",
+        "EE 577B"
+      ],
+      "hit_at_5": 1,
+      "mrr_at_5": 1.0,
+      "precision_at_5": 0.2,
+      "ndcg_at_5": 1.0
+    },
+    {
+      "id": "S07",
+      "category": "cloud_computing",
+      "question": "Which classes teach deploying applications on remote servers?",
+      "weight": 0.75,
+      "expected_courses": [
+        "EE 547"
+      ],
+      "retrieved_courses": [
+        "EE 547",
+        "EE 250",
+        "EE 457",
+        "EE 455",
+        "EE 597"
+      ],
+      "hit_at_5": 1,
+      "mrr_at_5": 1.0,
+      "precision_at_5": 0.2,
+      "ndcg_at_5": 1.0
+    },
+    {
+      "id": "S08",
+      "category": "networking",
+      "question": "Which courses explain how computers communicate across networks?",
+      "weight": 0.75,
+      "expected_courses": [
+        "EE 450",
+        "EE 597"
+      ],
+      "retrieved_courses": [
+        "EE 597",
+        "EE 557",
+        "EE 457",
+        "EE 450",
+        "EE 105"
+      ],
+      "hit_at_5": 1,
+      "mrr_at_5": 1.0,
+      "precision_at_5": 0.4,
+      "ndcg_at_5": 0.8772153153380493
+    },
+    {
+      "id": "S09",
+      "category": "networking",
+      "question": "I want to understand how connected devices exchange information.",
+      "weight": 0.75,
+      "expected_courses": [
+        "EE 250",
+        "EE 450",
+        "EE 535"
+      ],
+      "retrieved_courses": [
+        "EE 576",
+        "EE 105",
+        "EE 535",
+        "EE 467",
+        "EE 448"
+      ],
+      "hit_at_5": 1,
+      "mrr_at_5": 0.3333333333333333,
+      "precision_at_5": 0.2,
+      "ndcg_at_5": 0.23463936301137822
+    },
+    {
+      "id": "S10",
+      "category": "networking",
+      "question": "Which course covers wireless network architecture and protocols?",
+      "weight": 0.75,
+      "expected_courses": [
+        "EE 597"
+      ],
+      "retrieved_courses": [
+        "EE 597",
+        "EE 450",
+        "EE 535",
+        "EE 632A",
+        "EE 250"
+      ],
+      "hit_at_5": 1,
+      "mrr_at_5": 1.0,
+      "precision_at_5": 0.2,
+      "ndcg_at_5": 1.0
+    },
+    {
+      "id": "S11",
+      "category": "distributed_systems",
+      "question": "Which course teaches distributed computing for connected devices?",
+      "weight": 0.75,
+      "expected_courses": [
+        "EE 250"
+      ],
+      "retrieved_courses": [
+        "EE 250",
+        "EE 547",
+        "EE 354",
+        "EE 557",
+        "EE 538"
+      ],
+      "hit_at_5": 1,
+      "mrr_at_5": 1.0,
+      "precision_at_5": 0.2,
+      "ndcg_at_5": 1.0
+    },
+    {
+      "id": "S12",
+      "category": "distributed_systems",
+      "question": "I want to study systems where multiple computers coordinate tasks.",
+      "weight": 0.75,
+      "expected_courses": [
+        "EE 250"
+      ],
+      "retrieved_courses": [
+        "EE 557",
+        "EE 457",
+        "EE 455",
+        "EE 508",
+        "EE 105"
+      ],
+      "hit_at_5": 0,
+      "mrr_at_5": 0.0,
+      "precision_at_5": 0.0,
+      "ndcg_at_5": 0.0
+    },
+    {
+      "id": "S13",
+      "category": "probability",
+      "question": "Which courses cover probability, random variables, and uncertainty?",
+      "weight": 0.75,
+      "expected_courses": [
+        "EE 364",
+        "EE 503"
+      ],
+      "retrieved_courses": [
+        "EE 364",
+        "EE 503",
+        "EE 562",
+        "EE 563",
+        "EE 515"
+      ],
+      "hit_at_5": 1,
+      "mrr_at_5": 1.0,
+      "precision_at_5": 0.4,
+      "ndcg_at_5": 1.0
+    },
+    {
+      "id": "S14",
+      "category": "probability",
+      "question": "Where can I study random processes and Markov chains?",
+      "weight": 0.75,
+      "expected_courses": [
+        "EE 562"
+      ],
+      "retrieved_courses": [
+        "EE 562",
+        "EE 512",
+        "EE 503",
+        "EE 364",
+        "EE 563"
+      ],
+      "hit_at_5": 1,
+      "mrr_at_5": 1.0,
+      "precision_at_5": 0.2,
+      "ndcg_at_5": 1.0
+    },
+    {
+      "id": "S15",
+      "category": "probability",
+      "question": "I want to learn about stochastic processes and Brownian motion.",
+      "weight": 0.75,
+      "expected_courses": [
+        "EE 512"
+      ],
+      "retrieved_courses": [
+        "EE 512",
+        "EE 562",
+        "EE 364",
+        "EE 563",
+        "EE 559"
+      ],
+      "hit_at_5": 1,
+      "mrr_at_5": 1.0,
+      "precision_at_5": 0.2,
+      "ndcg_at_5": 1.0
+    },
+    {
+      "id": "S16",
+      "category": "computer_architecture",
+      "question": "Which course teaches computer organization and processor architecture?",
+      "weight": 0.75,
+      "expected_courses": [
+        "EE 457",
+        "EE 557"
+      ],
+      "retrieved_courses": [
+        "EE 557",
+        "EE 457",
+        "EE 533",
+        "EE 455",
+        "EE 459"
+      ],
+      "hit_at_5": 1,
+      "mrr_at_5": 1.0,
+      "precision_at_5": 0.4,
+      "ndcg_at_5": 1.0
+    },
+    {
+      "id": "S17",
+      "category": "digital_hardware",
+      "question": "Which class teaches digital circuit design using Verilog?",
+      "weight": 0.75,
+      "expected_courses": [
+        "EE 354"
+      ],
+      "retrieved_courses": [
+        "EE 354",
+        "EE 477",
+        "EE 577A",
+        "EE 658",
+        "EE 524"
+      ],
+      "hit_at_5": 1,
+      "mrr_at_5": 1.0,
+      "precision_at_5": 0.2,
+      "ndcg_at_5": 1.0
+    },
+    {
+      "id": "S18",
+      "category": "wireless_communications",
+      "question": "Which course covers cellular communication and mobile channels?",
+      "weight": 0.75,
+      "expected_courses": [
+        "EE 535"
+      ],
+      "retrieved_courses": [
+        "EE 535",
+        "EE 597",
+        "EE 632A",
+        "EE 448",
+        "EE 519"
+      ],
+      "hit_at_5": 1,
+      "mrr_at_5": 1.0,
+      "precision_at_5": 0.2,
+      "ndcg_at_5": 1.0
+    },
+    {
+      "id": "S19",
+      "category": "robotics",
+      "question": "Which courses teach robotics and autonomous systems?",
+      "weight": 0.75,
+      "expected_courses": [
+        "EE 445",
+        "EE 545"
+      ],
+      "retrieved_courses": [
+        "EE 545",
+        "EE 445",
+        "EE 561",
+        "EE 109",
+        "EE 563"
+      ],
+      "hit_at_5": 1,
+      "mrr_at_5": 1.0,
+      "precision_at_5": 0.4,
+      "ndcg_at_5": 1.0
+    },
+    {
+      "id": "S20",
+      "category": "control_systems",
+      "question": "Where can I learn about feedback control and dynamic systems?",
+      "weight": 0.75,
+      "expected_courses": [
+        "EE 482",
+        "EE 587"
+      ],
+      "retrieved_courses": [
+        "EE 481",
+        "EE 587",
+        "EE 545",
+        "EE 482",
+        "EE 528"
+      ],
+      "hit_at_5": 1,
+      "mrr_at_5": 0.5,
+      "precision_at_5": 0.4,
+      "ndcg_at_5": 0.6509209298071326
+    },
+    {
+      "id": "S01",
+      "category": "machine_learning",
+      "question": "Which courses teach computers to recognize patterns in data?",
+      "weight": 0.85,
+      "expected_courses": [
+        "EE 460",
+        "EE 559"
+      ],
+      "retrieved_courses": [
+        "EE 354",
+        "EE 559",
+        "EE 364",
+        "EE 457",
+        "EE 561"
+      ],
+      "hit_at_5": 1,
+      "mrr_at_5": 0.5,
+      "precision_at_5": 0.2,
+      "ndcg_at_5": 0.38685280723454163
+    },
+    {
+      "id": "S02",
+      "category": "machine_learning",
+      "question": "Where can I learn supervised classification and regression?",
+      "weight": 0.85,
+      "expected_courses": [
+        "EE 460",
+        "EE 559"
+      ],
+      "retrieved_courses": [
+        "EE 559",
+        "EE 563",
+        "EE 460",
+        "EE 541",
+        "EE 508"
+      ],
+      "hit_at_5": 1,
+      "mrr_at_5": 1.0,
+      "precision_at_5": 0.4,
+      "ndcg_at_5": 0.9197207891481876
+    },
+    {
+      "id": "S03",
+      "category": "machine_learning",
+      "question": "Which class covers neural networks and learning algorithms?",
+      "weight": 0.85,
+      "expected_courses": [
+        "EE 460",
+        "EE 559"
+      ],
+      "retrieved_courses": [
+        "EE 508",
+        "EE 559",
+        "EE 460",
+        "EE 541",
+        "EE 515"
+      ],
+      "hit_at_5": 1,
+      "mrr_at_5": 0.5,
+      "precision_at_5": 0.4,
+      "ndcg_at_5": 0.6934264036172708
+    },
+    {
+      "id": "S04",
+      "category": "machine_learning",
+      "question": "I want to study how machines learn from examples.",
+      "weight": 0.85,
+      "expected_courses": [
+        "EE 460",
+        "EE 559"
+      ],
+      "retrieved_courses": [
+        "EE 508",
+        "EE 559",
+        "EE 541",
+        "EE 561",
+        "EE 457"
+      ],
+      "hit_at_5": 1,
+      "mrr_at_5": 0.5,
+      "precision_at_5": 0.2,
+      "ndcg_at_5": 0.38685280723454163
+    },
+    {
+      "id": "S05",
+      "category": "cloud_computing",
+      "question": "Which course teaches deploying software on cloud platforms?",
+      "weight": 0.85,
+      "expected_courses": [
+        "EE 547"
+      ],
+      "retrieved_courses": [
+        "EE 547",
+        "EE 541",
+        "EE 250",
+        "EE 457",
+        "EE 455"
+      ],
+      "hit_at_5": 1,
+      "mrr_at_5": 1.0,
+      "precision_at_5": 0.2,
+      "ndcg_at_5": 1.0
+    },
+    {
+      "id": "S06",
+      "category": "cloud_computing",
+      "question": "I want to learn about virtualization, APIs, and scalable applications.",
+      "weight": 0.85,
+      "expected_courses": [
+        "EE 547"
+      ],
+      "retrieved_courses": [
+        "EE 547",
+        "EE 557",
+        "EE 508",
+        "EE 455",
+        "EE 577B"
+      ],
+      "hit_at_5": 1,
+      "mrr_at_5": 1.0,
+      "precision_at_5": 0.2,
+      "ndcg_at_5": 1.0
+    },
+    {
+      "id": "S07",
+      "category": "cloud_computing",
+      "question": "Which classes teach deploying applications on remote servers?",
+      "weight": 0.85,
+      "expected_courses": [
+        "EE 547"
+      ],
+      "retrieved_courses": [
+        "EE 547",
+        "EE 250",
+        "EE 457",
+        "EE 455",
+        "EE 597"
+      ],
+      "hit_at_5": 1,
+      "mrr_at_5": 1.0,
+      "precision_at_5": 0.2,
+      "ndcg_at_5": 1.0
+    },
+    {
+      "id": "S08",
+      "category": "networking",
+      "question": "Which courses explain how computers communicate across networks?",
+      "weight": 0.85,
+      "expected_courses": [
+        "EE 450",
+        "EE 597"
+      ],
+      "retrieved_courses": [
+        "EE 597",
+        "EE 457",
+        "EE 557",
+        "EE 450",
+        "EE 448"
+      ],
+      "hit_at_5": 1,
+      "mrr_at_5": 1.0,
+      "precision_at_5": 0.4,
+      "ndcg_at_5": 0.8772153153380493
+    },
+    {
+      "id": "S09",
+      "category": "networking",
+      "question": "I want to understand how connected devices exchange information.",
+      "weight": 0.85,
+      "expected_courses": [
+        "EE 250",
+        "EE 450",
+        "EE 535"
+      ],
+      "retrieved_courses": [
+        "EE 576",
+        "EE 535",
+        "EE 105",
+        "EE 467",
+        "EE 448"
+      ],
+      "hit_at_5": 1,
+      "mrr_at_5": 0.5,
+      "precision_at_5": 0.2,
+      "ndcg_at_5": 0.2960819109658652
+    },
+    {
+      "id": "S10",
+      "category": "networking",
+      "question": "Which course covers wireless network architecture and protocols?",
+      "weight": 0.85,
+      "expected_courses": [
+        "EE 597"
+      ],
+      "retrieved_courses": [
+        "EE 597",
+        "EE 535",
+        "EE 450",
+        "EE 632A",
+        "EE 250"
+      ],
+      "hit_at_5": 1,
+      "mrr_at_5": 1.0,
+      "precision_at_5": 0.2,
+      "ndcg_at_5": 1.0
+    },
+    {
+      "id": "S11",
+      "category": "distributed_systems",
+      "question": "Which course teaches distributed computing for connected devices?",
+      "weight": 0.85,
+      "expected_courses": [
+        "EE 250"
+      ],
+      "retrieved_courses": [
+        "EE 250",
+        "EE 547",
+        "EE 354",
+        "EE 557",
+        "EE 457"
+      ],
+      "hit_at_5": 1,
+      "mrr_at_5": 1.0,
+      "precision_at_5": 0.2,
+      "ndcg_at_5": 1.0
+    },
+    {
+      "id": "S12",
+      "category": "distributed_systems",
+      "question": "I want to study systems where multiple computers coordinate tasks.",
+      "weight": 0.85,
+      "expected_courses": [
+        "EE 250"
+      ],
+      "retrieved_courses": [
+        "EE 557",
+        "EE 457",
+        "EE 455",
+        "EE 508",
+        "EE 354"
+      ],
+      "hit_at_5": 0,
+      "mrr_at_5": 0.0,
+      "precision_at_5": 0.0,
+      "ndcg_at_5": 0.0
+    },
+    {
+      "id": "S13",
+      "category": "probability",
+      "question": "Which courses cover probability, random variables, and uncertainty?",
+      "weight": 0.85,
+      "expected_courses": [
+        "EE 364",
+        "EE 503"
+      ],
+      "retrieved_courses": [
+        "EE 364",
+        "EE 503",
+        "EE 563",
+        "EE 562",
+        "EE 559"
+      ],
+      "hit_at_5": 1,
+      "mrr_at_5": 1.0,
+      "precision_at_5": 0.4,
+      "ndcg_at_5": 1.0
+    },
+    {
+      "id": "S14",
+      "category": "probability",
+      "question": "Where can I study random processes and Markov chains?",
+      "weight": 0.85,
+      "expected_courses": [
+        "EE 562"
+      ],
+      "retrieved_courses": [
+        "EE 562",
+        "EE 512",
+        "EE 503",
+        "EE 364",
+        "EE 563"
+      ],
+      "hit_at_5": 1,
+      "mrr_at_5": 1.0,
+      "precision_at_5": 0.2,
+      "ndcg_at_5": 1.0
+    },
+    {
+      "id": "S15",
+      "category": "probability",
+      "question": "I want to learn about stochastic processes and Brownian motion.",
+      "weight": 0.85,
+      "expected_courses": [
+        "EE 512"
+      ],
+      "retrieved_courses": [
+        "EE 512",
+        "EE 562",
+        "EE 364",
+        "EE 563",
+        "EE 559"
+      ],
+      "hit_at_5": 1,
+      "mrr_at_5": 1.0,
+      "precision_at_5": 0.2,
+      "ndcg_at_5": 1.0
+    },
+    {
+      "id": "S16",
+      "category": "computer_architecture",
+      "question": "Which course teaches computer organization and processor architecture?",
+      "weight": 0.85,
+      "expected_courses": [
+        "EE 457",
+        "EE 557"
+      ],
+      "retrieved_courses": [
+        "EE 557",
+        "EE 457",
+        "EE 533",
+        "EE 455",
+        "EE 459"
+      ],
+      "hit_at_5": 1,
+      "mrr_at_5": 1.0,
+      "precision_at_5": 0.4,
+      "ndcg_at_5": 1.0
+    },
+    {
+      "id": "S17",
+      "category": "digital_hardware",
+      "question": "Which class teaches digital circuit design using Verilog?",
+      "weight": 0.85,
+      "expected_courses": [
+        "EE 354"
+      ],
+      "retrieved_courses": [
+        "EE 354",
+        "EE 477",
+        "EE 577A",
+        "EE 658",
+        "EE 524"
+      ],
+      "hit_at_5": 1,
+      "mrr_at_5": 1.0,
+      "precision_at_5": 0.2,
+      "ndcg_at_5": 1.0
+    },
+    {
+      "id": "S18",
+      "category": "wireless_communications",
+      "question": "Which course covers cellular communication and mobile channels?",
+      "weight": 0.85,
+      "expected_courses": [
+        "EE 535"
+      ],
+      "retrieved_courses": [
+        "EE 535",
+        "EE 597",
+        "EE 632A",
+        "EE 448",
+        "EE 519"
+      ],
+      "hit_at_5": 1,
+      "mrr_at_5": 1.0,
+      "precision_at_5": 0.2,
+      "ndcg_at_5": 1.0
+    },
+    {
+      "id": "S19",
+      "category": "robotics",
+      "question": "Which courses teach robotics and autonomous systems?",
+      "weight": 0.85,
+      "expected_courses": [
+        "EE 445",
+        "EE 545"
+      ],
+      "retrieved_courses": [
+        "EE 545",
+        "EE 445",
+        "EE 561",
+        "EE 109",
+        "EE 563"
+      ],
+      "hit_at_5": 1,
+      "mrr_at_5": 1.0,
+      "precision_at_5": 0.4,
+      "ndcg_at_5": 1.0
+    },
+    {
+      "id": "S20",
+      "category": "control_systems",
+      "question": "Where can I learn about feedback control and dynamic systems?",
+      "weight": 0.85,
+      "expected_courses": [
+        "EE 482",
+        "EE 587"
+      ],
+      "retrieved_courses": [
+        "EE 587",
+        "EE 482",
+        "EE 481",
+        "EE 545",
+        "EE 528"
+      ],
+      "hit_at_5": 1,
+      "mrr_at_5": 1.0,
+      "precision_at_5": 0.4,
+      "ndcg_at_5": 1.0
+    },
+    {
+      "id": "S01",
+      "category": "machine_learning",
+      "question": "Which courses teach computers to recognize patterns in data?",
+      "weight": 1.0,
+      "expected_courses": [
+        "EE 460",
+        "EE 559"
+      ],
+      "retrieved_courses": [
+        "EE 354",
+        "EE 559",
+        "EE 364",
+        "EE 457",
+        "EE 561"
+      ],
+      "hit_at_5": 1,
+      "mrr_at_5": 0.5,
+      "precision_at_5": 0.2,
+      "ndcg_at_5": 0.38685280723454163
+    },
+    {
+      "id": "S02",
+      "category": "machine_learning",
+      "question": "Where can I learn supervised classification and regression?",
+      "weight": 1.0,
+      "expected_courses": [
+        "EE 460",
+        "EE 559"
+      ],
+      "retrieved_courses": [
+        "EE 559",
+        "EE 563",
+        "EE 508",
+        "EE 541",
+        "EE 460"
+      ],
+      "hit_at_5": 1,
+      "mrr_at_5": 1.0,
+      "precision_at_5": 0.4,
+      "ndcg_at_5": 0.8503449055347546
+    },
+    {
+      "id": "S03",
+      "category": "machine_learning",
+      "question": "Which class covers neural networks and learning algorithms?",
+      "weight": 1.0,
+      "expected_courses": [
+        "EE 460",
+        "EE 559"
+      ],
+      "retrieved_courses": [
+        "EE 508",
+        "EE 559",
+        "EE 460",
+        "EE 541",
+        "EE 561"
+      ],
+      "hit_at_5": 1,
+      "mrr_at_5": 0.5,
+      "precision_at_5": 0.4,
+      "ndcg_at_5": 0.6934264036172708
+    },
+    {
+      "id": "S04",
+      "category": "machine_learning",
+      "question": "I want to study how machines learn from examples.",
+      "weight": 1.0,
+      "expected_courses": [
+        "EE 460",
+        "EE 559"
+      ],
+      "retrieved_courses": [
+        "EE 508",
+        "EE 559",
+        "EE 541",
+        "EE 561",
+        "EE 457"
+      ],
+      "hit_at_5": 1,
+      "mrr_at_5": 0.5,
+      "precision_at_5": 0.2,
+      "ndcg_at_5": 0.38685280723454163
+    },
+    {
+      "id": "S05",
+      "category": "cloud_computing",
+      "question": "Which course teaches deploying software on cloud platforms?",
+      "weight": 1.0,
+      "expected_courses": [
+        "EE 547"
+      ],
+      "retrieved_courses": [
+        "EE 547",
+        "EE 541",
+        "EE 457",
+        "EE 250",
+        "EE 354"
+      ],
+      "hit_at_5": 1,
+      "mrr_at_5": 1.0,
+      "precision_at_5": 0.2,
+      "ndcg_at_5": 1.0
+    },
+    {
+      "id": "S06",
+      "category": "cloud_computing",
+      "question": "I want to learn about virtualization, APIs, and scalable applications.",
+      "weight": 1.0,
+      "expected_courses": [
+        "EE 547"
+      ],
+      "retrieved_courses": [
+        "EE 547",
+        "EE 557",
+        "EE 455",
+        "EE 577B",
+        "EE 508"
+      ],
+      "hit_at_5": 1,
+      "mrr_at_5": 1.0,
+      "precision_at_5": 0.2,
+      "ndcg_at_5": 1.0
+    },
+    {
+      "id": "S07",
+      "category": "cloud_computing",
+      "question": "Which classes teach deploying applications on remote servers?",
+      "weight": 1.0,
+      "expected_courses": [
+        "EE 547"
+      ],
+      "retrieved_courses": [
+        "EE 547",
+        "EE 250",
+        "EE 457",
+        "EE 455",
+        "EE 597"
+      ],
+      "hit_at_5": 1,
+      "mrr_at_5": 1.0,
+      "precision_at_5": 0.2,
+      "ndcg_at_5": 1.0
+    },
+    {
+      "id": "S08",
+      "category": "networking",
+      "question": "Which courses explain how computers communicate across networks?",
+      "weight": 1.0,
+      "expected_courses": [
+        "EE 450",
+        "EE 597"
+      ],
+      "retrieved_courses": [
+        "EE 597",
+        "EE 457",
+        "EE 557",
+        "EE 448",
+        "EE 535"
+      ],
+      "hit_at_5": 1,
+      "mrr_at_5": 1.0,
+      "precision_at_5": 0.2,
+      "ndcg_at_5": 0.6131471927654584
+    },
+    {
+      "id": "S09",
+      "category": "networking",
+      "question": "I want to understand how connected devices exchange information.",
+      "weight": 1.0,
+      "expected_courses": [
+        "EE 250",
+        "EE 450",
+        "EE 535"
+      ],
+      "retrieved_courses": [
+        "EE 576",
+        "EE 535",
+        "EE 105",
+        "EE 467",
+        "EE 448"
+      ],
+      "hit_at_5": 1,
+      "mrr_at_5": 0.5,
+      "precision_at_5": 0.2,
+      "ndcg_at_5": 0.2960819109658652
+    },
+    {
+      "id": "S10",
+      "category": "networking",
+      "question": "Which course covers wireless network architecture and protocols?",
+      "weight": 1.0,
+      "expected_courses": [
+        "EE 597"
+      ],
+      "retrieved_courses": [
+        "EE 597",
+        "EE 535",
+        "EE 632A",
+        "EE 450",
+        "EE 250"
+      ],
+      "hit_at_5": 1,
+      "mrr_at_5": 1.0,
+      "precision_at_5": 0.2,
+      "ndcg_at_5": 1.0
+    },
+    {
+      "id": "S11",
+      "category": "distributed_systems",
+      "question": "Which course teaches distributed computing for connected devices?",
+      "weight": 1.0,
+      "expected_courses": [
+        "EE 250"
+      ],
+      "retrieved_courses": [
+        "EE 547",
+        "EE 250",
+        "EE 354",
+        "EE 557",
+        "EE 457"
+      ],
+      "hit_at_5": 1,
+      "mrr_at_5": 0.5,
+      "precision_at_5": 0.2,
+      "ndcg_at_5": 0.6309297535714575
+    },
+    {
+      "id": "S12",
+      "category": "distributed_systems",
+      "question": "I want to study systems where multiple computers coordinate tasks.",
+      "weight": 1.0,
+      "expected_courses": [
+        "EE 250"
+      ],
+      "retrieved_courses": [
+        "EE 557",
+        "EE 457",
+        "EE 455",
+        "EE 508",
+        "EE 354"
+      ],
+      "hit_at_5": 0,
+      "mrr_at_5": 0.0,
+      "precision_at_5": 0.0,
+      "ndcg_at_5": 0.0
+    },
+    {
+      "id": "S13",
+      "category": "probability",
+      "question": "Which courses cover probability, random variables, and uncertainty?",
+      "weight": 1.0,
+      "expected_courses": [
+        "EE 364",
+        "EE 503"
+      ],
+      "retrieved_courses": [
+        "EE 364",
+        "EE 503",
+        "EE 563",
+        "EE 559",
+        "EE 562"
+      ],
+      "hit_at_5": 1,
+      "mrr_at_5": 1.0,
+      "precision_at_5": 0.4,
+      "ndcg_at_5": 1.0
+    },
+    {
+      "id": "S14",
+      "category": "probability",
+      "question": "Where can I study random processes and Markov chains?",
+      "weight": 1.0,
+      "expected_courses": [
+        "EE 562"
+      ],
+      "retrieved_courses": [
+        "EE 562",
+        "EE 512",
+        "EE 364",
+        "EE 503",
+        "EE 563"
+      ],
+      "hit_at_5": 1,
+      "mrr_at_5": 1.0,
+      "precision_at_5": 0.2,
+      "ndcg_at_5": 1.0
+    },
+    {
+      "id": "S15",
+      "category": "probability",
+      "question": "I want to learn about stochastic processes and Brownian motion.",
+      "weight": 1.0,
+      "expected_courses": [
+        "EE 512"
+      ],
+      "retrieved_courses": [
+        "EE 512",
+        "EE 562",
+        "EE 364",
+        "EE 563",
+        "EE 515"
+      ],
+      "hit_at_5": 1,
+      "mrr_at_5": 1.0,
+      "precision_at_5": 0.2,
+      "ndcg_at_5": 1.0
+    },
+    {
+      "id": "S16",
+      "category": "computer_architecture",
+      "question": "Which course teaches computer organization and processor architecture?",
+      "weight": 1.0,
+      "expected_courses": [
+        "EE 457",
+        "EE 557"
+      ],
+      "retrieved_courses": [
+        "EE 557",
+        "EE 457",
+        "EE 533",
+        "EE 455",
+        "EE 459"
+      ],
+      "hit_at_5": 1,
+      "mrr_at_5": 1.0,
+      "precision_at_5": 0.4,
+      "ndcg_at_5": 1.0
+    },
+    {
+      "id": "S17",
+      "category": "digital_hardware",
+      "question": "Which class teaches digital circuit design using Verilog?",
+      "weight": 1.0,
+      "expected_courses": [
+        "EE 354"
+      ],
+      "retrieved_courses": [
+        "EE 354",
+        "EE 477",
+        "EE 577A",
+        "EE 658",
+        "EE 538"
+      ],
+      "hit_at_5": 1,
+      "mrr_at_5": 1.0,
+      "precision_at_5": 0.2,
+      "ndcg_at_5": 1.0
+    },
+    {
+      "id": "S18",
+      "category": "wireless_communications",
+      "question": "Which course covers cellular communication and mobile channels?",
+      "weight": 1.0,
+      "expected_courses": [
+        "EE 535"
+      ],
+      "retrieved_courses": [
+        "EE 535",
+        "EE 597",
+        "EE 632A",
+        "EE 519",
+        "EE 448"
+      ],
+      "hit_at_5": 1,
+      "mrr_at_5": 1.0,
+      "precision_at_5": 0.2,
+      "ndcg_at_5": 1.0
+    },
+    {
+      "id": "S19",
+      "category": "robotics",
+      "question": "Which courses teach robotics and autonomous systems?",
+      "weight": 1.0,
+      "expected_courses": [
+        "EE 445",
+        "EE 545"
+      ],
+      "retrieved_courses": [
+        "EE 545",
+        "EE 561",
+        "EE 445",
+        "EE 109",
+        "EE 563"
+      ],
+      "hit_at_5": 1,
+      "mrr_at_5": 1.0,
+      "precision_at_5": 0.4,
+      "ndcg_at_5": 0.9197207891481876
+    },
+    {
+      "id": "S20",
+      "category": "control_systems",
+      "question": "Where can I learn about feedback control and dynamic systems?",
+      "weight": 1.0,
+      "expected_courses": [
+        "EE 482",
+        "EE 587"
+      ],
+      "retrieved_courses": [
+        "EE 482",
+        "EE 545",
+        "EE 587",
+        "EE 481",
+        "EE 528"
+      ],
+      "hit_at_5": 1,
+      "mrr_at_5": 1.0,
+      "precision_at_5": 0.4,
+      "ndcg_at_5": 0.9197207891481876
+    }
+  ]
+}

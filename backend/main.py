@@ -5,6 +5,7 @@ from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel, Field
 
 from backend.rag_service import get_context, format_term
+from backend.prerequisite_service import answer_prerequisite_scenario
 
 app = FastAPI(title="USC Advisor AI Backend")
 
@@ -62,6 +63,46 @@ async def ask(data: Question):
             "sources": [],
             "status": "review_required",
         }
+
+    prerequisite_answer = answer_prerequisite_scenario(
+        data.question,
+        docs,
+    )
+
+    if prerequisite_answer is not None:
+        return {
+            "answer": prerequisite_answer,
+            "sources": _response_sources(docs),
+            "status": "review_required",
+        }
+
+    # Complete catalogs are structured facts, not LLM-generated answers.
+    if (
+        len(docs) == 1
+        and docs[0].get("retrieval_method") == "historical_catalog"
+        and docs[0].get("catalog_status") == "collected"
+    ):
+        doc = docs[0]
+        courses = doc.get("courses") or []
+
+        lines = [
+            f"- {course.get('course_code')}: {course.get('title')}"
+            for course in courses
+        ]
+
+        answer = (
+            f"The collected USC Electrical Engineering catalog "
+            f"for {format_term(doc['term_code'])} contains "
+            f"{len(courses)} courses:\n\n"
+            + "\n".join(lines)
+        )
+
+        return {
+            "answer": answer,
+            "sources": _response_sources(docs),
+            "status": "review_required",
+        }
+
 
     if len(docs) == 1:
         doc = docs[0]
@@ -173,6 +214,15 @@ async def ask(data: Question):
                 "such as [1]; the interface displays document and page details. "
                 "Do not generalize course-specific grading or policies "
                 "to other courses, semesters, sections, or all USC students. "
+                "For course-discovery and recommendation questions, discuss "
+                "only the course topics, skills, and technologies supported "
+                "by the retrieved descriptions. Do not make claims about "
+                "prerequisites, corequisites, eligibility, enrollment, "
+                "or required preparation unless the question asks for them "
+                "and verified structured evidence is provided. "
+                "A missing prerequisite field does not mean that a course "
+                "has no prerequisites. "
+
             ),
         },
         {

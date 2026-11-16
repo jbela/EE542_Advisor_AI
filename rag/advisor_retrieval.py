@@ -28,14 +28,23 @@ SYLLABUS_CONTENT_PATTERN = re.compile(
 )
 
 HISTORICAL_CATALOG_PATTERN = re.compile(
-    r"\b(what|which|list|show|find)\b.*"
-    r"\b(courses?|classes)\b.*"
-    r"\b(offered|available|listed|scheduled)\b",
+    r"\b("
+    r"(?:what|which|list|show|find|display|tell me)\b.*"
+    r"\b(?:courses?|classes)\b.*"
+    r"\b(?:offered|available|listed|scheduled)"
+    r"|"
+    r"(?:list|show|display|tell me)\b.*"
+    r"\b(?:all|every)\b.*"
+    r"\b(?:courses?|classes)\b"
+    r"|"
+    r"how many\b.*"
+    r"\b(?:courses?|classes)\b"
+    r")",
     re.IGNORECASE,
 )
 
 SEMESTER_PATTERN = re.compile(
-    r"\b(Spring|Summer|Fall)\s+(20\d{2})\b",
+    r"\b(Spring|Summer|Fall)\s+(?:of\s+)?(20\d{2})\b",
     re.IGNORECASE,
 )
 
@@ -65,6 +74,7 @@ EXACT_LOOKUP_PATTERN = re.compile(
     r"preparation|prepare|before taking|need to take|"
     r"need to complete|completed|enroll|enrollment|"
     r"eligible|eligibility|need both|need either|"
+    r"sufficient|enough|satisfy|eligible|qualify|"
     r"last offered|most recent listing)\b",
     re.IGNORECASE,
 )
@@ -75,6 +85,8 @@ POLICY_PATTERN = re.compile(
     r"registration|register|d[- ]?clearance|waiver|exception|"
     r"degree requirements?|graduation requirements?|academic standing|"
     r"leave of absence|reduced course load|deadline|tuition|"
+    r"transfer credit|transfer course|course substitution|"
+    r"substitute|substitution|equivalency|equivalent course|"
     r"academic calendar|student services)\b",
     re.IGNORECASE,
 )
@@ -85,6 +97,18 @@ COURSE_PATTERN = re.compile(
     re.IGNORECASE,
 )
 
+SUBJECT_DISCOVERY_PATTERN = re.compile(
+    r"\b("
+    r"i want to (?:learn|study|understand|explore)|"
+    r"i am interested in|i'm interested in|"
+    r"interested in learning|"
+    r"where can i (?:learn|study|explore)(?: about)?|"
+    r"which (?:courses?|class|classes) "
+    r"(?:teach|teaches|cover|covers|focus(?:es)? on)|"
+    r"(?:courses?|class|classes) (?:about|related to)"
+    r")\b",
+    re.IGNORECASE,
+)
 
 COMPARISON_PATTERN = re.compile(
     r"\b(compare|comparison|difference|different|"
@@ -127,6 +151,14 @@ def choose_retrieval_method(question):
     """
 
     codes = extract_course_codes(question)
+
+    if re.search(
+        r"\b(substitute|substitution|transfer credit|"
+        r"transfer course|equivalency|equivalent course)\b",
+        question,
+        re.IGNORECASE
+    ):
+        return "policy"
 
     if (
         not codes
@@ -187,10 +219,11 @@ def choose_retrieval_method(question):
     if POLICY_PATTERN.search(question):
         return "policy"
 
-    if COURSE_PATTERN.search(question):
+    if (
+        COURSE_PATTERN.search(question)
+        or SUBJECT_DISCOVERY_PATTERN.search(question)
+    ):
         return "course"
-
-    return "general"
 
 
 def _course_evidence(course, requested_term, method="exact"):
@@ -521,20 +554,44 @@ def retrieve_for_advisor(question, term_code=DEFAULT_TERM, top_k=5):
                 break
         return results
 
-    # Lazy import: exact lookups work without loading FAISS or embeddings.
+
+    # Semantic course discovery uses the separate BGE index.
+    if method == "course":
+        from rag.discovery_retrieve import retrieve_discovery
+
+        results = retrieve_discovery(
+            question,
+            term_code=term_code,
+            top_k=top_k,
+        )
+
+        return [
+            {
+                **result,
+                "retrieval_method": "semantic_bge",
+                "requested_term": term_code,
+                "historical": False,
+                "requested_term_checked": True,
+                "source_url": result.get("url"),
+            }
+            for result in results
+        ]
+
+    # Other retrieval routes continue using MiniLM + BM25.
+    # Keep the import lazy so exact lookups do not load embeddings.
     from rag.retrieve import retrieve
 
-    category = "course" if method == "course" else None
-    # Policy sources have several categories (graduate, international, shared),
-    # so exclude courses rather than requiring one specific policy category.
-    results = retrieve(question, top_k=top_k, category=category,
-                       term_code=term_code,
-                       exclude_category="course" if method == "policy" else None)
-    return [{"retrieval_method": "hybrid", **r} for r in results]
+    results = retrieve(
+        question,
+        top_k=top_k,
+        term_code=term_code,
+        exclude_category="course" if method == "policy" else None,
+    )
 
-
-if __name__ == "__main__":
-    question = input("Ask a USC advising question: ")
-    for result in retrieve_for_advisor(question):
-        print("\n" + "=" * 50)
-        print(result)
+    return [
+        {
+            "retrieval_method": "hybrid",
+            **result,
+        }
+        for result in results
+    ]

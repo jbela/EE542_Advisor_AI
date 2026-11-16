@@ -43,5 +43,9 @@
   {"id":"Q37","category":"uncertainty","question":"Will EE 542 definitely be offered in Fall 2027?","term_code":"20273","expected_behavior":"avoid_future_prediction"},
   {"id":"Q38","category":"uncertainty","question":"What are the prerequisites for EE 999?","term_code":"20271","expected_behavior":"missing_course"},
   {"id":"Q39","category":"uncertainty","question":"Can USC waive my degree requirements?","expected_behavior":"requires_advisor_verification"},
-  {"id":"Q40","category":"uncertainty","question":"Which courses should I take next semester?","expected_behavior":"request_student_context"}
+  {"id":"Q40","category":"uncertainty","question":"Which courses should I take next semester?","expected_behavior":"request_student_context"},
+  {"id":"Q41","category":"prerequisites","question":"What are the prerequisites for EE 562?","term_code":"20271","expected_courses":["EE 562"]},
+  {"id":"Q42","category":"prerequisites","question":"Do I need both EE 441 and EE 510 for EE 562?","term_code":"20271","expected_courses":["EE 562"]},
+  {"id":"Q43","category":"prerequisites","question":"Is EE 503 alone sufficient for EE 562?","term_code":"20271","expected_courses":["EE 562"]},
+  {"id":"Q44","category":"prerequisites","question":"Can EE 510 satisfy the alternative prerequisite for EE 562?","term_code":"20271","expected_courses":["EE 562"]}
 ]

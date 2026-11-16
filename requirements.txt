@@ -6,3 +6,7 @@ numpy
 rank-bm25
 filelock
 pypdf
+fastapi
+uvicorn
+streamlit
+httpx

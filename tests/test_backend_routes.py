@@ -61,14 +61,51 @@ class TestBackendRoutes(unittest.TestCase):
         self.assertIn("Summer 2026", result[0]["text"])
         self.assertIn("Fall 2026", result[1]["text"])
 
-    def test_catalog_truncated_honestly(self):
+
+    def test_catalog_preserves_all_courses(self):
         result = self.check([{
-            "retrieval_method": "historical_catalog", "term_code": "20253",
-            "status": "collected", "course_count": 20,
-            "courses": [{"course_code": f"EE {400+i}", "title": "Example"} for i in range(20)],
+            "retrieval_method": "historical_catalog",
+            "term_code": "20253",
+            "status": "collected",
+            "course_count": 20,
+            "source_url": "https://classes.usc.edu/term/20253/",
+            "courses": [
+                {
+                    "course_code": f"EE {400+i}",
+                    "title": "Example"
+                }
+                for i in range(20)
+            ],
         }])
-        self.assertIn("first 15", result[0]["text"])
-        self.assertNotIn("EE 419", result[0]["text"])
+
+        self.assertEqual(len(result), 1)
+
+        catalog = result[0]
+
+        self.assertEqual(catalog["course_count"], 20)
+        self.assertEqual(len(catalog["courses"]), 20)
+        self.assertEqual(
+            catalog["retrieval_method"],
+            "historical_catalog"
+        )
+        self.assertEqual(catalog["term_code"], "20253")
+        self.assertEqual(
+            catalog["catalog_status"],
+            "collected"
+        )
+
+        self.assertEqual(
+            catalog["courses"][0]["course_code"],
+            "EE 400"
+        )
+        self.assertEqual(
+            catalog["courses"][-1]["course_code"],
+            "EE 419"
+        )
+
+        self.assertIn("20 courses", catalog["text"])
+        self.assertTrue(catalog["url"])
+
 
     def test_uncollected_catalog(self):
         result = self.check([{

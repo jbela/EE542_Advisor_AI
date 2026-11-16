@@ -56,5 +56,117 @@ class TestUnifiedAPI(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(answer["status"], "review_required")
 
 
+    def test_bge_evidence_reaches_backend(self):
+        from unittest.mock import patch
+        from backend.rag_service import get_context
+
+        fake_results = [{
+            "retrieval_method": "semantic_bge",
+            "course_code": "EE 547",
+            "title": "EE 547 - Applied and Cloud Computing",
+            "term_code": "20271",
+            "requested_term": "20271",
+            "historical": False,
+            "requested_term_checked": True,
+            "category": "course",
+            "source_type": "catalog",
+            "document_id": "course_20271_123",
+            "chunk_id": "course_20271_123",
+            "url": "https://classes.usc.edu/term/20271/course/EE547",
+            "text": (
+                "Course: EE 547\n"
+                "Description: Cloud applications, APIs, "
+                "databases and software deployment."
+            ),
+        }]
+
+        with patch(
+            "backend.rag_service.retrieve_for_advisor",
+            return_value=fake_results,
+        ):
+            docs = get_context(
+                "Which class teaches cloud computing?",
+                term_code="20271",
+                top_k=5,
+            )
+
+        self.assertEqual(len(docs), 1)
+        self.assertEqual(docs[0]["course_code"], "EE 547")
+        self.assertEqual(docs[0]["retrieval_method"], "semantic_bge")
+        self.assertEqual(docs[0]["term_code"], "20271")
+        self.assertIn("software deployment", docs[0]["text"])
+        self.assertTrue(docs[0]["url"])
+
+
+    def test_complete_catalog_skips_llm(self):
+        from unittest.mock import patch
+        from fastapi.testclient import TestClient
+        from backend.main import app
+
+        courses = [
+            {
+                "course_code": f"EE {100+i}",
+                "title": f"Example Course {i}"
+            }
+            for i in range(82)
+        ]
+
+        fake_context = [{
+            "id": "catalog_20271",
+            "title": "EE course catalog - Spring 2027",
+            "text": "Collected EE course catalog for Spring 2027: 82 courses.",
+            "url": "https://classes.usc.edu/term/20271/catalogue/school/ENGV/program/EE",
+            "category": "course",
+            "course_code": None,
+            "term_code": "20271",
+            "requested_term": "20271",
+            "historical": True,
+            "retrieval_method": "historical_catalog",
+            "catalog_status": "collected",
+            "course_count": 82,
+            "courses": courses,
+        }]
+
+        with patch(
+            "backend.main.get_context",
+            return_value=fake_context,
+        ), patch(
+            "backend.main.httpx.AsyncClient"
+        ) as mock_llm:
+
+            client = TestClient(app)
+
+            response = client.post(
+                "/ask",
+                json={
+                    "question": "What courses are offered in Spring 2027?",
+                    "term_code": "20271",
+                },
+            )
+
+        self.assertEqual(response.status_code, 200)
+
+        data = response.json()
+        answer = data["answer"]
+
+        self.assertIn("82 courses", answer)
+        self.assertIn("EE 100", answer)
+        self.assertIn("EE 181", answer)
+
+        self.assertEqual(
+            len(data["sources"]),
+            1
+        )
+
+        self.assertEqual(
+            data["sources"][0]["retrieval_method"],
+            "historical_catalog"
+        )
+
+        mock_llm.assert_not_called()
+
+
+
+
 if __name__ == "__main__":
     unittest.main()

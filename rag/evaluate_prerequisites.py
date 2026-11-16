@@ -53,6 +53,26 @@ EXPECTED = {
         "preparation_codes": {"EE 457"},
         "preparation_terms": {"c++"},
     },
+     "Q41": {
+        "course": "EE 562",
+        "term": "20271",
+        "prerequisites": ("AND", {"EE 503", "EE 441", "EE 510"}),
+    },
+    "Q42": {
+        "course": "EE 562",
+        "term": "20271",
+        "prerequisites": ("AND", {"EE 503", "EE 441", "EE 510"}),
+    },
+    "Q43": {
+        "course": "EE 562",
+        "term": "20271",
+        "prerequisites": ("AND", {"EE 503", "EE 441", "EE 510"}),
+    },
+    "Q44": {
+        "course": "EE 562",
+        "term": "20271",
+        "prerequisites": ("AND", {"EE 503", "EE 441", "EE 510"}),
+    },
 }
 
 
@@ -100,6 +120,28 @@ def check_preparation(text, codes, terms):
         and all(term in normalized for term in terms)
     )
 
+def check_ee562_structure(value):
+    if not isinstance(value, dict):
+        return False
+
+    if value.get("operator") != "AND":
+        return False
+
+    groups = value.get("groups")
+
+    if not isinstance(groups, list) or len(groups) != 2:
+        return False
+
+    mandatory, alternative = groups
+
+    return (
+        mandatory.get("operator") == "SINGLE"
+        and mandatory.get("courses") == ["EE 503"]
+        and alternative.get("operator") == "OR"
+        and set(alternative.get("courses", []))
+        == {"EE 441", "EE 510"}
+        and alternative.get("required_courses") == 1
+    )
 
 def evaluate_question(question, results):
     expected = EXPECTED[question["id"]]
@@ -136,6 +178,11 @@ def evaluate_question(question, results):
         )
         checks["preparation_separate"] = not bool(
             prereq_codes & expected["preparation_codes"]
+        )
+
+    if question["id"] in {"Q41", "Q42", "Q43", "Q44"}:
+        checks["nested_structure"] = check_ee562_structure(
+            primary.get("prerequisites")
         )
 
     return checks

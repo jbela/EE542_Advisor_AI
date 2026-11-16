@@ -153,7 +153,7 @@ def normalize(doc):
         "term_code": term or None,
         "requested_term": requested or None,
         "historical": historical,
-        "retrieval_method": "hybrid",
+        "retrieval_method": method,
         "source_type": doc.get("source_type"),
         "section_label": doc.get("section_label"),
         "source_file": doc.get("source_file"),
@@ -226,24 +226,38 @@ def normalize_special(doc):
             "retrieval_method": method,
         }
 
+
     if method == "historical_catalog":
         status = doc.get("status")
+
         if status == "term_not_collected":
-            text = f"EE course records for {format_term(term)} have not been collected. No course list can be verified."
+            text = (
+                f"EE course records for {format_term(term)} "
+                "have not been collected. "
+                "No course list can be verified."
+            )
             source = None
+            courses = []
+            count = 0
+
         elif status == "collected":
             courses = doc.get("courses") or []
-            count = doc.get("course_count", len(courses))
-            lines = [f"{c.get('course_code')}: {c.get('title')}" for c in courses[:15]]
-            text = f"Collected EE course catalog for {format_term(term)}: {count} records.\n" + "\n".join(lines)
-            if len(courses) > 15:
-                text += "\nOnly the first 15 are shown; this is not the complete list."
+            count = len(courses)
+
+            text = (
+                f"Collected EE course catalog for "
+                f"{format_term(term)}: {count} courses."
+            )
+
         else:
-            raise ValueError(f"Unexpected historical catalog status: {status}")
+            raise ValueError(
+                f"Unexpected historical catalog status: {status}"
+            )
+
         return {
             "id": f"catalog_{term}",
             "title": f"EE course catalog - {format_term(term)}",
-            "text": text[:MAX_CHARS],
+            "text": text,
             "url": source,
             "category": "course",
             "course_code": None,
@@ -251,7 +265,11 @@ def normalize_special(doc):
             "requested_term": term,
             "historical": True,
             "retrieval_method": method,
+            "catalog_status": status,
+            "course_count": count,
+            "courses": courses,
         }
+
 
     raise ValueError(f"Unsupported special retrieval method: {method}")
 
@@ -262,9 +280,16 @@ def get_context(question, term_code=DEFAULT_TERM, top_k=5):
     evidence = []
     for doc in results:
         method = doc.get("retrieval_method", "hybrid")
-        if method in ("exact", "hybrid"):
+        if method in ("exact", "hybrid", "semantic_bge"):
             item = normalize(doc)
-            if method == "hybrid":
+
+            if method in ("hybrid", "semantic_bge"):
+                item["requested_term"] = str(
+                    doc.get("requested_term")
+                    or term_code
+                    or DEFAULT_TERM
+                )
+
                 item["requested_term"] = str(
                     doc.get("requested_term")
                     or term_code

@@ -12,6 +12,7 @@ class TestReindexTrigger(unittest.TestCase):
             patch.object(run_sync, "sync_courses"),
             patch.object(run_sync, "sync_policies"),
             patch.object(run_sync, "sync_index"),
+            patch.object(run_sync, "sync_discovery_index"),
         ]
 
         mocks = [p.start() for p in self.patchers]
@@ -24,6 +25,7 @@ class TestReindexTrigger(unittest.TestCase):
             self.mock_courses,
             self.mock_policies,
             self.mock_index,
+            self.mock_discovery,
         ) = mocks
 
         self.mock_courses.return_value = {
@@ -42,18 +44,29 @@ class TestReindexTrigger(unittest.TestCase):
             "knowledge_fingerprint": "fingerprint_123",
         }
 
-    def test_successful_sync_checks_index(self):
+        self.mock_discovery.return_value = {
+            "rebuilt": False,
+            "knowledge_fingerprint": "discovery_fingerprint_123",
+        }
+
+    def test_successful_sync_checks_both_indexes(self):
         result = run_sync.main()
 
         self.mock_index.assert_called_once_with()
-        self.assertFalse(result["index_result"]["rebuilt"])
+        self.mock_discovery.assert_called_once_with()
 
-    def test_academic_changes_check_index(self):
+        self.assertFalse(result["index_result"]["rebuilt"])
+        self.assertFalse(
+            result["discovery_index_result"]["rebuilt"]
+        )
+
+    def test_academic_changes_check_both_indexes(self):
         self.mock_courses.return_value["academic_updates"] = True
 
         run_sync.main()
 
         self.mock_index.assert_called_once_with()
+        self.mock_discovery.assert_called_once_with()
 
     def test_failed_course_sync_does_not_rebuild(self):
         self.mock_courses.return_value["failed_terms"] = ["20271"]
@@ -62,6 +75,7 @@ class TestReindexTrigger(unittest.TestCase):
             run_sync.main()
 
         self.mock_index.assert_not_called()
+        self.mock_discovery.assert_not_called()
 
     def test_failed_policy_sync_does_not_rebuild(self):
         self.mock_policies.return_value["failed_sources"] = [
@@ -72,6 +86,28 @@ class TestReindexTrigger(unittest.TestCase):
             run_sync.main()
 
         self.mock_index.assert_not_called()
+        self.mock_discovery.assert_not_called()
+
+    def test_failed_main_index_skips_discovery(self):
+        self.mock_index.side_effect = RuntimeError(
+            "Main index rebuild failed"
+        )
+
+        with self.assertRaises(RuntimeError):
+            run_sync.main()
+
+        self.mock_discovery.assert_not_called()
+
+    def test_failed_discovery_index_reports_failure(self):
+        self.mock_discovery.side_effect = RuntimeError(
+            "BGE discovery index rebuild failed"
+        )
+
+        with self.assertRaises(RuntimeError):
+            run_sync.main()
+
+        self.mock_index.assert_called_once_with()
+        self.mock_discovery.assert_called_once_with()
 
 
 if __name__ == "__main__":

@@ -91,5 +91,52 @@ class TestVerifiedRequirements(unittest.TestCase):
         )
 
 
+    def test_ee562_nested_prerequisites(self):
+        from rag.course_lookup import lookup_course
+
+        course = lookup_course("EE 562", "20271")
+        self.assertIsNotNone(course)
+
+        requirements = course["prerequisites_display"]
+
+        self.assertEqual(requirements["operator"], "AND")
+        self.assertEqual(len(requirements["groups"]), 2)
+
+        self.assertEqual(
+            requirements["groups"][0],
+            {
+                "operator": "SINGLE",
+                "courses": ["EE 503"]
+            }
+        )
+
+        self.assertEqual(
+            requirements["groups"][1],
+            {
+                "operator": "OR",
+                "courses": ["EE 441", "EE 510"],
+                "required_courses": 1
+            }
+        )
+
+        self.assertEqual(
+            course["prerequisite_verification"]["status"],
+            "verified"
+        )
+
+    def test_ee562_verification_does_not_change_ee597(self):
+        from rag.course_lookup import lookup_course
+
+        course = lookup_course("EE 597", "20271")
+
+        self.assertEqual(
+            course["prerequisites_display"],
+            {
+                "operator": "AND",
+                "courses": ["EE 450", "EE 503"]
+            }
+        )
+
+
 if __name__ == "__main__":
     unittest.main()

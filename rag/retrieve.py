@@ -147,10 +147,12 @@ def retrieve(question, top_k=5, category=None, term_code=None, exclude_category=
             continue
 
         # Filter by category
-        if category and doc["category"] not in (
-            category, "shared"
-        ):
-            continue
+        if category is not None:
+            if category == "course":
+                if doc.get("category") != "course":
+                    continue
+            elif doc.get("category") not in (category, "shared"):
+                continue
 
         # Filter courses by semester
         if term_code is not None:

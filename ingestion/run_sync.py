@@ -7,7 +7,10 @@ from filelock import FileLock, Timeout
 from ingestion.discover_terms import main as discover_terms
 from ingestion.sync_courses import main as sync_courses
 from ingestion.collect import main as sync_policies
+
 from rag.sync_index import sync_index
+from rag.sync_discovery_index import sync_discovery_index
+
 
 ROOT = Path(__file__).resolve().parents[1]
 LOCK_FILE = ROOT / "data" / ".academic_sync.lock"
@@ -40,12 +43,16 @@ def main():
     print("\nSTEP 4: Synchronizing RAG index...")
     index_result = sync_index()
 
+    print("\nSTEP 5: Synchronizing BGE discovery index...")
+    discovery_index_result = sync_discovery_index()
+
     print("\nSynchronization finished successfully.")
 
     return {
         "course_result": course_result,
         "policy_result": policy_result,
-        "index_result": index_result
+        "index_result": index_result,
+        "discovery_index_result": discovery_index_result,
     }
 
 

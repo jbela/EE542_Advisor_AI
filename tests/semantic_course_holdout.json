@@ -1,0 +1,22 @@
+[
+  {"id":"H01","category":"machine_learning","question":"I want to build models that predict outcomes using labeled training data.","term_code":"20271","expected_courses":["EE 460","EE 559"]},
+  {"id":"H02","category":"machine_learning","question":"Which classes explore decision trees and neural networks?","term_code":"20271","expected_courses":["EE 460","EE 559"]},
+  {"id":"H03","category":"machine_learning","question":"Where can I study methods for reducing the number of features in a dataset?","term_code":"20271","expected_courses":["EE 460"]},
+  {"id":"H04","category":"cloud_computing","question":"I want to build scalable web services with databases and APIs.","term_code":"20271","expected_courses":["EE 547"]},
+  {"id":"H05","category":"cloud_computing","question":"Which course teaches running software inside virtualized cloud environments?","term_code":"20271","expected_courses":["EE 547"]},
+  {"id":"H06","category":"networking","question":"I want to understand how information travels between devices over a computer network.","term_code":"20271","expected_courses":["EE 450","EE 597"]},
+  {"id":"H07","category":"networking","question":"Which class studies communication protocols and network performance?","term_code":"20271","expected_courses":["EE 450","EE 597"]},
+  {"id":"H08","category":"distributed_systems","question":"How can sensors and smart devices communicate through a shared network?","term_code":"20271","expected_courses":["EE 250","EE 535"]},
+  {"id":"H09","category":"distributed_systems","question":"I want to develop software for interconnected embedded devices.","term_code":"20271","expected_courses":["EE 250","EE 109"]},
+  {"id":"H10","category":"probability","question":"Which courses explain how to model unpredictable events mathematically?","term_code":"20271","expected_courses":["EE 364","EE 503","EE 562"]},
+  {"id":"H11","category":"probability","question":"Where can I study Gaussian processes and martingales?","term_code":"20271","expected_courses":["EE 562","EE 512"]},
+  {"id":"H12","category":"probability","question":"Which class covers stochastic calculus for financial applications?","term_code":"20271","expected_courses":["EE 512"]},
+  {"id":"H13","category":"computer_architecture","question":"I want to understand how CPUs organize and execute machine instructions.","term_code":"20271","expected_courses":["EE 457","EE 557"]},
+  {"id":"H14","category":"computer_architecture","question":"Which courses explain processor design and computer hardware organization?","term_code":"20271","expected_courses":["EE 457","EE 557"]},
+  {"id":"H15","category":"digital_hardware","question":"Where can I learn to implement synchronous logic circuits on programmable hardware?","term_code":"20271","expected_courses":["EE 354"]},
+  {"id":"H16","category":"wireless_communications","question":"Which class studies how mobile phones communicate through cellular networks?","term_code":"20271","expected_courses":["EE 535"]},
+  {"id":"H17","category":"wireless_communications","question":"I want to understand how wireless channels affect transmitted signals.","term_code":"20271","expected_courses":["EE 535","EE 467"]},
+  {"id":"H18","category":"robotics","question":"Which courses focus on building intelligent robotic systems?","term_code":"20271","expected_courses":["EE 445","EE 545"]},
+  {"id":"H19","category":"control_systems","question":"I want to design controllers that use feedback to regulate dynamic systems.","term_code":"20271","expected_courses":["EE 482","EE 587"]},
+  {"id":"H20","category":"control_systems","question":"Which class teaches practical experiments with control systems?","term_code":"20271","expected_courses":["EE 481"]}
+]

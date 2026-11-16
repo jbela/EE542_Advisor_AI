@@ -1,0 +1,1550 @@
+{
+  "MiniLM_full": {
+    "model": "sentence-transformers/all-MiniLM-L6-v2",
+    "text_format": "full",
+    "summary": {
+      "hit_at_5": 1.0,
+      "mrr_at_5": 0.9016666666666666,
+      "precision_at_5": 0.3200000000000001,
+      "ndcg_at_5": 0.8909661655869765,
+      "build_seconds": 1.529349500022363
+    },
+    "details": [
+      {
+        "id": "H01",
+        "question": "I want to build models that predict outcomes using labeled training data.",
+        "expected": [
+          "EE 460",
+          "EE 559"
+        ],
+        "retrieved": [
+          "EE 559",
+          "EE 460",
+          "EE 561",
+          "EE 496",
+          "EE 541"
+        ],
+        "hit_at_5": 1,
+        "mrr_at_5": 1.0,
+        "precision_at_5": 0.4,
+        "ndcg_at_5": 1.0
+      },
+      {
+        "id": "H02",
+        "question": "Which classes explore decision trees and neural networks?",
+        "expected": [
+          "EE 460",
+          "EE 559"
+        ],
+        "retrieved": [
+          "EE 559",
+          "EE 460",
+          "EE 515",
+          "EE 508",
+          "EE 541"
+        ],
+        "hit_at_5": 1,
+        "mrr_at_5": 1.0,
+        "precision_at_5": 0.4,
+        "ndcg_at_5": 1.0
+      },
+      {
+        "id": "H03",
+        "question": "Where can I study methods for reducing the number of features in a dataset?",
+        "expected": [
+          "EE 460"
+        ],
+        "retrieved": [
+          "EE 559",
+          "EE 460",
+          "EE 508",
+          "EE 538",
+          "EE 355"
+        ],
+        "hit_at_5": 1,
+        "mrr_at_5": 0.5,
+        "precision_at_5": 0.2,
+        "ndcg_at_5": 0.6309297535714575
+      },
+      {
+        "id": "H04",
+        "question": "I want to build scalable web services with databases and APIs.",
+        "expected": [
+          "EE 547"
+        ],
+        "retrieved": [
+          "EE 547",
+          "EE 508",
+          "EE 576",
+          "EE 557",
+          "EE 533"
+        ],
+        "hit_at_5": 1,
+        "mrr_at_5": 1.0,
+        "precision_at_5": 0.2,
+        "ndcg_at_5": 1.0
+      },
+      {
+        "id": "H05",
+        "question": "Which course teaches running software inside virtualized cloud environments?",
+        "expected": [
+          "EE 547"
+        ],
+        "retrieved": [
+          "EE 547",
+          "EE 457",
+          "EE 557",
+          "EE 541",
+          "EE 577B"
+        ],
+        "hit_at_5": 1,
+        "mrr_at_5": 1.0,
+        "precision_at_5": 0.2,
+        "ndcg_at_5": 1.0
+      },
+      {
+        "id": "H06",
+        "question": "I want to understand how information travels between devices over a computer network.",
+        "expected": [
+          "EE 450",
+          "EE 597"
+        ],
+        "retrieved": [
+          "EE 576",
+          "EE 535",
+          "EE 364",
+          "EE 105",
+          "EE 597"
+        ],
+        "hit_at_5": 1,
+        "mrr_at_5": 0.2,
+        "precision_at_5": 0.2,
+        "ndcg_at_5": 0.23719771276929622
+      },
+      {
+        "id": "H07",
+        "question": "Which class studies communication protocols and network performance?",
+        "expected": [
+          "EE 450",
+          "EE 597"
+        ],
+        "retrieved": [
+          "EE 597",
+          "EE 450",
+          "EE 535",
+          "EE 448",
+          "EE 533"
+        ],
+        "hit_at_5": 1,
+        "mrr_at_5": 1.0,
+        "precision_at_5": 0.4,
+        "ndcg_at_5": 1.0
+      },
+      {
+        "id": "H08",
+        "question": "How can sensors and smart devices communicate through a shared network?",
+        "expected": [
+          "EE 250",
+          "EE 535"
+        ],
+        "retrieved": [
+          "EE 250",
+          "EE 450",
+          "EE 535",
+          "EE 597",
+          "EE 607"
+        ],
+        "hit_at_5": 1,
+        "mrr_at_5": 1.0,
+        "precision_at_5": 0.4,
+        "ndcg_at_5": 0.9197207891481876
+      },
+      {
+        "id": "H09",
+        "question": "I want to develop software for interconnected embedded devices.",
+        "expected": [
+          "EE 250",
+          "EE 109"
+        ],
+        "retrieved": [
+          "EE 355",
+          "EE 576",
+          "EE 109",
+          "EE 459",
+          "EE 533"
+        ],
+        "hit_at_5": 1,
+        "mrr_at_5": 0.3333333333333333,
+        "precision_at_5": 0.2,
+        "ndcg_at_5": 0.3065735963827292
+      },
+      {
+        "id": "H10",
+        "question": "Which courses explain how to model unpredictable events mathematically?",
+        "expected": [
+          "EE 364",
+          "EE 503",
+          "EE 562"
+        ],
+        "retrieved": [
+          "EE 364",
+          "EE 512",
+          "EE 562",
+          "EE 563",
+          "EE 503"
+        ],
+        "hit_at_5": 1,
+        "mrr_at_5": 1.0,
+        "precision_at_5": 0.6,
+        "ndcg_at_5": 0.8854598815714874
+      },
+      {
+        "id": "H11",
+        "question": "Where can I study Gaussian processes and martingales?",
+        "expected": [
+          "EE 562",
+          "EE 512"
+        ],
+        "retrieved": [
+          "EE 562",
+          "EE 512",
+          "EE 563",
+          "EE 364",
+          "EE 515"
+        ],
+        "hit_at_5": 1,
+        "mrr_at_5": 1.0,
+        "precision_at_5": 0.4,
+        "ndcg_at_5": 1.0
+      },
+      {
+        "id": "H12",
+        "question": "Which class covers stochastic calculus for financial applications?",
+        "expected": [
+          "EE 512"
+        ],
+        "retrieved": [
+          "EE 512",
+          "EE 562",
+          "EE 518",
+          "EE 364",
+          "EE 559"
+        ],
+        "hit_at_5": 1,
+        "mrr_at_5": 1.0,
+        "precision_at_5": 0.2,
+        "ndcg_at_5": 1.0
+      },
+      {
+        "id": "H13",
+        "question": "I want to understand how CPUs organize and execute machine instructions.",
+        "expected": [
+          "EE 457",
+          "EE 557"
+        ],
+        "retrieved": [
+          "EE 457",
+          "EE 557",
+          "EE 109",
+          "EE 533",
+          "EE 459"
+        ],
+        "hit_at_5": 1,
+        "mrr_at_5": 1.0,
+        "precision_at_5": 0.4,
+        "ndcg_at_5": 1.0
+      },
+      {
+        "id": "H14",
+        "question": "Which courses explain processor design and computer hardware organization?",
+        "expected": [
+          "EE 457",
+          "EE 557"
+        ],
+        "retrieved": [
+          "EE 557",
+          "EE 457",
+          "EE 459",
+          "EE 577A",
+          "EE 533"
+        ],
+        "hit_at_5": 1,
+        "mrr_at_5": 1.0,
+        "precision_at_5": 0.4,
+        "ndcg_at_5": 1.0
+      },
+      {
+        "id": "H15",
+        "question": "Where can I learn to implement synchronous logic circuits on programmable hardware?",
+        "expected": [
+          "EE 354"
+        ],
+        "retrieved": [
+          "EE 354",
+          "EE 109",
+          "EE 155",
+          "EE 538",
+          "EE 577A"
+        ],
+        "hit_at_5": 1,
+        "mrr_at_5": 1.0,
+        "precision_at_5": 0.2,
+        "ndcg_at_5": 1.0
+      },
+      {
+        "id": "H16",
+        "question": "Which class studies how mobile phones communicate through cellular networks?",
+        "expected": [
+          "EE 535"
+        ],
+        "retrieved": [
+          "EE 535",
+          "EE 597",
+          "EE 448",
+          "EE 467",
+          "EE 632A"
+        ],
+        "hit_at_5": 1,
+        "mrr_at_5": 1.0,
+        "precision_at_5": 0.2,
+        "ndcg_at_5": 1.0
+      },
+      {
+        "id": "H17",
+        "question": "I want to understand how wireless channels affect transmitted signals.",
+        "expected": [
+          "EE 535",
+          "EE 467"
+        ],
+        "retrieved": [
+          "EE 535",
+          "EE 467",
+          "EE 370",
+          "EE 597",
+          "EE 632A"
+        ],
+        "hit_at_5": 1,
+        "mrr_at_5": 1.0,
+        "precision_at_5": 0.4,
+        "ndcg_at_5": 1.0
+      },
+      {
+        "id": "H18",
+        "question": "Which courses focus on building intelligent robotic systems?",
+        "expected": [
+          "EE 445",
+          "EE 545"
+        ],
+        "retrieved": [
+          "EE 545",
+          "EE 561",
+          "EE 445",
+          "EE 109",
+          "EE 559"
+        ],
+        "hit_at_5": 1,
+        "mrr_at_5": 1.0,
+        "precision_at_5": 0.4,
+        "ndcg_at_5": 0.9197207891481876
+      },
+      {
+        "id": "H19",
+        "question": "I want to design controllers that use feedback to regulate dynamic systems.",
+        "expected": [
+          "EE 482",
+          "EE 587"
+        ],
+        "retrieved": [
+          "EE 587",
+          "EE 481",
+          "EE 482",
+          "EE 545",
+          "EE 301"
+        ],
+        "hit_at_5": 1,
+        "mrr_at_5": 1.0,
+        "precision_at_5": 0.4,
+        "ndcg_at_5": 0.9197207891481876
+      },
+      {
+        "id": "H20",
+        "question": "Which class teaches practical experiments with control systems?",
+        "expected": [
+          "EE 481"
+        ],
+        "retrieved": [
+          "EE 481",
+          "EE 482",
+          "EE 545",
+          "EE 364",
+          "EE 563"
+        ],
+        "hit_at_5": 1,
+        "mrr_at_5": 1.0,
+        "precision_at_5": 0.2,
+        "ndcg_at_5": 1.0
+      }
+    ]
+  },
+  "MiniLM_clean": {
+    "model": "sentence-transformers/all-MiniLM-L6-v2",
+    "text_format": "clean",
+    "summary": {
+      "hit_at_5": 1.0,
+      "mrr_at_5": 0.8541666666666666,
+      "precision_at_5": 0.3200000000000001,
+      "ndcg_at_5": 0.8636575620735467,
+      "build_seconds": 0.6996908999863081
+    },
+    "details": [
+      {
+        "id": "H01",
+        "question": "I want to build models that predict outcomes using labeled training data.",
+        "expected": [
+          "EE 460",
+          "EE 559"
+        ],
+        "retrieved": [
+          "EE 559",
+          "EE 460",
+          "EE 541",
+          "EE 561",
+          "EE 519"
+        ],
+        "hit_at_5": 1,
+        "mrr_at_5": 1.0,
+        "precision_at_5": 0.4,
+        "ndcg_at_5": 1.0
+      },
+      {
+        "id": "H02",
+        "question": "Which classes explore decision trees and neural networks?",
+        "expected": [
+          "EE 460",
+          "EE 559"
+        ],
+        "retrieved": [
+          "EE 559",
+          "EE 460",
+          "EE 508",
+          "EE 515",
+          "EE 541"
+        ],
+        "hit_at_5": 1,
+        "mrr_at_5": 1.0,
+        "precision_at_5": 0.4,
+        "ndcg_at_5": 1.0
+      },
+      {
+        "id": "H03",
+        "question": "Where can I study methods for reducing the number of features in a dataset?",
+        "expected": [
+          "EE 460"
+        ],
+        "retrieved": [
+          "EE 559",
+          "EE 460",
+          "EE 508",
+          "EE 538",
+          "EE 541"
+        ],
+        "hit_at_5": 1,
+        "mrr_at_5": 0.5,
+        "precision_at_5": 0.2,
+        "ndcg_at_5": 0.6309297535714575
+      },
+      {
+        "id": "H04",
+        "question": "I want to build scalable web services with databases and APIs.",
+        "expected": [
+          "EE 547"
+        ],
+        "retrieved": [
+          "EE 557",
+          "EE 250",
+          "EE 457",
+          "EE 547",
+          "EE 577A"
+        ],
+        "hit_at_5": 1,
+        "mrr_at_5": 0.25,
+        "precision_at_5": 0.2,
+        "ndcg_at_5": 0.43067655807339306
+      },
+      {
+        "id": "H05",
+        "question": "Which course teaches running software inside virtualized cloud environments?",
+        "expected": [
+          "EE 547"
+        ],
+        "retrieved": [
+          "EE 547",
+          "EE 541",
+          "EE 250",
+          "EE 522",
+          "EE 455"
+        ],
+        "hit_at_5": 1,
+        "mrr_at_5": 1.0,
+        "precision_at_5": 0.2,
+        "ndcg_at_5": 1.0
+      },
+      {
+        "id": "H06",
+        "question": "I want to understand how information travels between devices over a computer network.",
+        "expected": [
+          "EE 450",
+          "EE 597"
+        ],
+        "retrieved": [
+          "EE 535",
+          "EE 576",
+          "EE 450",
+          "EE 364",
+          "EE 448"
+        ],
+        "hit_at_5": 1,
+        "mrr_at_5": 0.3333333333333333,
+        "precision_at_5": 0.2,
+        "ndcg_at_5": 0.3065735963827292
+      },
+      {
+        "id": "H07",
+        "question": "Which class studies communication protocols and network performance?",
+        "expected": [
+          "EE 450",
+          "EE 597"
+        ],
+        "retrieved": [
+          "EE 450",
+          "EE 597",
+          "EE 535",
+          "EE 457",
+          "EE 698"
+        ],
+        "hit_at_5": 1,
+        "mrr_at_5": 1.0,
+        "precision_at_5": 0.4,
+        "ndcg_at_5": 1.0
+      },
+      {
+        "id": "H08",
+        "question": "How can sensors and smart devices communicate through a shared network?",
+        "expected": [
+          "EE 250",
+          "EE 535"
+        ],
+        "retrieved": [
+          "EE 450",
+          "EE 250",
+          "EE 535",
+          "EE 448",
+          "EE 632A"
+        ],
+        "hit_at_5": 1,
+        "mrr_at_5": 0.5,
+        "precision_at_5": 0.4,
+        "ndcg_at_5": 0.6934264036172708
+      },
+      {
+        "id": "H09",
+        "question": "I want to develop software for interconnected embedded devices.",
+        "expected": [
+          "EE 250",
+          "EE 109"
+        ],
+        "retrieved": [
+          "EE 109",
+          "EE 459",
+          "EE 576",
+          "EE 533",
+          "EE 355"
+        ],
+        "hit_at_5": 1,
+        "mrr_at_5": 1.0,
+        "precision_at_5": 0.2,
+        "ndcg_at_5": 0.6131471927654584
+      },
+      {
+        "id": "H10",
+        "question": "Which courses explain how to model unpredictable events mathematically?",
+        "expected": [
+          "EE 364",
+          "EE 503",
+          "EE 562"
+        ],
+        "retrieved": [
+          "EE 364",
+          "EE 562",
+          "EE 512",
+          "EE 503",
+          "EE 559"
+        ],
+        "hit_at_5": 1,
+        "mrr_at_5": 1.0,
+        "precision_at_5": 0.6,
+        "ndcg_at_5": 0.9674679834891693
+      },
+      {
+        "id": "H11",
+        "question": "Where can I study Gaussian processes and martingales?",
+        "expected": [
+          "EE 562",
+          "EE 512"
+        ],
+        "retrieved": [
+          "EE 562",
+          "EE 512",
+          "EE 364",
+          "EE 563",
+          "EE 559"
+        ],
+        "hit_at_5": 1,
+        "mrr_at_5": 1.0,
+        "precision_at_5": 0.4,
+        "ndcg_at_5": 1.0
+      },
+      {
+        "id": "H12",
+        "question": "Which class covers stochastic calculus for financial applications?",
+        "expected": [
+          "EE 512"
+        ],
+        "retrieved": [
+          "EE 512",
+          "EE 562",
+          "EE 518",
+          "EE 364",
+          "EE 559"
+        ],
+        "hit_at_5": 1,
+        "mrr_at_5": 1.0,
+        "precision_at_5": 0.2,
+        "ndcg_at_5": 1.0
+      },
+      {
+        "id": "H13",
+        "question": "I want to understand how CPUs organize and execute machine instructions.",
+        "expected": [
+          "EE 457",
+          "EE 557"
+        ],
+        "retrieved": [
+          "EE 457",
+          "EE 557",
+          "EE 109",
+          "EE 533",
+          "EE 508"
+        ],
+        "hit_at_5": 1,
+        "mrr_at_5": 1.0,
+        "precision_at_5": 0.4,
+        "ndcg_at_5": 1.0
+      },
+      {
+        "id": "H14",
+        "question": "Which courses explain processor design and computer hardware organization?",
+        "expected": [
+          "EE 457",
+          "EE 557"
+        ],
+        "retrieved": [
+          "EE 457",
+          "EE 557",
+          "EE 459",
+          "EE 455",
+          "EE 109"
+        ],
+        "hit_at_5": 1,
+        "mrr_at_5": 1.0,
+        "precision_at_5": 0.4,
+        "ndcg_at_5": 1.0
+      },
+      {
+        "id": "H15",
+        "question": "Where can I learn to implement synchronous logic circuits on programmable hardware?",
+        "expected": [
+          "EE 354"
+        ],
+        "retrieved": [
+          "EE 109",
+          "EE 354",
+          "EE 155",
+          "EE 631",
+          "EE 576"
+        ],
+        "hit_at_5": 1,
+        "mrr_at_5": 0.5,
+        "precision_at_5": 0.2,
+        "ndcg_at_5": 0.6309297535714575
+      },
+      {
+        "id": "H16",
+        "question": "Which class studies how mobile phones communicate through cellular networks?",
+        "expected": [
+          "EE 535"
+        ],
+        "retrieved": [
+          "EE 535",
+          "EE 597",
+          "EE 448",
+          "EE 632A",
+          "EE 450"
+        ],
+        "hit_at_5": 1,
+        "mrr_at_5": 1.0,
+        "precision_at_5": 0.2,
+        "ndcg_at_5": 1.0
+      },
+      {
+        "id": "H17",
+        "question": "I want to understand how wireless channels affect transmitted signals.",
+        "expected": [
+          "EE 535",
+          "EE 467"
+        ],
+        "retrieved": [
+          "EE 535",
+          "EE 467",
+          "EE 370",
+          "EE 632A",
+          "EE 597"
+        ],
+        "hit_at_5": 1,
+        "mrr_at_5": 1.0,
+        "precision_at_5": 0.4,
+        "ndcg_at_5": 1.0
+      },
+      {
+        "id": "H18",
+        "question": "Which courses focus on building intelligent robotic systems?",
+        "expected": [
+          "EE 445",
+          "EE 545"
+        ],
+        "retrieved": [
+          "EE 545",
+          "EE 445",
+          "EE 561",
+          "EE 459",
+          "EE 455"
+        ],
+        "hit_at_5": 1,
+        "mrr_at_5": 1.0,
+        "precision_at_5": 0.4,
+        "ndcg_at_5": 1.0
+      },
+      {
+        "id": "H19",
+        "question": "I want to design controllers that use feedback to regulate dynamic systems.",
+        "expected": [
+          "EE 482",
+          "EE 587"
+        ],
+        "retrieved": [
+          "EE 482",
+          "EE 587",
+          "EE 481",
+          "EE 301",
+          "EE 545"
+        ],
+        "hit_at_5": 1,
+        "mrr_at_5": 1.0,
+        "precision_at_5": 0.4,
+        "ndcg_at_5": 1.0
+      },
+      {
+        "id": "H20",
+        "question": "Which class teaches practical experiments with control systems?",
+        "expected": [
+          "EE 481"
+        ],
+        "retrieved": [
+          "EE 481",
+          "EE 482",
+          "EE 545",
+          "EE 445",
+          "EE 364"
+        ],
+        "hit_at_5": 1,
+        "mrr_at_5": 1.0,
+        "precision_at_5": 0.2,
+        "ndcg_at_5": 1.0
+      }
+    ]
+  },
+  "BGE_full": {
+    "model": "BAAI/bge-base-en-v1.5",
+    "text_format": "full",
+    "summary": {
+      "hit_at_5": 1.0,
+      "mrr_at_5": 0.95,
+      "precision_at_5": 0.3300000000000001,
+      "ndcg_at_5": 0.922599097818843,
+      "build_seconds": 9.994454099971335
+    },
+    "details": [
+      {
+        "id": "H01",
+        "question": "I want to build models that predict outcomes using labeled training data.",
+        "expected": [
+          "EE 460",
+          "EE 559"
+        ],
+        "retrieved": [
+          "EE 559",
+          "EE 460",
+          "EE 508",
+          "EE 541",
+          "EE 563"
+        ],
+        "hit_at_5": 1,
+        "mrr_at_5": 1.0,
+        "precision_at_5": 0.4,
+        "ndcg_at_5": 1.0
+      },
+      {
+        "id": "H02",
+        "question": "Which classes explore decision trees and neural networks?",
+        "expected": [
+          "EE 460",
+          "EE 559"
+        ],
+        "retrieved": [
+          "EE 559",
+          "EE 460",
+          "EE 541",
+          "EE 508",
+          "EE 561"
+        ],
+        "hit_at_5": 1,
+        "mrr_at_5": 1.0,
+        "precision_at_5": 0.4,
+        "ndcg_at_5": 1.0
+      },
+      {
+        "id": "H03",
+        "question": "Where can I study methods for reducing the number of features in a dataset?",
+        "expected": [
+          "EE 460"
+        ],
+        "retrieved": [
+          "EE 559",
+          "EE 460",
+          "EE 569",
+          "EE 508",
+          "EE 541"
+        ],
+        "hit_at_5": 1,
+        "mrr_at_5": 0.5,
+        "precision_at_5": 0.2,
+        "ndcg_at_5": 0.6309297535714575
+      },
+      {
+        "id": "H04",
+        "question": "I want to build scalable web services with databases and APIs.",
+        "expected": [
+          "EE 547"
+        ],
+        "retrieved": [
+          "EE 250",
+          "EE 547",
+          "EE 450",
+          "EE 533",
+          "EE 355"
+        ],
+        "hit_at_5": 1,
+        "mrr_at_5": 0.5,
+        "precision_at_5": 0.2,
+        "ndcg_at_5": 0.6309297535714575
+      },
+      {
+        "id": "H05",
+        "question": "Which course teaches running software inside virtualized cloud environments?",
+        "expected": [
+          "EE 547"
+        ],
+        "retrieved": [
+          "EE 547",
+          "EE 541",
+          "EE 250",
+          "EE 533",
+          "EE 508"
+        ],
+        "hit_at_5": 1,
+        "mrr_at_5": 1.0,
+        "precision_at_5": 0.2,
+        "ndcg_at_5": 1.0
+      },
+      {
+        "id": "H06",
+        "question": "I want to understand how information travels between devices over a computer network.",
+        "expected": [
+          "EE 450",
+          "EE 597"
+        ],
+        "retrieved": [
+          "EE 450",
+          "EE 597",
+          "EE 250",
+          "EE 105",
+          "EE 533"
+        ],
+        "hit_at_5": 1,
+        "mrr_at_5": 1.0,
+        "precision_at_5": 0.4,
+        "ndcg_at_5": 1.0
+      },
+      {
+        "id": "H07",
+        "question": "Which class studies communication protocols and network performance?",
+        "expected": [
+          "EE 450",
+          "EE 597"
+        ],
+        "retrieved": [
+          "EE 597",
+          "EE 450",
+          "EE 533",
+          "EE 448",
+          "EE 632A"
+        ],
+        "hit_at_5": 1,
+        "mrr_at_5": 1.0,
+        "precision_at_5": 0.4,
+        "ndcg_at_5": 1.0
+      },
+      {
+        "id": "H08",
+        "question": "How can sensors and smart devices communicate through a shared network?",
+        "expected": [
+          "EE 250",
+          "EE 535"
+        ],
+        "retrieved": [
+          "EE 250",
+          "EE 597",
+          "EE 450",
+          "EE 533",
+          "EE 109"
+        ],
+        "hit_at_5": 1,
+        "mrr_at_5": 1.0,
+        "precision_at_5": 0.2,
+        "ndcg_at_5": 0.6131471927654584
+      },
+      {
+        "id": "H09",
+        "question": "I want to develop software for interconnected embedded devices.",
+        "expected": [
+          "EE 250",
+          "EE 109"
+        ],
+        "retrieved": [
+          "EE 109",
+          "EE 459",
+          "EE 355",
+          "EE 533",
+          "EE 250"
+        ],
+        "hit_at_5": 1,
+        "mrr_at_5": 1.0,
+        "precision_at_5": 0.4,
+        "ndcg_at_5": 0.8503449055347546
+      },
+      {
+        "id": "H10",
+        "question": "Which courses explain how to model unpredictable events mathematically?",
+        "expected": [
+          "EE 364",
+          "EE 503",
+          "EE 562"
+        ],
+        "retrieved": [
+          "EE 364",
+          "EE 562",
+          "EE 512",
+          "EE 503",
+          "EE 563"
+        ],
+        "hit_at_5": 1,
+        "mrr_at_5": 1.0,
+        "precision_at_5": 0.6,
+        "ndcg_at_5": 0.9674679834891693
+      },
+      {
+        "id": "H11",
+        "question": "Where can I study Gaussian processes and martingales?",
+        "expected": [
+          "EE 562",
+          "EE 512"
+        ],
+        "retrieved": [
+          "EE 562",
+          "EE 512",
+          "EE 563",
+          "EE 364",
+          "EE 503"
+        ],
+        "hit_at_5": 1,
+        "mrr_at_5": 1.0,
+        "precision_at_5": 0.4,
+        "ndcg_at_5": 1.0
+      },
+      {
+        "id": "H12",
+        "question": "Which class covers stochastic calculus for financial applications?",
+        "expected": [
+          "EE 512"
+        ],
+        "retrieved": [
+          "EE 512",
+          "EE 518",
+          "EE 562",
+          "EE 364",
+          "EE 503"
+        ],
+        "hit_at_5": 1,
+        "mrr_at_5": 1.0,
+        "precision_at_5": 0.2,
+        "ndcg_at_5": 1.0
+      },
+      {
+        "id": "H13",
+        "question": "I want to understand how CPUs organize and execute machine instructions.",
+        "expected": [
+          "EE 457",
+          "EE 557"
+        ],
+        "retrieved": [
+          "EE 457",
+          "EE 533",
+          "EE 557",
+          "EE 508",
+          "EE 577A"
+        ],
+        "hit_at_5": 1,
+        "mrr_at_5": 1.0,
+        "precision_at_5": 0.4,
+        "ndcg_at_5": 0.9197207891481876
+      },
+      {
+        "id": "H14",
+        "question": "Which courses explain processor design and computer hardware organization?",
+        "expected": [
+          "EE 457",
+          "EE 557"
+        ],
+        "retrieved": [
+          "EE 557",
+          "EE 533",
+          "EE 457",
+          "EE 577A",
+          "EE 577B"
+        ],
+        "hit_at_5": 1,
+        "mrr_at_5": 1.0,
+        "precision_at_5": 0.4,
+        "ndcg_at_5": 0.9197207891481876
+      },
+      {
+        "id": "H15",
+        "question": "Where can I learn to implement synchronous logic circuits on programmable hardware?",
+        "expected": [
+          "EE 354"
+        ],
+        "retrieved": [
+          "EE 354",
+          "EE 109",
+          "EE 577B",
+          "EE 533",
+          "EE 577A"
+        ],
+        "hit_at_5": 1,
+        "mrr_at_5": 1.0,
+        "precision_at_5": 0.2,
+        "ndcg_at_5": 1.0
+      },
+      {
+        "id": "H16",
+        "question": "Which class studies how mobile phones communicate through cellular networks?",
+        "expected": [
+          "EE 535"
+        ],
+        "retrieved": [
+          "EE 535",
+          "EE 597",
+          "EE 632A",
+          "EE 448",
+          "EE 467"
+        ],
+        "hit_at_5": 1,
+        "mrr_at_5": 1.0,
+        "precision_at_5": 0.2,
+        "ndcg_at_5": 1.0
+      },
+      {
+        "id": "H17",
+        "question": "I want to understand how wireless channels affect transmitted signals.",
+        "expected": [
+          "EE 535",
+          "EE 467"
+        ],
+        "retrieved": [
+          "EE 535",
+          "EE 597",
+          "EE 467",
+          "EE 370",
+          "EE 632A"
+        ],
+        "hit_at_5": 1,
+        "mrr_at_5": 1.0,
+        "precision_at_5": 0.4,
+        "ndcg_at_5": 0.9197207891481876
+      },
+      {
+        "id": "H18",
+        "question": "Which courses focus on building intelligent robotic systems?",
+        "expected": [
+          "EE 445",
+          "EE 545"
+        ],
+        "retrieved": [
+          "EE 445",
+          "EE 545",
+          "EE 561",
+          "EE 250",
+          "EE 541"
+        ],
+        "hit_at_5": 1,
+        "mrr_at_5": 1.0,
+        "precision_at_5": 0.4,
+        "ndcg_at_5": 1.0
+      },
+      {
+        "id": "H19",
+        "question": "I want to design controllers that use feedback to regulate dynamic systems.",
+        "expected": [
+          "EE 482",
+          "EE 587"
+        ],
+        "retrieved": [
+          "EE 587",
+          "EE 482",
+          "EE 481",
+          "EE 528",
+          "EE 545"
+        ],
+        "hit_at_5": 1,
+        "mrr_at_5": 1.0,
+        "precision_at_5": 0.4,
+        "ndcg_at_5": 1.0
+      },
+      {
+        "id": "H20",
+        "question": "Which class teaches practical experiments with control systems?",
+        "expected": [
+          "EE 481"
+        ],
+        "retrieved": [
+          "EE 481",
+          "EE 482",
+          "EE 587",
+          "EE 545",
+          "EE 141"
+        ],
+        "hit_at_5": 1,
+        "mrr_at_5": 1.0,
+        "precision_at_5": 0.2,
+        "ndcg_at_5": 1.0
+      }
+    ]
+  },
+  "BGE_clean": {
+    "model": "BAAI/bge-base-en-v1.5",
+    "text_format": "clean",
+    "summary": {
+      "hit_at_5": 1.0,
+      "mrr_at_5": 0.95,
+      "precision_at_5": 0.3300000000000001,
+      "ndcg_at_5": 0.9234439454440423,
+      "build_seconds": 4.314794800011441
+    },
+    "details": [
+      {
+        "id": "H01",
+        "question": "I want to build models that predict outcomes using labeled training data.",
+        "expected": [
+          "EE 460",
+          "EE 559"
+        ],
+        "retrieved": [
+          "EE 559",
+          "EE 460",
+          "EE 508",
+          "EE 541",
+          "EE 563"
+        ],
+        "hit_at_5": 1,
+        "mrr_at_5": 1.0,
+        "precision_at_5": 0.4,
+        "ndcg_at_5": 1.0
+      },
+      {
+        "id": "H02",
+        "question": "Which classes explore decision trees and neural networks?",
+        "expected": [
+          "EE 460",
+          "EE 559"
+        ],
+        "retrieved": [
+          "EE 460",
+          "EE 559",
+          "EE 508",
+          "EE 541",
+          "EE 561"
+        ],
+        "hit_at_5": 1,
+        "mrr_at_5": 1.0,
+        "precision_at_5": 0.4,
+        "ndcg_at_5": 1.0
+      },
+      {
+        "id": "H03",
+        "question": "Where can I study methods for reducing the number of features in a dataset?",
+        "expected": [
+          "EE 460"
+        ],
+        "retrieved": [
+          "EE 559",
+          "EE 460",
+          "EE 508",
+          "EE 569",
+          "EE 541"
+        ],
+        "hit_at_5": 1,
+        "mrr_at_5": 0.5,
+        "precision_at_5": 0.2,
+        "ndcg_at_5": 0.6309297535714575
+      },
+      {
+        "id": "H04",
+        "question": "I want to build scalable web services with databases and APIs.",
+        "expected": [
+          "EE 547"
+        ],
+        "retrieved": [
+          "EE 250",
+          "EE 547",
+          "EE 450",
+          "EE 533",
+          "EE 538"
+        ],
+        "hit_at_5": 1,
+        "mrr_at_5": 0.5,
+        "precision_at_5": 0.2,
+        "ndcg_at_5": 0.6309297535714575
+      },
+      {
+        "id": "H05",
+        "question": "Which course teaches running software inside virtualized cloud environments?",
+        "expected": [
+          "EE 547"
+        ],
+        "retrieved": [
+          "EE 547",
+          "EE 541",
+          "EE 250",
+          "EE 533",
+          "EE 508"
+        ],
+        "hit_at_5": 1,
+        "mrr_at_5": 1.0,
+        "precision_at_5": 0.2,
+        "ndcg_at_5": 1.0
+      },
+      {
+        "id": "H06",
+        "question": "I want to understand how information travels between devices over a computer network.",
+        "expected": [
+          "EE 450",
+          "EE 597"
+        ],
+        "retrieved": [
+          "EE 450",
+          "EE 597",
+          "EE 250",
+          "EE 105",
+          "EE 370"
+        ],
+        "hit_at_5": 1,
+        "mrr_at_5": 1.0,
+        "precision_at_5": 0.4,
+        "ndcg_at_5": 1.0
+      },
+      {
+        "id": "H07",
+        "question": "Which class studies communication protocols and network performance?",
+        "expected": [
+          "EE 450",
+          "EE 597"
+        ],
+        "retrieved": [
+          "EE 597",
+          "EE 533",
+          "EE 450",
+          "EE 448",
+          "EE 250"
+        ],
+        "hit_at_5": 1,
+        "mrr_at_5": 1.0,
+        "precision_at_5": 0.4,
+        "ndcg_at_5": 0.9197207891481876
+      },
+      {
+        "id": "H08",
+        "question": "How can sensors and smart devices communicate through a shared network?",
+        "expected": [
+          "EE 250",
+          "EE 535"
+        ],
+        "retrieved": [
+          "EE 250",
+          "EE 597",
+          "EE 533",
+          "EE 109",
+          "EE 450"
+        ],
+        "hit_at_5": 1,
+        "mrr_at_5": 1.0,
+        "precision_at_5": 0.2,
+        "ndcg_at_5": 0.6131471927654584
+      },
+      {
+        "id": "H09",
+        "question": "I want to develop software for interconnected embedded devices.",
+        "expected": [
+          "EE 250",
+          "EE 109"
+        ],
+        "retrieved": [
+          "EE 109",
+          "EE 459",
+          "EE 250",
+          "EE 533",
+          "EE 355"
+        ],
+        "hit_at_5": 1,
+        "mrr_at_5": 1.0,
+        "precision_at_5": 0.4,
+        "ndcg_at_5": 0.9197207891481876
+      },
+      {
+        "id": "H10",
+        "question": "Which courses explain how to model unpredictable events mathematically?",
+        "expected": [
+          "EE 364",
+          "EE 503",
+          "EE 562"
+        ],
+        "retrieved": [
+          "EE 364",
+          "EE 562",
+          "EE 503",
+          "EE 512",
+          "EE 559"
+        ],
+        "hit_at_5": 1,
+        "mrr_at_5": 1.0,
+        "precision_at_5": 0.6,
+        "ndcg_at_5": 1.0
+      },
+      {
+        "id": "H11",
+        "question": "Where can I study Gaussian processes and martingales?",
+        "expected": [
+          "EE 562",
+          "EE 512"
+        ],
+        "retrieved": [
+          "EE 562",
+          "EE 512",
+          "EE 563",
+          "EE 364",
+          "EE 503"
+        ],
+        "hit_at_5": 1,
+        "mrr_at_5": 1.0,
+        "precision_at_5": 0.4,
+        "ndcg_at_5": 1.0
+      },
+      {
+        "id": "H12",
+        "question": "Which class covers stochastic calculus for financial applications?",
+        "expected": [
+          "EE 512"
+        ],
+        "retrieved": [
+          "EE 512",
+          "EE 518",
+          "EE 562",
+          "EE 503",
+          "EE 364"
+        ],
+        "hit_at_5": 1,
+        "mrr_at_5": 1.0,
+        "precision_at_5": 0.2,
+        "ndcg_at_5": 1.0
+      },
+      {
+        "id": "H13",
+        "question": "I want to understand how CPUs organize and execute machine instructions.",
+        "expected": [
+          "EE 457",
+          "EE 557"
+        ],
+        "retrieved": [
+          "EE 457",
+          "EE 557",
+          "EE 533",
+          "EE 508",
+          "EE 577B"
+        ],
+        "hit_at_5": 1,
+        "mrr_at_5": 1.0,
+        "precision_at_5": 0.4,
+        "ndcg_at_5": 1.0
+      },
+      {
+        "id": "H14",
+        "question": "Which courses explain processor design and computer hardware organization?",
+        "expected": [
+          "EE 457",
+          "EE 557"
+        ],
+        "retrieved": [
+          "EE 557",
+          "EE 457",
+          "EE 577A",
+          "EE 533",
+          "EE 577B"
+        ],
+        "hit_at_5": 1,
+        "mrr_at_5": 1.0,
+        "precision_at_5": 0.4,
+        "ndcg_at_5": 1.0
+      },
+      {
+        "id": "H15",
+        "question": "Where can I learn to implement synchronous logic circuits on programmable hardware?",
+        "expected": [
+          "EE 354"
+        ],
+        "retrieved": [
+          "EE 354",
+          "EE 109",
+          "EE 577B",
+          "EE 658",
+          "EE 577A"
+        ],
+        "hit_at_5": 1,
+        "mrr_at_5": 1.0,
+        "precision_at_5": 0.2,
+        "ndcg_at_5": 1.0
+      },
+      {
+        "id": "H16",
+        "question": "Which class studies how mobile phones communicate through cellular networks?",
+        "expected": [
+          "EE 535"
+        ],
+        "retrieved": [
+          "EE 535",
+          "EE 597",
+          "EE 448",
+          "EE 632A",
+          "EE 467"
+        ],
+        "hit_at_5": 1,
+        "mrr_at_5": 1.0,
+        "precision_at_5": 0.2,
+        "ndcg_at_5": 1.0
+      },
+      {
+        "id": "H17",
+        "question": "I want to understand how wireless channels affect transmitted signals.",
+        "expected": [
+          "EE 535",
+          "EE 467"
+        ],
+        "retrieved": [
+          "EE 535",
+          "EE 370",
+          "EE 597",
+          "EE 467",
+          "EE 632A"
+        ],
+        "hit_at_5": 1,
+        "mrr_at_5": 1.0,
+        "precision_at_5": 0.4,
+        "ndcg_at_5": 0.8772153153380493
+      },
+      {
+        "id": "H18",
+        "question": "Which courses focus on building intelligent robotic systems?",
+        "expected": [
+          "EE 445",
+          "EE 545"
+        ],
+        "retrieved": [
+          "EE 445",
+          "EE 545",
+          "EE 561",
+          "EE 250",
+          "EE 460"
+        ],
+        "hit_at_5": 1,
+        "mrr_at_5": 1.0,
+        "precision_at_5": 0.4,
+        "ndcg_at_5": 1.0
+      },
+      {
+        "id": "H19",
+        "question": "I want to design controllers that use feedback to regulate dynamic systems.",
+        "expected": [
+          "EE 482",
+          "EE 587"
+        ],
+        "retrieved": [
+          "EE 587",
+          "EE 481",
+          "EE 528",
+          "EE 482",
+          "EE 545"
+        ],
+        "hit_at_5": 1,
+        "mrr_at_5": 1.0,
+        "precision_at_5": 0.4,
+        "ndcg_at_5": 0.8772153153380493
+      },
+      {
+        "id": "H20",
+        "question": "Which class teaches practical experiments with control systems?",
+        "expected": [
+          "EE 481"
+        ],
+        "retrieved": [
+          "EE 481",
+          "EE 587",
+          "EE 141",
+          "EE 545",
+          "EE 528"
+        ],
+        "hit_at_5": 1,
+        "mrr_at_5": 1.0,
+        "precision_at_5": 0.2,
+        "ndcg_at_5": 1.0
+      }
+    ]
+  }
+}

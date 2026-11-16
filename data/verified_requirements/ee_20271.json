@@ -13,6 +13,31 @@
       "verification_source": "official_course_listing",
       "source_url": "https://classes.usc.edu/term/20271/course/EE597",
       "source_text": "Prerequisites: EE 450 and EE 503"
+    },
+    "EE 562": {
+      "prerequisites_display": {
+        "operator": "AND",
+        "groups": [
+          {
+            "operator": "SINGLE",
+            "courses": [
+              "EE 503"
+            ]
+          },
+          {
+            "operator": "OR",
+            "courses": [
+              "EE 441",
+              "EE 510"
+            ],
+            "required_courses": 1
+          }
+        ]
+      },
+      "verification_status": "verified",
+      "verification_source": "official_course_listing",
+      "source_url": "https://classes.usc.edu/term/20271/course/EE562",
+      "source_text": "Prerequisites: EE 503 and 1 from (EE 441 or EE 510)"
     }
   }
 }

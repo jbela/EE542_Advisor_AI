@@ -1,0 +1,22 @@
+[
+  {"id":"S01","category":"machine_learning","question":"Which courses teach computers to recognize patterns in data?","term_code":"20271","expected_courses":["EE 460","EE 559"]},
+  {"id":"S02","category":"machine_learning","question":"Where can I learn supervised classification and regression?","term_code":"20271","expected_courses":["EE 460","EE 559"]},
+  {"id":"S03","category":"machine_learning","question":"Which class covers neural networks and learning algorithms?","term_code":"20271","expected_courses":["EE 460","EE 559"]},
+  {"id":"S04","category":"machine_learning","question":"I want to study how machines learn from examples.","term_code":"20271","expected_courses":["EE 460","EE 559"]},
+  {"id":"S05","category":"cloud_computing","question":"Which course teaches deploying software on cloud platforms?","term_code":"20271","expected_courses":["EE 547"]},
+  {"id":"S06","category":"cloud_computing","question":"I want to learn about virtualization, APIs, and scalable applications.","term_code":"20271","expected_courses":["EE 547"]},
+  {"id":"S07","category":"cloud_computing","question":"Which classes teach deploying applications on remote servers?","term_code":"20271","expected_courses":["EE 547"]},
+  {"id":"S08","category":"networking","question":"Which courses explain how computers communicate across networks?","term_code":"20271","expected_courses":["EE 450","EE 597"]},
+  {"id":"S09","category":"networking","question":"I want to understand how connected devices exchange information.","term_code":"20271","expected_courses":["EE 250","EE 450","EE 535"]},
+  {"id":"S10","category":"networking","question":"Which course covers wireless network architecture and protocols?","term_code":"20271","expected_courses":["EE 597"]},
+  {"id":"S11","category":"distributed_systems","question":"Which course teaches distributed computing for connected devices?","term_code":"20271","expected_courses":["EE 250"]},
+  {"id":"S12","category":"distributed_systems","question":"I want to study systems where multiple computers coordinate tasks.","term_code":"20271","expected_courses":["EE 250"]},
+  {"id":"S13","category":"probability","question":"Which courses cover probability, random variables, and uncertainty?","term_code":"20271","expected_courses":["EE 364","EE 503"]},
+  {"id":"S14","category":"probability","question":"Where can I study random processes and Markov chains?","term_code":"20271","expected_courses":["EE 562"]},
+  {"id":"S15","category":"probability","question":"I want to learn about stochastic processes and Brownian motion.","term_code":"20271","expected_courses":["EE 512"]},
+  {"id":"S16","category":"computer_architecture","question":"Which course teaches computer organization and processor architecture?","term_code":"20271","expected_courses":["EE 457","EE 557"]},
+  {"id":"S17","category":"digital_hardware","question":"Which class teaches digital circuit design using Verilog?","term_code":"20271","expected_courses":["EE 354"]},
+  {"id":"S18","category":"wireless_communications","question":"Which course covers cellular communication and mobile channels?","term_code":"20271","expected_courses":["EE 535"]},
+  {"id":"S19","category":"robotics","question":"Which courses teach robotics and autonomous systems?","term_code":"20271","expected_courses":["EE 445","EE 545"]},
+  {"id":"S20","category":"control_systems","question":"Where can I learn about feedback control and dynamic systems?","term_code":"20271","expected_courses":["EE 482","EE 587"]}
+]

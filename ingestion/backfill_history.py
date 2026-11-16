@@ -17,6 +17,7 @@ from ingestion.backfill_courses import (
     COURSES_DIR,
 )
 from rag.sync_index import sync_index
+from rag.sync_discovery_index import sync_discovery_index
 
 
 def select_archived_terms(known_terms, years=5):
@@ -108,11 +109,16 @@ def backfill_history(years=5, delay=10, max_terms=None, dry_run=False):
         if index < len(missing) - 1:
             time.sleep(delay)
 
+
     index_result = None
+    discovery_index_result = None
 
     if results or not failures:
         print("\nSynchronizing collected academic data...")
+
         index_result = sync_index()
+        discovery_index_result = sync_discovery_index()
+
 
     if failures:
         print(
@@ -120,6 +126,7 @@ def backfill_history(years=5, delay=10, max_terms=None, dry_run=False):
             "Successfully collected semesters were retained. "
             "Historical coverage remains incomplete."
         )
+
 
     summary = {
         "status": (
@@ -130,7 +137,9 @@ def backfill_history(years=5, delay=10, max_terms=None, dry_run=False):
         "collected_terms": len(results),
         "failed_terms": failures,
         "index": index_result,
+        "discovery_index": discovery_index_result,
     }
+
 
     print("\n" + "=" * 65)
     print("BACKFILL SUMMARY")

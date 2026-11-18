@@ -138,11 +138,29 @@ class TestGradingLookup(GradingFixture, unittest.TestCase):
         fake.retrieve.assert_not_called()
         self.assertEqual(result[0]["grading_fact"]["weight_percent"], 37)
 
-    def test_missing_explicit_term_has_no_answer(self):
+
+    def test_missing_explicit_term_reports_unavailable(self):
         result = router.retrieve_for_advisor(
             "What percentage is the final project worth in ZZ 123 in Spring 2027?"
         )
-        self.assertEqual(result, [])
+
+        self.assertEqual(len(result), 1)
+
+        doc = result[0]
+
+        self.assertEqual(
+            doc["retrieval_method"],
+            "syllabus_unavailable"
+        )
+        self.assertEqual(doc["course_code"], "ZZ 123")
+        self.assertEqual(doc["requested_term"], "20271")
+        self.assertEqual(doc["term_code"], "20271")
+        self.assertEqual(doc["available_terms"], ["20263"])
+        self.assertFalse(doc["historical"])
+
+        self.assertNotIn("grading_fact", doc)
+        self.assertNotIn("text", doc)
+
 
 
 class TestGradingAPI(GradingFixture, unittest.IsolatedAsyncioTestCase):

@@ -465,6 +465,24 @@ def retrieve_for_advisor(question, term_code=DEFAULT_TERM, top_k=5):
         )
 
         if selected_term is None:
+            if explicit_term is not None:
+                from rag.syllabus_lookup import syllabus_availability
+
+                availability = syllabus_availability(
+                    codes[0],
+                    explicit_term,
+                )
+
+                return [{
+                    "retrieval_method": "syllabus_unavailable",
+                    "source_type": "syllabus",
+                    "course_code": codes[0],
+                    "term_code": explicit_term,
+                    "requested_term": explicit_term,
+                    "available_terms": availability["available_terms"],
+                    "historical": False,
+                }]
+
             return []
 
         grading = lookup_grading_fact(question, codes[0], selected_term)

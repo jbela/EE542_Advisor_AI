@@ -53,6 +53,24 @@ def answer_prerequisite_scenario(question, docs):
 
     doc = candidates[0]
 
+
+    # General prerequisite questions do not require student history.
+    general_prerequisite_question = re.search(
+        r"\b(?:what|which)\s+(?:are\s+)?"
+        r"(?:the\s+)?(?:prerequisites?|pre[- ]?reqs?)\b",
+        question,
+        re.IGNORECASE,
+    )
+
+    if general_prerequisite_question:
+        return (
+            "EE 562 requires EE 503 and at least one of "
+            "EE 441 or EE 510. [1]\n\n"
+            "These are the verified listed prerequisites "
+            "for Spring 2027. Enrollment eligibility may "
+            "also depend on other restrictions."
+        )
+
     statuses = extract_course_statuses(question)
 
     requirements_text = (

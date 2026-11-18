@@ -40,6 +40,7 @@ def _response_sources(docs):
             "document_id": doc.get("document_id"),
             "course_code": doc.get("course_code"),
             "source_type": doc.get("source_type"),
+            "instructor": doc.get("instructor"),
             "section_label": doc.get("section_label"),
             "source_file": doc.get("source_file"),
             "page_number": doc.get("page_number"),
@@ -60,6 +61,39 @@ async def ask(data: Question):
     if not docs:
         return {
             "answer": "I could not find a verified USC source for this question. Please check with an academic advisor or the relevant USC office.",
+            "sources": [],
+            "status": "review_required",
+        }
+
+    if (
+        len(docs) == 1
+        and docs[0].get("retrieval_method") == "syllabus_unavailable"
+    ):
+        doc = docs[0]
+
+        course = doc["course_code"]
+        requested = format_term(doc["requested_term"])
+        available = doc.get("available_terms", [])
+
+        answer = (
+            f"I don't have an imported {course} syllabus "
+            f"for {requested}, so I cannot verify its "
+            "course-specific policies or requirements."
+        )
+
+        if available:
+            semesters = ", ".join(
+                format_term(term) for term in available
+            )
+
+            answer += (
+                f"\n\nImported syllabi are available for: "
+                f"{semesters}. Their policies may differ "
+                "from the requested semester."
+            )
+
+        return {
+            "answer": answer,
             "sources": [],
             "status": "review_required",
         }

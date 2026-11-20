@@ -6,10 +6,17 @@ from pydantic import BaseModel, Field
 import re
 
 from backend.rag_service import get_context, format_term
+<<<<<<< HEAD
 from backend.prerequisite_service import answer_prerequisite_scenario
 from rag.syllabus_grading_comparison import compare_grading_profiles
 from rag.course_lookup import extract_course_codes
 from rag.advisor_retrieval import extract_semester
+=======
+from backend.prerequisite_service import assess_prerequisite_scenario
+from backend.student_question import is_personal_prerequisite, target_course
+from backend.answer_quality import answer_exact_prerequisites, check_citations
+from rag.evidence_sufficiency import classify_evidence
+>>>>>>> f32b1f5 (Rebasing main)
 
 app = FastAPI(title="USC Advisor AI Backend")
 
@@ -54,6 +61,7 @@ def _response_sources(docs):
 
 @app.post("/ask")
 async def ask(data: Question):
+<<<<<<< HEAD
     question = data.question
 
     course_codes = extract_course_codes(question)
@@ -102,6 +110,15 @@ async def ask(data: Question):
             "sources": [],
             "status": "review_required",
         }
+=======
+    # Normalize only clear, personal prerequisite intents for retrieval.
+    # The RAG router still decides how to retrieve the canonical question.
+    retrieval_question = data.question
+    if is_personal_prerequisite(data.question):
+        code = target_course(data.question)
+        if code:
+            retrieval_question = f"What are the prerequisites for {code}?"
+>>>>>>> f32b1f5 (Rebasing main)
     try:
         docs = get_context(retrieval_question, term_code=data.term_code, top_k=5)
     except (FileNotFoundError, RuntimeError, ValueError) as exc:
@@ -203,6 +220,7 @@ async def ask(data: Question):
             "status": "review_required",
             "decision_status": "evidence_available",
             "invalid_citations": [],
+<<<<<<< HEAD
         }
 
     # History is a collected structured fact. Do not let the LLM choose
@@ -222,6 +240,8 @@ async def ask(data: Question):
             "status": "review_required",
             "decision_status": "evidence_available",
             "invalid_citations": [],
+=======
+>>>>>>> f32b1f5 (Rebasing main)
         }
 
     # Complete catalogs are structured facts, not LLM-generated answers.
@@ -454,6 +474,7 @@ async def ask(data: Question):
         raise HTTPException(status_code=502, detail="LLM service failed") from exc
 
     answer, invalid = check_citations(answer, docs)
+<<<<<<< HEAD
     coverage = citation_coverage(
         answer, docs, required=requires_source_citations(data.question, docs)
     )
@@ -470,6 +491,8 @@ async def ask(data: Question):
             "with a verifiable source reference. Please review the sources "
             "below or ask the appropriate USC office."
         )
+=======
+>>>>>>> f32b1f5 (Rebasing main)
     sources = _response_sources(docs)
     return {
         "answer": answer,
@@ -478,5 +501,8 @@ async def ask(data: Question):
         "status": "review_required",
         "decision_status": "evidence_available",
         "invalid_citations": invalid,
+<<<<<<< HEAD
         **coverage,
+=======
+>>>>>>> f32b1f5 (Rebasing main)
     }

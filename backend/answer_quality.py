@@ -62,6 +62,7 @@ def answer_exact_prerequisites(question, docs):
     if doc.get("url"):
         statement += f" [{i}]"
     return statement
+<<<<<<< HEAD
 
 
 def requires_source_citations(question, docs):
@@ -105,3 +106,5 @@ def course_citation_issues(answer, docs):
         if not normalized.issubset(supported):
             issues.append(line.strip()[:150])
     return issues
+=======
+>>>>>>> f32b1f5 (Rebasing main)

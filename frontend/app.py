@@ -10,6 +10,7 @@ from zoneinfo import ZoneInfo
 import requests
 import streamlit as st
 
+
 # ----------------------------------
 # Page Configuration
 # ----------------------------------
@@ -34,6 +35,7 @@ USER_AVATAR = (
     str(TRAVELER_PATH) if TRAVELER_PATH.is_file() else "👤"
 )
 
+
 # ----------------------------------
 # USC Theme
 # ----------------------------------
@@ -51,7 +53,6 @@ st.markdown(
             background-color: var(--usc-bg);
         }
 
-        /* Reduce excess space above content */
         .block-container {
             padding-top: 3rem;
             padding-bottom: 2rem;
@@ -62,14 +63,12 @@ st.markdown(
             color: var(--usc-cardinal) !important;
         }
 
-        /* Sidebar */
         section[data-testid="stSidebar"] .stButton button p {
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
         }
 
-        /* Buttons */
         .stButton > button {
             border-radius: 9px;
             border: 1px solid #DED6CE;
@@ -95,7 +94,6 @@ st.markdown(
             background-color: #750000 !important;
         }
 
-        /* Inline citation chips */
         .usc-sources-row {
             display: flex;
             align-items: center;
@@ -130,13 +128,24 @@ st.markdown(
             white-space: nowrap;
         }
 
+
+        /* Syllabus document citations */
+        .usc-syllabus-chip {
+            max-width: 100%;
+            white-space: normal;
+            overflow: visible;
+            text-overflow: clip;
+            line-height: 1.5;
+            overflow-wrap: anywhere;
+            cursor: default;
+        }
+
         .usc-source-chip:hover {
             background-color: #FFF5F0;
             border-color: #990000;
             color: #990000 !important;
         }
 
-        /* Align chat headings with avatar */
         [data-testid="stChatMessage"] h3 {
             margin-top: 0 !important;
             padding-top: 0 !important;
@@ -145,12 +154,10 @@ st.markdown(
             line-height: 1.25 !important;
         }
 
-        /* Adjust Tommy avatar position */
         [data-testid="stChatMessageAvatar"]:has(img) {
             margin-top: 6px;
         }
 
-        /* Chat cards */
         [data-testid="stChatMessage"] {
             background-color: white;
             border: 1px solid var(--usc-border);
@@ -158,7 +165,6 @@ st.markdown(
             padding: 0.7rem;
         }
 
-        /* Tommy chat avatar */
         [data-testid="stChatMessageAvatar"] {
             background-color: transparent !important;
             border: none !important;
@@ -172,7 +178,6 @@ st.markdown(
             background-color: transparent;
         }
 
-        /* Chat input */
         [data-testid="stChatInput"] {
             border-radius: 12px;
         }
@@ -181,7 +186,6 @@ st.markdown(
             background-color: var(--usc-bg);
         }
 
-        /* Hide deploy button if present */
         .stAppDeployButton,
         [data-testid="stAppDeployButton"] {
             display: none !important;
@@ -194,7 +198,7 @@ st.markdown(
         hr {
             border-color: var(--usc-border);
         }
-        /* Inline Expand / Collapse control */
+
         [class*="st-key-answer_toggle_"] button {
             background: transparent !important;
             border: none !important;
@@ -222,6 +226,7 @@ st.markdown(
     """,
     unsafe_allow_html=True,
 )
+
 
 def toggle_answer(state_key):
     st.session_state[state_key] = not st.session_state.get(
@@ -259,6 +264,7 @@ def display_assistant_answer(answer: str, state_key: str):
         on_click=toggle_answer,
         args=(state_key,),
     )
+
 
 # ----------------------------------
 # Session State
@@ -320,6 +326,7 @@ def new_chat():
 def open_chat(chat_id):
     st.session_state.active_chat_id = chat_id
 
+
 # ----------------------------------
 # FastAPI Integration
 # ----------------------------------
@@ -368,6 +375,7 @@ def get_api_response(question: str) -> dict:
             "status": "error",
         }
 
+
 # ----------------------------------
 # Sidebar
 # ----------------------------------
@@ -389,6 +397,7 @@ with st.sidebar:
 
         if len(title) > 23:
             title = title[:23] + "..."
+
         created_at = chat_data.get("created_at")
         date_prefix = ""
 
@@ -451,19 +460,26 @@ with button_col:
         new_chat()
         st.rerun()
 
+
 # ----------------------------------
 # Suggested Questions
-# Always visible, even after chatting
 # ----------------------------------
 st.markdown("**Suggested Questions**")
 
 example_questions = [
-    ("Spring 2027 EE Courses",
-     "What EE courses are offered in Spring 2027?"),
-    ("International Student Enrollment",
-     "What is USC's minimum full-time enrollment for international graduate students?"),
-    ("D-Clearance Guidance",
-     "How does D-Clearance work?"),
+    (
+        "Spring 2027 EE Courses",
+        "What EE courses are offered in Spring 2027?",
+    ),
+    (
+        "International Student Enrollment",
+        "What is USC's minimum full-time enrollment for "
+        "international graduate students?",
+    ),
+    (
+        "D-Clearance Guidance",
+        "How does D-Clearance work?",
+    ),
 ]
 
 columns = st.columns(3, gap="small")
@@ -531,7 +547,6 @@ for message_index, message in enumerate(messages):
         else:
             st.markdown(content)
 
-        # Display citation chips for assistant messages
         if message["role"] == "assistant":
             sources = message.get("sources") or []
             status = message.get("status", "unknown")
@@ -545,25 +560,24 @@ for message_index, message in enumerate(messages):
             for i, source in enumerate(sources, start=1):
                 if not isinstance(source, dict):
                     continue
-                # Display local syllabus sources without a web link.
-                if (
-                    source.get("source_type") == "syllabus"
-                    and not source.get("url")
-                ):
+
+
+                # Syllabi: one non-clickable citation per document.
+                if source.get("source_type") == "syllabus":
                     title = str(
                         source.get("title") or "Course syllabus"
                     )
                     course = str(
                         source.get("course_code") or "Syllabus"
                     )
-                    page = source.get("page_number")
+                    term = str(source.get("term_code") or "")
+                    instructor = source.get("instructor")
 
                     source_key = (
                         "syllabus",
                         source.get("document_id")
                         or source.get("source_file")
-                        or title,
-                        page,
+                        or (course, term, title),
                     )
 
                     if source_key in seen_sources:
@@ -571,20 +585,44 @@ for message_index, message in enumerate(messages):
 
                     seen_sources.add(source_key)
 
-                    page_label = (
-                        f" · p. {page}"
-                        if isinstance(page, int) and page > 0
-                        else ""
-                    )
-                    label = course + page_label
-                    tooltip = title + page_label
+                    seasons = {
+                        "1": "Spring",
+                        "2": "Summer",
+                        "3": "Fall",
+                    }
+
+                    if (
+                        len(term) == 5
+                        and term[:4].isdigit()
+                        and term[-1] in seasons
+                    ):
+                        semester = (
+                            f"{seasons[term[-1]]} {term[:4]}"
+                        )
+                    else:
+                        semester = "Semester unknown"
+
+
+                    label = f"{course} | {semester} Syllabus"
+
+                    if instructor:
+                        label += f" | Prof. {instructor}"
+
+                    section = source.get("section_label")
+
+                    if section and section != "Unspecified":
+                        label += f" | Section {section}"
+
 
                     source_chips.append(
-                        f'<span class="usc-source-chip" '
-                        f'title="{escape(tooltip, quote=True)}">'
+                        f'<span class="usc-source-chip usc-syllabus-chip" '
+                        f'title="{escape(title, quote=True)}">'
                         f'{escape(label)}</span>'
                     )
+
                     continue
+
+                # Courses and policies: clickable links.
                 url = source.get("url")
 
                 if not isinstance(url, str):
@@ -606,10 +644,9 @@ for message_index, message in enumerate(messages):
                     source.get("title") or f"Source {i}"
                 )
 
-                # Show repeated chunks from the same source only once.
                 source_key = (
                     parsed._replace(fragment="").geturl(),
-                    str(source.get("title") or "").strip(),
+                    title.strip(),
                 )
 
                 if source_key in seen_sources:
@@ -617,9 +654,8 @@ for message_index, message in enumerate(messages):
 
                 seen_sources.add(source_key)
 
-                # Short label, full title on hover
                 label = (
-                    title[:21] + "…"
+                    title[:21] + "..."
                     if len(title) > 22
                     else title
                 )
@@ -630,7 +666,7 @@ for message_index, message in enumerate(messages):
                     f'title="{escape(title, quote=True)}" '
                     f'target="_blank" '
                     f'rel="noopener noreferrer">'
-                    f'↗ {escape(label)}</a>'
+                    f'&#8599; {escape(label)}</a>'
                 )
 
             if source_chips:
@@ -650,6 +686,7 @@ for message_index, message in enumerate(messages):
                 st.caption(
                     "No supporting sources available yet."
                 )
+
 
 # ----------------------------------
 # Chat Input
@@ -679,7 +716,6 @@ if prompt:
         "content": prompt,
     })
 
-    # Display the question before waiting for the API.
     with st.chat_message("user", avatar=USER_AVATAR):
         st.markdown(prompt)
 

@@ -18,6 +18,8 @@ def main(argv=None):
     parser.add_argument("--course", required=True)
     parser.add_argument("--term", required=True)
     parser.add_argument("--section", default="Unspecified")
+    parser.add_argument("--instructor", default=None)
+    parser.add_argument("--url", default=None)
     parser.add_argument("--overwrite", action="store_true")
     args = parser.parse_args(argv)
 
@@ -77,10 +79,11 @@ def main(argv=None):
         "term_code": args.term,
         "section_label": section_label,
         "source_file": pdf_path.name,
-        "url": None,
+        "url": args.url,
         "file_hash": hashlib.sha256(pdf_path.read_bytes()).hexdigest(),
         "page_count": len(pages),
         "pages": pages,
+        "instructor": args.instructor,
     }
 
     output_path.parent.mkdir(parents=True, exist_ok=True)

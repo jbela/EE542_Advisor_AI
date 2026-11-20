@@ -247,6 +247,7 @@ def load_syllabus_documents():
                     "course_code": data["course_code"],
                     "term_code": data["term_code"],
                     "section_label": data["section_label"],
+                    "instructor": data.get("instructor"),
                     "source_file": data["source_file"],
                     "page_number": page_number,
                 })

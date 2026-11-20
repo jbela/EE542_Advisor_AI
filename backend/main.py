@@ -5,7 +5,10 @@ from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel, Field
 
 from backend.rag_service import get_context, format_term
-from backend.prerequisite_service import answer_prerequisite_scenario
+from backend.prerequisite_service import assess_prerequisite_scenario
+from backend.student_question import is_personal_prerequisite, target_course
+from backend.answer_quality import answer_exact_prerequisites, check_citations
+from rag.evidence_sufficiency import classify_evidence
 
 app = FastAPI(title="USC Advisor AI Backend")
 
@@ -50,19 +53,61 @@ def _response_sources(docs):
 
 @app.post("/ask")
 async def ask(data: Question):
+    # Normalize only clear, personal prerequisite intents for retrieval.
+    # The RAG router still decides how to retrieve the canonical question.
+    retrieval_question = data.question
+    if is_personal_prerequisite(data.question):
+        code = target_course(data.question)
+        if code:
+            retrieval_question = f"What are the prerequisites for {code}?"
     try:
-        docs = get_context(data.question, term_code=data.term_code, top_k=5)
+        docs = get_context(retrieval_question, term_code=data.term_code, top_k=5)
     except (FileNotFoundError, RuntimeError, ValueError) as exc:
         raise HTTPException(
             status_code=503,
             detail=f"Academic retrieval is unavailable: {exc}",
         ) from exc
 
+    decision = classify_evidence(data.question, docs)
+    decision_status = decision["decision_status"]
+
+    # Advising approvals and guarantees are not LLM decisions.
+    responses = {
+        "no_enrollment_guarantee": (
+            "Meeting listed prerequisites does not guarantee enrollment. "
+            "Registration may also depend on clearance, restrictions, and open seats; "
+            "confirm with the responsible USC office."
+        ),
+        "advisor_verification_required": (
+            "I can't approve a waiver, substitution, or transfer equivalency. "
+            "Please ask the authorized USC department or advisor to verify the decision."
+        ),
+        "student_context_required": (
+            "To suggest a personalized course plan, please share your degree program, "
+            "courses already completed, academic interests, and intended semester. "
+            "An advisor should confirm final degree requirements."
+        ),
+        "future_availability_unconfirmed": (
+            "The available sources do not confirm that this course will be offered "
+            "in the requested future semester. Historical listings cannot guarantee future availability."
+        ),
+    }
+    if decision_status in responses:
+        return {
+            "answer": responses[decision_status],
+            "sources": _response_sources(docs),
+            "status": "review_required",
+            "decision_status": decision_status,
+            "invalid_citations": [],
+        }
+
     if not docs:
         return {
-            "answer": "I could not find a verified USC source for this question. Please check with an academic advisor or the relevant USC office.",
+            "answer": "I could not find verified USC evidence for this question. Please check with an academic advisor or the relevant USC office.",
             "sources": [],
             "status": "review_required",
+            "decision_status": "course_not_found",
+            "invalid_citations": [],
         }
 
     if (
@@ -98,16 +143,24 @@ async def ask(data: Question):
             "status": "review_required",
         }
 
-    prerequisite_answer = answer_prerequisite_scenario(
-        data.question,
-        docs,
-    )
-
-    if prerequisite_answer is not None:
+    prerequisite = assess_prerequisite_scenario(data.question, docs)
+    if prerequisite is not None:
         return {
-            "answer": prerequisite_answer,
+            "answer": prerequisite["answer"],
             "sources": _response_sources(docs),
             "status": "review_required",
+            "decision_status": prerequisite["decision_status"],
+            "invalid_citations": [],
+        }
+
+    direct = answer_exact_prerequisites(data.question, docs)
+    if direct is not None:
+        return {
+            "answer": direct,
+            "sources": _response_sources(docs),
+            "status": "review_required",
+            "decision_status": "evidence_available",
+            "invalid_citations": [],
         }
 
     # Complete catalogs are structured facts, not LLM-generated answers.
@@ -135,6 +188,8 @@ async def ask(data: Question):
             "answer": answer,
             "sources": _response_sources(docs),
             "status": "review_required",
+            "decision_status": "evidence_available",
+            "invalid_citations": [],
         }
 
 
@@ -150,6 +205,8 @@ async def ask(data: Question):
                 "answer": doc["text"],
                 "sources": [],
                 "status": "review_required",
+                "decision_status": "evidence_unavailable",
+                "invalid_citations": [],
             }
 
     # Reviewed grading facts are rendered directly, not reinterpreted by an LLM.
@@ -170,7 +227,20 @@ async def ask(data: Question):
                 "answer": answer,
                 "sources": _response_sources(docs),
                 "status": "review_required",
+                "decision_status": "evidence_available",
+                "invalid_citations": [],
             }
+
+    if len(docs) == 1 and not docs[0].get("url") and docs[0].get("retrieval_method") in (
+        "historical_catalog", "availability", "comparison", "history"
+    ):
+        return {
+            "answer": docs[0]["text"],
+            "sources": [],
+            "status": "review_required",
+            "decision_status": "evidence_unavailable",
+            "invalid_citations": [],
+        }
 
     context = "\n\n".join(
         f"[{i}] {doc['title']}\n{doc['text']}"
@@ -256,6 +326,13 @@ async def ask(data: Question):
                 "and verified structured evidence is provided. "
                 "A missing prerequisite field does not mean that a course "
                 "has no prerequisites. "
+                "Respond in clear student-friendly language with the answer first. "
+                "Avoid repeating the question, listing unrelated course details, "
+                "or including raw JSON and internal data labels. "
+                "Differentiate a course listing from a course being open for registration. "
+                "Never state that missing data means a requirement does not exist. "
+                "If the request asks for a personal decision, do not invent "
+                "a degree plan or decide eligibility from incomplete information. "
 
             ),
         },
@@ -282,10 +359,13 @@ async def ask(data: Question):
     except (httpx.HTTPError, KeyError, ValueError) as exc:
         raise HTTPException(status_code=502, detail="LLM service failed") from exc
 
+    answer, invalid = check_citations(answer, docs)
     sources = _response_sources(docs)
     return {
         "answer": answer,
         "sources": sources,
         # Citation presence alone is not proof that the answer is supported.
         "status": "review_required",
+        "decision_status": "evidence_available",
+        "invalid_citations": invalid,
     }

@@ -91,51 +91,51 @@ class TestVerifiedRequirements(unittest.TestCase):
         )
 
 
+    def _course_fixture(self, directory):
+        """Use a minimal collected snapshot; Git excludes generated datasets."""
+        records = {
+            "term_code": "20271",
+            "courses": [
+                {"course_code": "EE 562", "title": "Random Processes in Engineering", "prerequisites_display": None},
+                {"course_code": "EE 597", "title": "Wireless Networks", "prerequisites_display": None},
+            ],
+        }
+        (directory / "ee_20271.json").write_text(json.dumps(records), encoding="utf-8")
+
     def test_ee562_nested_prerequisites(self):
-        from rag.course_lookup import lookup_course
+        from rag import course_lookup
 
-        course = lookup_course("EE 562", "20271")
+        with tempfile.TemporaryDirectory() as temp:
+            directory = Path(temp)
+            self._course_fixture(directory)
+            with patch.object(course_lookup, "COURSES_DIR", directory):
+                course = course_lookup.lookup_course("EE 562", "20271")
+
         self.assertIsNotNone(course)
-
         requirements = course["prerequisites_display"]
-
         self.assertEqual(requirements["operator"], "AND")
         self.assertEqual(len(requirements["groups"]), 2)
-
-        self.assertEqual(
-            requirements["groups"][0],
-            {
-                "operator": "SINGLE",
-                "courses": ["EE 503"]
-            }
-        )
-
-        self.assertEqual(
-            requirements["groups"][1],
-            {
-                "operator": "OR",
-                "courses": ["EE 441", "EE 510"],
-                "required_courses": 1
-            }
-        )
-
-        self.assertEqual(
-            course["prerequisite_verification"]["status"],
-            "verified"
-        )
+        self.assertEqual(requirements["groups"][0], {
+            "operator": "SINGLE", "courses": ["EE 503"]
+        })
+        self.assertEqual(requirements["groups"][1], {
+            "operator": "OR", "courses": ["EE 441", "EE 510"], "required_courses": 1
+        })
+        self.assertEqual(course["prerequisite_verification"]["status"], "verified")
 
     def test_ee562_verification_does_not_change_ee597(self):
-        from rag.course_lookup import lookup_course
+        from rag import course_lookup
 
-        course = lookup_course("EE 597", "20271")
+        with tempfile.TemporaryDirectory() as temp:
+            directory = Path(temp)
+            self._course_fixture(directory)
+            with patch.object(course_lookup, "COURSES_DIR", directory):
+                course = course_lookup.lookup_course("EE 597", "20271")
 
-        self.assertEqual(
-            course["prerequisites_display"],
-            {
-                "operator": "AND",
-                "courses": ["EE 450", "EE 503"]
-            }
-        )
+        self.assertIsNotNone(course)
+        self.assertEqual(course["prerequisites_display"], {
+            "operator": "AND", "courses": ["EE 450", "EE 503"]
+        })
 
 
 if __name__ == "__main__":

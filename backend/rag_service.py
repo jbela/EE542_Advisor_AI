@@ -108,6 +108,7 @@ def _course_record(doc, method="exact"):
         "requested_term": requested,
         "historical": historical,
         "requested_term_checked": checked,
+        "availability_status": doc.get("availability_status"),
         "retrieval_method": method,
         "prerequisite_verification": verification,
         "prerequisites_structured": doc.get("prerequisites"),
@@ -246,6 +247,7 @@ def normalize_special(doc):
             "requested_term": requested,
             "historical": bool(doc.get("historical", False)),
             "requested_term_checked": checked,
+            "availability_status": status,
             "retrieval_method": method,
         }
 

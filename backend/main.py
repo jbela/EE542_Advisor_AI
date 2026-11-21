@@ -7,8 +7,11 @@ from pydantic import BaseModel, Field
 from backend.rag_service import get_context, format_term
 from backend.prerequisite_service import assess_prerequisite_scenario
 from backend.student_question import is_personal_prerequisite, target_course
-from backend.answer_quality import answer_exact_prerequisites, check_citations
+from backend.answer_quality import (answer_exact_prerequisites, check_citations,
+                                    requires_source_citations, citation_coverage,
+                                    course_citation_issues)
 from rag.evidence_sufficiency import classify_evidence
+from rag.advisor_retrieval import choose_retrieval_method
 
 app = FastAPI(title="USC Advisor AI Backend")
 
@@ -163,6 +166,25 @@ async def ask(data: Question):
             "invalid_citations": [],
         }
 
+    # History is a collected structured fact. Do not let the LLM choose
+    # an arbitrary semester when multiple history records are retrieved.
+    if docs and all(d.get("retrieval_method") == "history" for d in docs) and \
+            "last offered" in data.question.lower():
+        latest = max(docs, key=lambda d: str(d.get("term_code") or ""))
+        code = latest.get("course_code") or "The course"
+        term = format_term(latest.get("term_code"))
+        citation_index = docs.index(latest) + 1
+        cite = f" [{citation_index}]" if latest.get("url") else ""
+        answer = (f"The latest collected listing for {code} is {term}.{cite} "
+                  "This only reflects collected course records and does not establish future availability.")
+        return {
+            "answer": answer,
+            "sources": _response_sources(docs),
+            "status": "review_required",
+            "decision_status": "evidence_available",
+            "invalid_citations": [],
+        }
+
     # Complete catalogs are structured facts, not LLM-generated answers.
     if (
         len(docs) == 1
@@ -268,6 +290,10 @@ async def ask(data: Question):
                 "or registration restrictions are absent. "
                 "If the source states 'Not specified in source record', explain "
                 "that prerequisite information is unavailable and do not assume none. "
+                "For personal immigration status, visa questions, and "
+                "disability accommodation approvals, explain only official "
+                "publicly documented processes; refer individual decisions "
+                "to the authorized campus office. Never promise an approval. "
                 "For academic policy questions, distinguish university-wide "
                 "requirements from department-specific procedures. "
                 "Do not generalize an individual department's rules to all USC departments. "
@@ -360,6 +386,22 @@ async def ask(data: Question):
         raise HTTPException(status_code=502, detail="LLM service failed") from exc
 
     answer, invalid = check_citations(answer, docs)
+    coverage = citation_coverage(
+        answer, docs, required=requires_source_citations(data.question, docs)
+    )
+    course_issues = course_citation_issues(answer, docs)
+    if course_issues:
+        # Detect an obvious wrong or missing course citation per named result.
+        # Do not present unsourced model-recommended courses as verified.
+        coverage["course_citation_issues"] = course_issues
+    if coverage["missing_citations"] or course_issues:
+        # The model supplied no usable source reference: avoid presenting
+        # an uncited factual answer as though it were verified.
+        answer = (
+            "I found related USC sources, but couldn't produce an answer "
+            "with a verifiable source reference. Please review the sources "
+            "below or ask the appropriate USC office."
+        )
     sources = _response_sources(docs)
     return {
         "answer": answer,
@@ -368,4 +410,5 @@ async def ask(data: Question):
         "status": "review_required",
         "decision_status": "evidence_available",
         "invalid_citations": invalid,
+        **coverage,
     }

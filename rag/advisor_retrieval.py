@@ -91,6 +91,24 @@ POLICY_PATTERN = re.compile(
     re.IGNORECASE,
 )
 
+# Procedural policy questions must not be routed to course discovery just
+# because they mention a specific course code.
+POLICY_PROCEDURE_PATTERN = re.compile(
+    r"\b(?:d[- ]?clearance|clearance request|reduced course load|"
+    r"academic accommodations?|disability accommodations?|accessibility|"
+    r"ois|international students?|visa|immigration|student status|"
+    r"leave of absence|registration deadlines?|academic policies|"
+    r"waivers?|substitutions?|transfer credit)\b",
+    re.IGNORECASE,
+)
+
+COURSE_SPECIFIC_FACT_PATTERN = re.compile(
+    r"\b(?:prerequisites?|pre[- ]?reqs?|corequisites?|restrictions?|"
+    r"requirements? for|eligible for|can i take|can i enroll|"
+    r"offered|availability|last offered)\b",
+    re.IGNORECASE,
+)
+
 COURSE_PATTERN = re.compile(
     r"\b(courses?|classes|syllab(?:us|i)|topics?|curriculum|"
     r"instructors?|prerequisites?|corequisites?|electives?)\b",
@@ -151,6 +169,11 @@ def choose_retrieval_method(question):
     """
 
     codes = extract_course_codes(question)
+
+    # Route procedural policies first, including named-course D-Clearance.
+    # 'What are the prerequisites for EE 597?' remains an exact lookup.
+    if POLICY_PROCEDURE_PATTERN.search(question):
+        return "policy"
 
     if re.search(
         r"\b(substitute|substitution|transfer credit|"
@@ -583,8 +606,10 @@ def retrieve_for_advisor(question, term_code=DEFAULT_TERM, top_k=5):
             top_k=top_k,
         )
 
-        return [
-            {
+        enriched = []
+        for result in results:
+            record = lookup_course(result.get("course_code", ""), term_code)
+            item = {
                 **result,
                 "retrieval_method": "semantic_bge",
                 "requested_term": term_code,
@@ -592,8 +617,12 @@ def retrieve_for_advisor(question, term_code=DEFAULT_TERM, top_k=5):
                 "requested_term_checked": True,
                 "source_url": result.get("url"),
             }
-            for result in results
-        ]
+            if record is not None:
+                # Catalog attributes are only attached to an exact-term record.
+                # Do not infer prerequisite eligibility from semantic similarity.
+                item["catalog_record"] = _course_evidence(record, term_code)
+            enriched.append(item)
+        return enriched
 
     # Other retrieval routes continue using MiniLM + BM25.
     # Keep the import lazy so exact lookups do not load embeddings.

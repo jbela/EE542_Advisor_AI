@@ -69,7 +69,6 @@ def assess_prerequisite_scenario(question, docs):
             "decision_status": "unknown",
         }
 
-<<<<<<< HEAD
     i, doc = candidates[0]
     term = format_term(doc.get("term_code"))
     rule = format_rule(doc["prerequisites_structured"])
@@ -107,51 +106,6 @@ def assess_prerequisite_scenario(question, docs):
         "answer": (conclusion + "\n\n" + rule_line +
                    "\n\nThis checks only the listed prerequisites based on your "
                    "reported courses; it does not guarantee registration eligibility."),
-=======
-    doc = candidates[0]
-
-
-    # General prerequisite questions do not require student history.
-    general_prerequisite_question = re.search(
-        r"\b(?:what|which)\s+(?:are\s+)?"
-        r"(?:the\s+)?(?:prerequisites?|pre[- ]?reqs?)\b",
-        question,
-        re.IGNORECASE,
-    )
-
-    if general_prerequisite_question:
-        return (
-            "EE 562 requires EE 503 and at least one of "
-            "EE 441 or EE 510. [1]\n\n"
-            "These are the verified listed prerequisites "
-            "for Spring 2027. Enrollment eligibility may "
-            "also depend on other restrictions."
-        )
-
-    statuses = extract_course_statuses(question)
-
-    requirements_text = (
-        "EE 562 requires EE 503 and at least one of "
-        "EE 441 or EE 510."
-    )
-    if statuses is None:
-        status = "unknown"
-        conclusion = "I couldn't reliably interpret which courses you've completed or haven't completed. Please list them explicitly so I can check the requirements."
-    else:
-        status = evaluate_prerequisites(
-            doc["prerequisites_structured"], statuses["completed"],
-            doc["prerequisite_verification"],
-            not_completed_courses=statuses["not_completed"],
-        )
-        if status == "satisfied":
-            conclusion = f"Based on the courses you reported completing, you satisfy the verified listed prerequisites for {code} in {term}. [{i}]"
-        elif status == "not_satisfied":
-            conclusion = f"Based on what you reported completing and not completing, you have not satisfied all verified listed prerequisites for {code} in {term}. [{i}]"
-        else:
-            conclusion = f"I cannot determine whether you satisfy all listed prerequisites for {code}, because some course-completion information is missing or uncertain. [{i}]"
-    return {
-        "answer": conclusion + "\n\n" + rule_line + "\n\nThis checks only the listed prerequisites based on your reported courses; it does not guarantee registration eligibility.",
->>>>>>> f32b1f5 (Rebasing main)
         "decision_status": status,
     }
 

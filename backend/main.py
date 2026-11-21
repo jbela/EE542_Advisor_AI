@@ -14,9 +14,11 @@ from rag.advisor_retrieval import extract_semester
 =======
 from backend.prerequisite_service import assess_prerequisite_scenario
 from backend.student_question import is_personal_prerequisite, target_course
-from backend.answer_quality import answer_exact_prerequisites, check_citations
+from backend.answer_quality import (answer_exact_prerequisites, check_citations,
+                                    requires_source_citations, citation_coverage,
+                                    course_citation_issues)
 from rag.evidence_sufficiency import classify_evidence
->>>>>>> f32b1f5 (Rebasing main)
+from rag.advisor_retrieval import choose_retrieval_method
 
 app = FastAPI(title="USC Advisor AI Backend")
 
@@ -220,7 +222,6 @@ async def ask(data: Question):
             "status": "review_required",
             "decision_status": "evidence_available",
             "invalid_citations": [],
-<<<<<<< HEAD
         }
 
     # History is a collected structured fact. Do not let the LLM choose
@@ -240,8 +241,6 @@ async def ask(data: Question):
             "status": "review_required",
             "decision_status": "evidence_available",
             "invalid_citations": [],
-=======
->>>>>>> f32b1f5 (Rebasing main)
         }
 
     # Complete catalogs are structured facts, not LLM-generated answers.
@@ -474,7 +473,6 @@ async def ask(data: Question):
         raise HTTPException(status_code=502, detail="LLM service failed") from exc
 
     answer, invalid = check_citations(answer, docs)
-<<<<<<< HEAD
     coverage = citation_coverage(
         answer, docs, required=requires_source_citations(data.question, docs)
     )
@@ -491,8 +489,6 @@ async def ask(data: Question):
             "with a verifiable source reference. Please review the sources "
             "below or ask the appropriate USC office."
         )
-=======
->>>>>>> f32b1f5 (Rebasing main)
     sources = _response_sources(docs)
     return {
         "answer": answer,
@@ -501,8 +497,5 @@ async def ask(data: Question):
         "status": "review_required",
         "decision_status": "evidence_available",
         "invalid_citations": invalid,
-<<<<<<< HEAD
         **coverage,
-=======
->>>>>>> f32b1f5 (Rebasing main)
     }

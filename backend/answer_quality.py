@@ -62,3 +62,46 @@ def answer_exact_prerequisites(question, docs):
     if doc.get("url"):
         statement += f" [{i}]"
     return statement
+
+
+def requires_source_citations(question, docs):
+    """Only answers grounded in retrieved public facts require citations."""
+    if not docs:
+        return False
+    methods = {d.get("retrieval_method") for d in docs}
+    return bool(methods & {"hybrid", "semantic_bge"})
+
+
+def citation_coverage(answer, docs, required=False):
+    """Check citation presence/validity, not whether claims are entailed."""
+    cited = {int(x) for x in CITATION.findall(answer)}
+    valid = {i for i, doc in enumerate(docs, 1) if doc.get("url")}
+    return {
+        "citations_required": bool(required),
+        "missing_citations": bool(required and not (cited & valid)),
+        "cited_source_count": len(cited & valid),
+    }
+
+
+def course_citation_issues(answer, docs):
+    """Spot obvious uncited/miscited course lines in BGE recommendation answers.
+
+    This is a conservative structural check, not semantic fact verification.
+    It only checks lines that visibly name a retrieved course code.
+    """
+    if not any(d.get("retrieval_method") == "semantic_bge" for d in docs):
+        return []
+    issues = []
+    for line in answer.splitlines():
+        codes = set(re.findall(r"\b[A-Z]{2,5}\s*[- ]?\s*\d{3}[A-Z]?\b", line, re.I))
+        if not codes:
+            continue
+        normalized = {re.sub(r"[^A-Z0-9]", "", c.upper()) for c in codes}
+        cited = {int(i) for i in CITATION.findall(line)}
+        supported = {
+            re.sub(r"[^A-Z0-9]", "", str(d.get("course_code") or "").upper())
+            for index, d in enumerate(docs, 1) if index in cited
+        }
+        if not normalized.issubset(supported):
+            issues.append(line.strip()[:150])
+    return issues

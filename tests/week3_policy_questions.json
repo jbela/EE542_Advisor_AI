@@ -1,0 +1,52 @@
+[
+  {
+    "id": "D-Clearance",
+    "question": "What is D-Clearance at USC?",
+    "expected_route": "policy"
+  },
+  {
+    "id": "D-Clearance procedure",
+    "question": "How do I request D-Clearance for EE 597?",
+    "expected_route": "policy"
+  },
+  {
+    "id": "International full-time",
+    "question": "What does USC say about full-time enrollment for international graduate students?",
+    "expected_route": "policy"
+  },
+  {
+    "id": "International reduced load",
+    "question": "Can an F-1 student take fewer units in the final semester?",
+    "expected_route": "policy"
+  },
+  {
+    "id": "International referral",
+    "question": "Can I drop below full-time enrollment without OIS approval?",
+    "expected_route": "policy"
+  },
+  {
+    "id": "Registration calendar",
+    "question": "Where can I find USC registration deadlines?",
+    "expected_route": "policy"
+  },
+  {
+    "id": "Graduate degree",
+    "question": "Where do I find MS Electrical Engineering degree requirements?",
+    "expected_route": "policy"
+  },
+  {
+    "id": "Accessibility",
+    "question": "Where do I request disability accommodations at USC?",
+    "expected_route": "policy"
+  },
+  {
+    "id": "No approval guarantee",
+    "question": "Can you guarantee my reduced course load will be approved?",
+    "expected_route": "policy"
+  },
+  {
+    "id": "Department scope",
+    "question": "Does EE department D-Clearance procedure apply to every USC department?",
+    "expected_route": "policy"
+  }
+]

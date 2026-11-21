@@ -16,6 +16,7 @@ import streamlit as st
 # ----------------------------------
 st.set_page_config(
     page_title="USC Trojan Guide",
+    page_title="USC Trojan Guide",
     page_icon="🎓",
     layout="wide",
     initial_sidebar_state="expanded",
@@ -719,7 +720,7 @@ if prompt:
     with st.chat_message("user", avatar=USER_AVATAR):
         st.markdown(prompt)
 
-    with st.spinner("USC Advisor AI is thinking..."):
+    with st.spinner("USC Trojan Guide is thinking..."):
         result = get_api_response(prompt)
 
     messages.append({

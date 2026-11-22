@@ -72,6 +72,38 @@ class TestGradingLookup(GradingFixture, unittest.TestCase):
         self.assertEqual(result["page_number"], 2)
         self.assertEqual(result["text"], "37% Final Project")
 
+    def test_canonical_name_with_full_source_label(self):
+        self.doc["pages"][0]["text"] = (
+            "Grading: 10% Reading assignments "
+            "(based on weekly summaries)"
+        )
+
+        self.reviewed["items"][0].update(
+            name="Reading assignments",
+            source_label=(
+                "Reading assignments "
+                "(based on weekly summaries)"
+            ),
+            aliases=["Reading"],
+            weight_percent=10,
+            source_quote=(
+                "10% Reading assignments "
+                "(based on weekly summaries)"
+            ),
+        )
+
+        self.save()
+
+        result = self.lookup(
+            "How much are Reading assignments worth in ZZ 123?"
+        )
+
+        self.assertIsNotNone(result)
+        self.assertEqual(
+            result["grading_fact"]["weight_percent"],
+            10,
+        )
+
     def test_alias(self):
         self.assertIsNotNone(self.lookup("How much is the Capstone worth in ZZ 123?"))
 

@@ -3,9 +3,13 @@ import os
 import httpx
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel, Field
+import re
 
 from backend.rag_service import get_context, format_term
 from backend.prerequisite_service import answer_prerequisite_scenario
+from rag.syllabus_grading_comparison import compare_grading_profiles
+from rag.course_lookup import extract_course_codes
+from rag.advisor_retrieval import extract_semester
 
 app = FastAPI(title="USC Advisor AI Backend")
 
@@ -50,6 +54,54 @@ def _response_sources(docs):
 
 @app.post("/ask")
 async def ask(data: Question):
+    question = data.question
+
+    course_codes = extract_course_codes(question)
+    requested_term = extract_semester(question)
+
+    comparison_requested = bool(
+        re.search(
+            r"\b(compare|comparison|differences?|versus|vs\.?)\b",
+            question,
+            re.IGNORECASE,
+        )
+    )
+
+    grading_requested = bool(
+        re.search(
+            r"\b(grading|grades?|grade adjustments?|"
+            r"grading policies|grading weights?)\b",
+            question,
+            re.IGNORECASE,
+        )
+    )
+
+    if (
+        comparison_requested
+        and grading_requested
+        and len(course_codes) >= 2
+        and requested_term is not None
+    ):
+        comparison = compare_grading_profiles(
+            course_codes,
+            requested_term,
+        )
+
+        if comparison is not None:
+            return comparison
+
+        return {
+            "answer": (
+                "I could not verify complete grading profiles for "
+                "all requested courses in this semester. "
+                "I cannot provide a reliable grading comparison "
+                "from the available reviewed records. "
+                "Please consult the relevant course syllabi "
+                "or instructors for confirmation."
+            ),
+            "sources": [],
+            "status": "review_required",
+        }
     try:
         docs = get_context(data.question, term_code=data.term_code, top_k=5)
     except (FileNotFoundError, RuntimeError, ValueError) as exc:
@@ -238,6 +290,35 @@ async def ask(data: Question):
                 "the requested information. "
                 "For simple factual questions, answer directly in "
                 "one or two short sentences. "
+
+                "When answering questions about a course syllabus, distinguish "
+                "formal prerequisites, listed course requirements, recommended "
+                "preparation, and skills used in assignments. Do not treat "
+                "recommended preparation as a formal prerequisite. "
+                "If a syllabus lists programming experience under requirements, "
+                "report that accurately without inventing an enrollment restriction. "
+                "For questions about generative AI tools such as ChatGPT, "
+                "do not assume that a general academic integrity statement "
+                "establishes permission or prohibition. If no explicit "
+                "generative AI usage policy is documented, state that the "
+                "available syllabus does not specify one and recommend "
+                "confirming with the instructor. "
+                "For syllabus comparisons, address every requested course "
+                "separately, use the correct semester for each, and compare "
+                "only facts supported by the corresponding syllabus. "
+                "Prefer a concise table or clearly separated sections for "
+                "grading comparisons. Include all relevant grading weights "
+                "when the sources provide them. "
+                "When comparing grading policies, check the retrieved "
+                "evidence for grade thresholds, discretionary adjustments, "
+                "participation rules, and late penalties before describing "
+                "differences. Never claim that a policy is absent unless "
+                "the available evidence explicitly establishes its absence. "
+                "If a policy is not found in the retrieved passages, say "
+                "that it could not be verified from those passages. "
+                "Do not contradict any explicit statement in the sources. "
+                "Do not substitute course catalog information for syllabus "
+                "grading policies. "
                 "For syllabus answers, mention the source semester briefly once. "
                 "Mention the section only when it is meaningful to the question; "
                 "never print 'Unspecified' or internal metadata labels. "
@@ -272,7 +353,7 @@ async def ask(data: Question):
                     "model": MODEL,
                     "messages": messages,
                     "stream": False,
-                    "options": {"num_predict": 350},
+                    "options": {"num_predict": 650},
                 },
             )
             response.raise_for_status()

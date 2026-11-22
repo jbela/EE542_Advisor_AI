@@ -11,7 +11,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 SYLLABI_DIR = ROOT / "data" / "processed" / "syllabi"
-GRADING_DIR = ROOT / "data" / "processed" / "syllabi_grading"
+GRADING_DIR = ROOT / "data" / "syllabus_poc" / "reviewed_grading"
 WEIGHT_QUESTION = re.compile(
     r"\b(percent(?:age)?|weight(?:ing)?|worth|how much)\b|%",
     re.IGNORECASE,
@@ -59,42 +59,68 @@ def lookup_grading_fact(question, course_code, term_code):
     for index, item in enumerate(reviewed.get("items", [])):
         if item.get("verified") is not True:
             continue
+
         name = item.get("name")
+        source_label = item.get("source_label") or name
         weight = item.get("weight_percent")
         page_number = item.get("page_number")
         quote = item.get("source_quote")
+
         if (
             not isinstance(name, str) or not name.strip()
+            or not isinstance(source_label, str)
+            or not source_label.strip()
             or type(weight) is not int or not 0 <= weight <= 100
             or type(page_number) is not int or page_number < 1
             or not isinstance(quote, str) or not quote.strip()
         ):
             continue
+
         aliases = [name] + [
-            a for a in item.get("aliases", []) if isinstance(a, str)
+            a for a in item.get("aliases", [])
+            if isinstance(a, str)
         ]
+
         if not any(
-            _phrase(a) and f" {_phrase(a)} " in question_words for a in aliases
+            _phrase(a)
+            and f" {_phrase(a)} " in question_words
+            for a in aliases
         ):
             continue
+
         page = next(
-            (p for p in doc.get("pages", [])
-             if p.get("page_number") == page_number),
+            (
+                p for p in doc.get("pages", [])
+                if p.get("page_number") == page_number
+            ),
             None,
         )
+
         if page is None:
             continue
+
         clean_quote = " ".join(quote.split())
-        if clean_quote not in " ".join(page.get("text", "").split()):
+        clean_page = " ".join(page.get("text", "").split())
+
+        if clean_quote not in clean_page:
             continue
-        # Require the assessment and its weight to be adjacent in the quote.
-        # This rejects using the attendance percentage for a final project.
-        item_name = r"\s+".join(re.escape(part) for part in name.split())
+
+        item_name = r"\s+".join(
+            re.escape(part)
+            for part in source_label.split()
+        )
+
         association = (
             rf"(?<![\w.]){weight}\s*%\s*{item_name}(?!\w)"
+            rf"|(?<!\w){item_name}\s*:\s*{weight}\s*%(?!\w)"
             rf"|(?<!\w){item_name}\s+{weight}(?![\d.%])"
         )
-        if not re.search(association, clean_quote, re.IGNORECASE):
+
+        if not re.search(
+            association,
+            clean_quote,
+            re.IGNORECASE,
+        ):
             continue
         matches.append({
             "chunk_id": f"{document_id}_grading_{index}",

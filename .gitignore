@@ -28,3 +28,6 @@ reports/*.csv
 
 # VS Code
 .vscode/
+
+.secrets/
+data/processed/advisor_updates/

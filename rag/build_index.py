@@ -52,6 +52,84 @@ def chunk_text(text, chunk_size=180, overlap=30):
     return chunks
 
 
+def chunk_syllabus_text(text, chunk_size=180, overlap=30):
+    """Split syllabus text at verified heading boundaries."""
+
+    import re
+
+    headings = [
+        "Course Description",
+        "Recommended Courses",
+        "Required Textbook",
+        "Other Requirements",
+        "Grading Policies",
+        "Grading",
+        "Preparation for Classes",
+        "Statement on Academic Integrity",
+        "Lecture Contents",
+        "Reading Assignments",
+        "Laboratory Assignments",
+        "Final Project",
+        "Project Demonstrations",
+        "Project Report",
+        "Class Participation",
+        "Special dates/times",
+        "Course Topics",
+    ]
+
+    heading_pattern = re.compile(
+        r"^("
+        + "|".join(
+            re.escape(h)
+            for h in sorted(headings, key=len, reverse=True)
+        )
+        + r")\s*:?\s*$",
+        re.IGNORECASE,
+    )
+
+    lines = text.splitlines()
+
+    sections = []
+    current_heading = "General"
+    current_lines = []
+
+    def save_section():
+        if current_lines:
+            section_text = "\n".join(current_lines).strip()
+
+            if section_text:
+                sections.append(
+                    (current_heading, section_text)
+                )
+
+    for line in lines:
+        stripped = line.strip()
+        match = heading_pattern.fullmatch(stripped)
+
+        if match:
+            save_section()
+            current_heading = match.group(1)
+            current_lines = [stripped]
+        else:
+            current_lines.append(line)
+
+    save_section()
+
+    results = []
+
+    for section_name, section_text in sections:
+        for chunk in chunk_text(
+            section_text,
+            chunk_size=chunk_size,
+            overlap=overlap,
+        ):
+            results.append({
+                "section": section_name,
+                "text": chunk,
+            })
+
+    return results
+
 # --------------------------------------------------
 # Process USC academic and policy documents
 # --------------------------------------------------
@@ -227,7 +305,9 @@ def load_syllabus_documents():
             if not text:
                 continue
 
-            for i, chunk in enumerate(chunk_text(text)):
+            for i, item in enumerate(chunk_syllabus_text(text)):
+                section_name = item["section"]
+                chunk = item["text"]
                 documents.append({
                     "chunk_id": (
                         f"{data['id']}_p{page_number}_{i}"
@@ -237,16 +317,19 @@ def load_syllabus_documents():
                     "text": (
                         f"Course: {data['course_code']}\n"
                         f"Source term: {data['term_code']}\n"
-                        f"Section: {data['section_label']}\n"
+                        f"Class section: {data['section_label']}\n"
+                        f"Syllabus topic: {section_name}\n"
                         f"Source: Syllabus, page {page_number}\n\n"
                         f"{chunk}"
                     ),
+                    "syllabus_section": section_name,
                     "url": data.get("url"),
                     "category": "course",
                     "source_type": "syllabus",
                     "course_code": data["course_code"],
                     "term_code": data["term_code"],
                     "section_label": data["section_label"],
+                    "instructor": data.get("instructor"),
                     "source_file": data["source_file"],
                     "page_number": page_number,
                 })

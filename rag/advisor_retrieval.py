@@ -19,11 +19,26 @@ from rag.course_lookup import (
 DEFAULT_TERM = "20271"
 
 SYLLABUS_CONTENT_PATTERN = re.compile(
-    r"\b(grading|grades?|percent(?:age)?|weight(?:ing)?|worth|"
+    r"\b("
+    r"grading|grades?|percent(?:age)?|weight(?:ing)?|worth|"
     r"final project|gold version|assignments?|late policy|"
-    r"late submissions?|attendance|quizzes|"
+    r"late submissions?|attendance|quizzes?|"
     r"learning objectives|topics?|textbooks?|"
-    r"office hours|ai policy)\b",
+    r"office hours|ai policy|"
+    r"generative\s+ai|ai\s+usage|"
+    r"artificial intelligence\s+(?:usage\s+)?policy|"
+    r"chatgpt|academic integrity|"
+    r"guarantee(?:s|d)?\s+(?:me\s+)?an?\s+[a-f][+-]?|"
+    r"score.*(?:an?\s+[a-f][+-]?)|"
+    r"python|c\+\+|c programming|programming experience|"
+    r"programming languages?|"
+    r"labs?|laborator(?:y|ies)|"
+    r"machine learning|deep learning|"
+    r"who teaches|who is the professor|"
+    r"who is the instructor|"
+    r"course materials?|required books?|"
+    r"recommended preparation"
+    r")\b",
     re.IGNORECASE,
 )
 
@@ -450,11 +465,14 @@ def retrieve_for_advisor(question, term_code=DEFAULT_TERM, top_k=5):
                 and find_syllabus_term(codes[0]) is not None
             )
         )
+
         and method not in (
             "availability",
             "history",
             "comparison",
+            "historical_catalog",
         )
+
     ):
         explicit_term = extract_semester(question)
 
@@ -465,6 +483,24 @@ def retrieve_for_advisor(question, term_code=DEFAULT_TERM, top_k=5):
         )
 
         if selected_term is None:
+            if explicit_term is not None:
+                from rag.syllabus_lookup import syllabus_availability
+
+                availability = syllabus_availability(
+                    codes[0],
+                    explicit_term,
+                )
+
+                return [{
+                    "retrieval_method": "syllabus_unavailable",
+                    "source_type": "syllabus",
+                    "course_code": codes[0],
+                    "term_code": explicit_term,
+                    "requested_term": explicit_term,
+                    "available_terms": availability["available_terms"],
+                    "historical": False,
+                }]
+
             return []
 
         grading = lookup_grading_fact(question, codes[0], selected_term)
@@ -476,16 +512,25 @@ def retrieve_for_advisor(question, term_code=DEFAULT_TERM, top_k=5):
                 "historical": selected_term != (explicit_term or term_code),
             }]
 
-        from rag.retrieve import retrieve
 
-        results = retrieve(
+        from rag.retrieve import retrieve
+        from rag.syllabus_reranker import rerank_syllabus
+
+        candidates = retrieve(
             question,
-            top_k=top_k,
+            top_k=max(top_k * 3, 15),
             category="course",
             term_code=selected_term,
             source_type="syllabus",
             course_codes=codes,
         )
+
+        results = rerank_syllabus(
+            question,
+            candidates,
+            top_k=top_k,
+        )
+
 
         return [
             {
@@ -514,6 +559,85 @@ def retrieve_for_advisor(question, term_code=DEFAULT_TERM, top_k=5):
             )
 
         return results[:top_k]
+
+
+    # Compare syllabus-specific information across courses.
+    if (
+        method == "comparison"
+        and len(codes) >= 2
+        and SYLLABUS_CONTENT_PATTERN.search(question)
+    ):
+        from rag.retrieve import retrieve
+        from rag.syllabus_reranker import rerank_syllabus
+
+        explicit_term = extract_semester(question)
+        results = []
+
+        for code in codes:
+            selected_term = find_syllabus_term(
+                code,
+                requested_term=explicit_term,
+                max_term=term_code,
+            )
+
+            if selected_term is None:
+                from rag.syllabus_lookup import syllabus_availability
+
+                availability = syllabus_availability(
+                    code,
+                    explicit_term or term_code,
+                )
+
+                results.append({
+                    "retrieval_method": "syllabus_unavailable",
+                    "source_type": "syllabus",
+                    "course_code": code,
+                    "term_code": explicit_term or term_code,
+                    "requested_term": explicit_term or term_code,
+                    "available_terms": availability["available_terms"],
+                    "historical": False,
+                })
+                continue
+
+            candidates = retrieve(
+                question,
+                top_k=15,
+                category="course",
+                term_code=selected_term,
+                source_type="syllabus",
+                course_codes=[code],
+            )
+
+            ranked = rerank_syllabus(
+                question,
+                candidates,
+                top_k=5,
+            )
+
+            if re.search(
+                r"\b(grading|grades?|grade policies|grading policies)\b",
+                question,
+                re.IGNORECASE,
+            ):
+                ranked = [
+                    doc for doc in ranked
+                    if str(doc.get("syllabus_section", "")).lower()
+                    in ("grading", "grading policies")
+                ]
+
+            ranked = ranked[:3]
+
+            for doc in ranked:
+                results.append({
+                    **doc,
+                    "retrieval_method": "hybrid",
+                    "requested_term": explicit_term or term_code,
+                    "historical": (
+                        selected_term != (explicit_term or term_code)
+                    ),
+                })
+
+        return results
 
     if method == "comparison":
         results = []

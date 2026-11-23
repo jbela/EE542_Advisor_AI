@@ -72,6 +72,38 @@ class TestGradingLookup(GradingFixture, unittest.TestCase):
         self.assertEqual(result["page_number"], 2)
         self.assertEqual(result["text"], "37% Final Project")
 
+    def test_canonical_name_with_full_source_label(self):
+        self.doc["pages"][0]["text"] = (
+            "Grading: 10% Reading assignments "
+            "(based on weekly summaries)"
+        )
+
+        self.reviewed["items"][0].update(
+            name="Reading assignments",
+            source_label=(
+                "Reading assignments "
+                "(based on weekly summaries)"
+            ),
+            aliases=["Reading"],
+            weight_percent=10,
+            source_quote=(
+                "10% Reading assignments "
+                "(based on weekly summaries)"
+            ),
+        )
+
+        self.save()
+
+        result = self.lookup(
+            "How much are Reading assignments worth in ZZ 123?"
+        )
+
+        self.assertIsNotNone(result)
+        self.assertEqual(
+            result["grading_fact"]["weight_percent"],
+            10,
+        )
+
     def test_alias(self):
         self.assertIsNotNone(self.lookup("How much is the Capstone worth in ZZ 123?"))
 
@@ -138,11 +170,29 @@ class TestGradingLookup(GradingFixture, unittest.TestCase):
         fake.retrieve.assert_not_called()
         self.assertEqual(result[0]["grading_fact"]["weight_percent"], 37)
 
-    def test_missing_explicit_term_has_no_answer(self):
+
+    def test_missing_explicit_term_reports_unavailable(self):
         result = router.retrieve_for_advisor(
             "What percentage is the final project worth in ZZ 123 in Spring 2027?"
         )
-        self.assertEqual(result, [])
+
+        self.assertEqual(len(result), 1)
+
+        doc = result[0]
+
+        self.assertEqual(
+            doc["retrieval_method"],
+            "syllabus_unavailable"
+        )
+        self.assertEqual(doc["course_code"], "ZZ 123")
+        self.assertEqual(doc["requested_term"], "20271")
+        self.assertEqual(doc["term_code"], "20271")
+        self.assertEqual(doc["available_terms"], ["20263"])
+        self.assertFalse(doc["historical"])
+
+        self.assertNotIn("grading_fact", doc)
+        self.assertNotIn("text", doc)
+
 
 
 class TestGradingAPI(GradingFixture, unittest.IsolatedAsyncioTestCase):

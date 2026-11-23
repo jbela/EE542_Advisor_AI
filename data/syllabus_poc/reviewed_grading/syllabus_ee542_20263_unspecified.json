@@ -1,0 +1,61 @@
+{
+  "document_id": "syllabus_ee542_20263_unspecified",
+  "source_file_hash": "75c6130a8905f414f0d058dae4bd6bfd8fa28e3e6b967909dacf1dc49ba48981",
+  "items": [
+    {
+      "name": "Attendance, class participation, and Quizzes",
+      "aliases": [
+        "Attendance and participation"
+      ],
+      "weight_percent": 15,
+      "page_number": 1,
+      "source_quote": "15% Attendance, class participation, and Quizzes",
+      "verified": true
+    },
+    {
+      "name": "Reading assignments",
+      "aliases": [
+        "Reading"
+      ],
+      "weight_percent": 10,
+      "page_number": 1,
+      "source_quote": "10% Reading assignments",
+      "verified": true
+    },
+    {
+      "name": "Laboratory assignments",
+      "aliases": [
+        "Labs",
+        "Laboratory"
+      ],
+      "weight_percent": 25,
+      "page_number": 1,
+      "source_quote": "25% Laboratory assignments",
+      "verified": true
+    },
+    {
+      "name": "Final Project",
+      "aliases": [
+        "Capstone project"
+      ],
+      "weight_percent": 50,
+      "page_number": 1,
+      "source_quote": "50% Final Project",
+      "verified": true
+    }
+  ],
+  "policies": [
+    {
+      "type": "late_penalty",
+      "page_number": 1,
+      "source_quote": "Late Policy: The score for the assignments turned in late will be deducted by 50%.",
+      "verified": true
+    },
+    {
+      "type": "grade_dispute",
+      "page_number": 1,
+      "source_quote": "Grade Adjustment: If you dispute any scoring of a problem on an exam or homework set, you have one week from the date that the graded paper is returned to request a change in the grade.",
+      "verified": true
+    }
+  ]
+}

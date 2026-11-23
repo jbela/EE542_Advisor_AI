@@ -1,0 +1,50 @@
+{
+  "document_id": "syllabus_ee510_20263_unspecified",
+  "source_file_hash": "d16f35af7070d4f8db2e9685f89506567bfc6fc1f95d291c4c674e1a72fc5c94",
+  "items": [
+    {
+      "name": "Homework",
+      "aliases": [
+        "Problem sets"
+      ],
+      "weight_percent": 20,
+      "page_number": 1,
+      "source_quote": "Homework: 20%",
+      "verified": true
+    },
+    {
+      "name": "Midterm",
+      "aliases": [
+        "Midterm exam"
+      ],
+      "weight_percent": 40,
+      "page_number": 1,
+      "source_quote": "Midterm: 40%",
+      "verified": true
+    },
+    {
+      "name": "Final",
+      "aliases": [
+        "Final exam"
+      ],
+      "weight_percent": 40,
+      "page_number": 1,
+      "source_quote": "Final: 40%",
+      "verified": true
+    }
+  ],
+  "policies": [
+    {
+      "type": "threshold_adjustment",
+      "page_number": 1,
+      "source_quote": "The above thresholds may be adjusted at the end of the semester at the discretion of the instructor.",
+      "verified": true
+    },
+    {
+      "type": "participation_adjustment",
+      "page_number": 1,
+      "source_quote": "Class participation may also be used to bump up the grade for students near a threshold.",
+      "verified": true
+    }
+  ]
+}

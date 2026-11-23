@@ -158,6 +158,7 @@ def normalize(doc):
         "source_type": doc.get("source_type"),
         "section_label": doc.get("section_label"),
         "source_file": doc.get("source_file"),
+        "instructor": doc.get("instructor"),
         "page_number": doc.get("page_number"),
         "grading_fact": doc.get("grading_fact"),
     }
@@ -170,6 +171,27 @@ def normalize_special(doc):
     code = doc.get("course_code") or ""
     checked = bool(doc.get("requested_term_checked", False))
     source = doc.get("source_url")
+
+    if method == "syllabus_unavailable":
+        available_terms = doc.get("available_terms", [])
+
+        return {
+            "id": f"syllabus_missing_{code.replace(' ', '')}_{term}",
+            "title": f"{code} syllabus unavailable",
+            "text": (
+                f"No imported syllabus is available for "
+                f"{code} in {format_term(term)}."
+            ),
+            "url": None,
+            "category": "course",
+            "source_type": "syllabus",
+            "course_code": code,
+            "term_code": term,
+            "requested_term": requested,
+            "retrieval_method": method,
+            "available_terms": available_terms,
+            "historical": False,
+        }
 
     if method in ("availability", "history", "comparison"):
         status = doc.get("availability_status")
@@ -296,7 +318,13 @@ def get_context(question, term_code=DEFAULT_TERM, top_k=5):
                     or term_code
                     or DEFAULT_TERM
                 )
-        elif method in ("availability", "history", "comparison", "historical_catalog"):
+        elif method in (
+            "availability",
+            "history",
+            "comparison",
+            "historical_catalog",
+            "syllabus_unavailable",
+        ):
             item = normalize_special(doc)
         else:
             raise ValueError(f"Unsupported retrieval method: {method}")

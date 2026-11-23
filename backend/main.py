@@ -1,5 +1,8 @@
 """Student question API backed by USC retrieval and local Ollama inference."""
 import os
+import json
+from datetime import datetime, timezone
+from pathlib import Path
 import httpx
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel, Field
@@ -10,7 +13,7 @@ from backend.prerequisite_service import assess_prerequisite_scenario
 from backend.student_question import is_personal_prerequisite, target_course
 from backend.answer_quality import (
     answer_exact_prerequisites, check_citations, requires_source_citations,
-    citation_coverage, course_citation_issues,
+    citation_coverage, course_citation_issues, cite_exact_course_listings,
 )
 from rag.evidence_sufficiency import classify_evidence
 from rag.advisor_retrieval import choose_retrieval_method, extract_semester
@@ -412,6 +415,15 @@ async def ask(data: Question):
                 "Respond in clear student-friendly language with the answer first. "
                 "Avoid repeating the question, listing unrelated course details, "
                 "or including raw JSON and internal data labels. "
+                "CITATION FORMAT (required for answers based on supplied sources): "
+                "Use bracketed source numbers exactly as shown, for example [1]. "
+                "Put a citation directly after each factual policy statement. "
+                "For a list of recommended courses, put a citation to that "
+                "specific course's source ON THE SAME LINE as its course code "
+                "and title. Example: - EE 547 — Applied and Cloud Computing [1]. "
+                "Do not collect citations at the end of the entire list. "
+                "Only cite a source if it supports the claim; when evidence "
+                "is missing, explicitly say that it cannot be verified. "
                 "Differentiate a course listing from a course being open for registration. "
                 "Never state that missing data means a requirement does not exist. "
                 "If the request asks for a personal decision, do not invent "
@@ -442,6 +454,8 @@ async def ask(data: Question):
     except (httpx.HTTPError, KeyError, ValueError) as exc:
         raise HTTPException(status_code=502, detail="LLM service failed") from exc
 
+    raw_answer = answer
+    answer = cite_exact_course_listings(answer, docs)
     answer, invalid = check_citations(answer, docs)
     coverage = citation_coverage(
         answer, docs, required=requires_source_citations(data.question, docs)
@@ -451,7 +465,35 @@ async def ask(data: Question):
         # Detect an obvious wrong or missing course citation per named result.
         # Do not present unsourced model-recommended courses as verified.
         coverage["course_citation_issues"] = course_issues
-    if coverage["missing_citations"] or course_issues:
+    rejected = bool(coverage["missing_citations"] or course_issues)
+    if os.getenv("DEBUG_CITATIONS") == "1" and rejected:
+        # Local-only diagnostics. Do not enable for real student conversations.
+        log_path = Path("reports/citation_debug.jsonl")
+        log_path.parent.mkdir(parents=True, exist_ok=True)
+        details = {
+            "timestamp_utc": datetime.now(timezone.utc).isoformat(),
+            "question": data.question,
+            "model": MODEL,
+            "raw_answer": raw_answer,
+            "cleaned_answer": answer,
+            "invalid_citation_numbers": invalid,
+            "coverage": coverage,
+            "course_citation_issues": course_issues,
+            "sources": [
+                {
+                    "number": i,
+                    "title": doc.get("title"),
+                    "course_code": doc.get("course_code"),
+                    "retrieval_method": doc.get("retrieval_method"),
+                    "url": doc.get("url"),
+                    "excerpt": (doc.get("text") or "")[:1200],
+                }
+                for i, doc in enumerate(docs, 1)
+            ],
+        }
+        with log_path.open("a", encoding="utf-8") as f:
+            f.write(json.dumps(details, ensure_ascii=False) + "\n")
+    if rejected:
         # The model supplied no usable source reference: avoid presenting
         # an uncited factual answer as though it were verified.
         answer = (

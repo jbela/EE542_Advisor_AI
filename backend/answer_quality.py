@@ -105,3 +105,54 @@ def course_citation_issues(answer, docs):
         if not normalized.issubset(supported):
             issues.append(line.strip()[:150])
     return issues
+
+def cite_exact_course_listings(answer, docs):
+    """Add citations to course-title list items matching retrieved records."""
+    if not any(d.get("retrieval_method") == "semantic_bge" for d in docs):
+        return answer
+
+    def norm(value):
+        return re.sub(r"[^a-z0-9]", "", str(value).lower())
+
+    lines = []
+
+    for line in answer.splitlines():
+        match = re.match(
+            r"^\s*(?:[-*]\s+|\d+[.)]\s+)([A-Z]{2,5}\s*-?\s*\d{3}[A-Z]?)\s*(.*)$",
+            line,
+            re.I,
+        )
+
+        if not match or CITATION.search(line):
+            lines.append(line)
+            continue
+
+        code = norm(match.group(1))
+        title_text = norm(match.group(2))
+        candidates = []
+
+        for i, doc in enumerate(docs, 1):
+            if norm(doc.get("course_code") or "") != code:
+                continue
+
+            if not doc.get("url"):
+                continue
+
+            title = str(doc.get("title") or "")
+
+            title = re.sub(
+                r"^\s*[A-Z]{2,5}\s*-?\s*\d{3}[A-Z]?\s*[-:–—]?\s*",
+                "",
+                title,
+                flags=re.I,
+            )
+
+            if norm(title) and title_text.endswith(norm(title)):
+                candidates.append(i)
+
+        if len(candidates) == 1:
+            line = f"{line.rstrip()} [{candidates[0]}]"
+
+        lines.append(line)
+
+    return "\n".join(lines)

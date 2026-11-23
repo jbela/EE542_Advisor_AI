@@ -6,19 +6,16 @@ from pydantic import BaseModel, Field
 import re
 
 from backend.rag_service import get_context, format_term
-<<<<<<< HEAD
-from backend.prerequisite_service import answer_prerequisite_scenario
-from rag.syllabus_grading_comparison import compare_grading_profiles
-from rag.course_lookup import extract_course_codes
-from rag.advisor_retrieval import extract_semester
-=======
 from backend.prerequisite_service import assess_prerequisite_scenario
 from backend.student_question import is_personal_prerequisite, target_course
-from backend.answer_quality import (answer_exact_prerequisites, check_citations,
-                                    requires_source_citations, citation_coverage,
-                                    course_citation_issues)
+from backend.answer_quality import (
+    answer_exact_prerequisites, check_citations, requires_source_citations,
+    citation_coverage, course_citation_issues,
+)
 from rag.evidence_sufficiency import classify_evidence
-from rag.advisor_retrieval import choose_retrieval_method
+from rag.advisor_retrieval import choose_retrieval_method, extract_semester
+from rag.course_lookup import extract_course_codes
+from rag.syllabus_grading_comparison import compare_grading_profiles
 
 app = FastAPI(title="USC Advisor AI Backend")
 
@@ -47,9 +44,7 @@ def _response_sources(docs):
             "term_code": doc.get("term_code"),
             "historical": doc.get("historical", False),
             "requested_term": doc.get("requested_term"),
-            "prerequisite_verification": doc.get(
-                "prerequisite_verification"
-            ),
+            "prerequisite_verification": doc.get("prerequisite_verification"),
             "document_id": doc.get("document_id"),
             "course_code": doc.get("course_code"),
             "source_type": doc.get("source_type"),
@@ -61,66 +56,41 @@ def _response_sources(docs):
         for doc in docs
     ]
 
+
 @app.post("/ask")
 async def ask(data: Question):
-<<<<<<< HEAD
     question = data.question
-
     course_codes = extract_course_codes(question)
     requested_term = extract_semester(question)
-
-    comparison_requested = bool(
-        re.search(
-            r"\b(compare|comparison|differences?|versus|vs\.?)\b",
-            question,
-            re.IGNORECASE,
-        )
-    )
-
-    grading_requested = bool(
-        re.search(
-            r"\b(grading|grades?|grade adjustments?|"
-            r"grading policies|grading weights?)\b",
-            question,
-            re.IGNORECASE,
-        )
-    )
-
-    if (
-        comparison_requested
-        and grading_requested
-        and len(course_codes) >= 2
-        and requested_term is not None
-    ):
-        comparison = compare_grading_profiles(
-            course_codes,
-            requested_term,
-        )
-
+    comparison_requested = bool(re.search(
+        r"\b(compare|comparison|differences?|versus|vs\.?)\b",
+        question, re.IGNORECASE,
+    ))
+    grading_requested = bool(re.search(
+        r"\b(grading|grades?|grade adjustments?|grading policies|grading weights?)\b",
+        question, re.IGNORECASE,
+    ))
+    if comparison_requested and grading_requested and len(course_codes) >= 2 and requested_term is not None:
+        comparison = compare_grading_profiles(course_codes, requested_term)
         if comparison is not None:
             return comparison
-
         return {
             "answer": (
-                "I could not verify complete grading profiles for "
-                "all requested courses in this semester. "
-                "I cannot provide a reliable grading comparison "
-                "from the available reviewed records. "
-                "Please consult the relevant course syllabi "
-                "or instructors for confirmation."
+                "I could not verify complete grading profiles for all requested "
+                "courses in this semester. I cannot provide a reliable grading "
+                "comparison from the available reviewed records. Please consult "
+                "the relevant course syllabi or instructors for confirmation."
             ),
             "sources": [],
             "status": "review_required",
         }
-=======
-    # Normalize only clear, personal prerequisite intents for retrieval.
-    # The RAG router still decides how to retrieve the canonical question.
-    retrieval_question = data.question
-    if is_personal_prerequisite(data.question):
-        code = target_course(data.question)
+
+    retrieval_question = question
+    if is_personal_prerequisite(question):
+        code = target_course(question)
         if code:
             retrieval_question = f"What are the prerequisites for {code}?"
->>>>>>> f32b1f5 (Rebasing main)
+
     try:
         docs = get_context(retrieval_question, term_code=data.term_code, top_k=5)
     except (FileNotFoundError, RuntimeError, ValueError) as exc:

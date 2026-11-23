@@ -58,5 +58,17 @@
     "title": "USC Registration Calendar",
     "url": "https://arr.usc.edu/registration-calendar/",
     "category": "shared"
- }
+  },
+  {
+    "id": "osas_how_to_register",
+    "title": "USC OSAS When and How to Register",
+    "url": "https://osas.usc.edu/new-students/when-how-to-register/",
+    "category": "shared"
+  },
+  {
+    "id": "osas_accommodation_information",
+    "title": "USC OSAS Accommodation Information",
+    "url": "https://osas.usc.edu/current-students/accommodation-information/",
+    "category": "shared"
+  }
 ]

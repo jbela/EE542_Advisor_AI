@@ -15,7 +15,7 @@ import streamlit as st
 # Page Configuration
 # ----------------------------------
 st.set_page_config(
-    page_title="USC Advisor AI",
+    page_title="USC Trojan Guide",
     page_icon="🎓",
     layout="wide",
     initial_sidebar_state="expanded",
@@ -380,7 +380,7 @@ def get_api_response(question: str) -> dict:
 # Sidebar
 # ----------------------------------
 with st.sidebar:
-    st.markdown("### USC Advisor AI")
+    st.markdown("### USC Trojan Guide")
     st.caption("Academic Advising Assistant")
     st.divider()
 
@@ -446,7 +446,7 @@ with logo_col:
         st.markdown("### USC")
 
 with title_col:
-    st.title("USC Advisor AI", anchor=False)
+    st.title("USC Trojan Guide", anchor=False)
     st.caption(
         "Your AI-powered Academic Advising Assistant"
     )
@@ -693,7 +693,7 @@ for message_index, message in enumerate(messages):
 # ----------------------------------
 with st.bottom:
     user_input = st.chat_input(
-        "Ask me anything about USC courses..."
+        " How can I help you today ..."
     )
 
     st.caption(

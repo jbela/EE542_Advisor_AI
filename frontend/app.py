@@ -719,7 +719,7 @@ if prompt:
     with st.chat_message("user", avatar=USER_AVATAR):
         st.markdown(prompt)
 
-    with st.spinner("USC Advisor AI is thinking..."):
+    with st.spinner("USC Trojan Guide is thinking..."):
         result = get_api_response(prompt)
 
     messages.append({

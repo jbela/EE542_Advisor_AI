@@ -143,6 +143,21 @@ SUBJECT_DISCOVERY_PATTERN = re.compile(
     re.IGNORECASE,
 )
 
+# Section facts (meeting times, instructors, seats) come from the Schedule of
+# Classes record for the requested semester, not from a syllabus.
+SCHEDULE_PATTERN = re.compile(
+    r"\b(?:when does .{0,40}\bmeet|meeting (?:times?|days?)|what time|"
+    r"class times?|lecture times?|days? and times?|who (?:teaches|is teaching)|"
+    r"instructors?|professors?|open seats?|seats?|how full|"
+    r"sections?|time slots?)\b",
+    re.IGNORECASE,
+)
+
+
+def asks_schedule(question):
+    return bool(SCHEDULE_PATTERN.search(question))
+
+
 COMPARISON_PATTERN = re.compile(
     r"\b(compare|comparison|difference|different|"
     r"changed|change between|versus|vs\.?)\b",
@@ -237,6 +252,12 @@ def choose_retrieval_method(question):
             return "exact"
 
     if codes:
+        if (SCHEDULE_PATTERN.search(question)
+                and not COMPARISON_PATTERN.search(question)
+                and not HISTORY_PATTERN.search(question)
+                and not re.search(r"\bsyllab(?:us|i)\b", question, re.IGNORECASE)):
+            return "exact"
+
         if COMPARISON_PATTERN.search(question):
             return "comparison"
 
@@ -283,6 +304,8 @@ def _course_evidence(course, requested_term, method="exact"):
         "recommended_preparation": course.get("recommended_preparation"),
         "source_url": course.get("source_url"),
         "prerequisite_verification": course.get("prerequisite_verification"),
+        "sections": course.get("sections"),
+        "collected_at": course.get("collected_at"),
     }
 
 def _availability_evidence(code, term_code):
@@ -485,6 +508,7 @@ def retrieve_for_advisor(question, term_code=DEFAULT_TERM, top_k=5):
             )
             or (
                 SYLLABUS_CONTENT_PATTERN.search(question)
+                and not asks_schedule(question)
                 and find_syllabus_term(codes[0]) is not None
             )
         )
@@ -696,6 +720,8 @@ def retrieve_for_advisor(question, term_code=DEFAULT_TERM, top_k=5):
                 "recommended_preparation": course.get("recommended_preparation"),
                 "source_url": course.get("source_url"),
                 "prerequisite_verification": course.get("prerequisite_verification"),
+                "sections": course.get("sections"),
+                "collected_at": course.get("collected_at"),
             })
             if len(results) >= top_k:
                 break

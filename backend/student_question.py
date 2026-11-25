@@ -32,7 +32,7 @@ ELIGIBILITY = re.compile(
 
 TARGET_PATTERNS = [
     re.compile(r"\b(?:prerequisites?|pre[- ]?reqs?|requirements?|eligibility)\s+(?:for|of)\s+(" + CODE + r")\b", re.I),
-    re.compile(r"\b(?:take|enroll\s+in|register\s+for|eligible\s+for|qualify\s+for|cleared\s+for|before|for)\s+(" + CODE + r")\b", re.I),
+    re.compile(r"\b(?:take|taking|enroll\s+in|enrolling\s+in|register\s+for|eligible\s+for|qualify\s+for|cleared\s+for|before|for)\s+(" + CODE + r")\b", re.I),
     re.compile(r"\b(" + CODE + r")\s+(?:prerequisites?|requirements?)\b", re.I),
 ]
 
@@ -93,6 +93,11 @@ def completion_statuses(question):
     if not markers:
         return None
     prefix = text[:markers[0][0]].strip()
+    # Context sentences before the claim ("I'm an EE master's student.") are
+    # ignored only if they are complete sentences that name no courses.
+    head, sep, tail = prefix.rpartition(".")
+    if sep and not CODE_RE.search(head):
+        prefix = tail.strip()
     if prefix and not re.fullmatch(
         r"(?:if|so|for\s+" + CODE + r"[,:]?|regarding\s+" + CODE + r"[,:]?)",
         prefix, re.I,

@@ -13,9 +13,48 @@ FACT_QUESTION = re.compile(
 )
 
 
+CITATION_GROUP = re.compile(r"\[(\s*\d+\s*(?:(?:[-–,]|and)\s*\d+\s*)+)\]")
+MAX_RANGE = 10
+
+
+def normalize_citation_groups(answer):
+    """Rewrite [1-3], [1, 2] and [1 and 2] as separate [n] citations.
+
+    Small models often group citations; without this the validator treats a
+    correctly sourced answer as uncited and triggers a slow retry. Each number
+    is still checked individually afterward. Ranges that are reversed or too
+    wide are left unchanged (and so stay invalid).
+    """
+    def expand(match):
+        numbers = []
+        for part in re.split(r"\s*(?:,|and)\s*", match.group(1).strip()):
+            bounds = [int(x) for x in re.split(r"\s*[-–]\s*", part)]
+            if len(bounds) == 1:
+                numbers.append(bounds[0])
+            elif len(bounds) == 2 and bounds[0] <= bounds[1] and bounds[1] - bounds[0] < MAX_RANGE:
+                numbers.extend(range(bounds[0], bounds[1] + 1))
+            else:
+                return match.group()
+        return "".join(f"[{n}]" for n in dict.fromkeys(numbers))
+
+    return CITATION_GROUP.sub(expand, answer)
+
+
+def is_citable(doc):
+    """A source is citable if a student can trace it: a public URL, or an
+    imported syllabus identified by document and page number."""
+    if doc.get("url"):
+        return True
+    return (
+        doc.get("source_type") == "syllabus"
+        and bool(doc.get("document_id"))
+        and doc.get("page_number") is not None
+    )
+
+
 def check_citations(answer, docs):
     """Remove invalid numeric citations; this does NOT verify claim support."""
-    valid = {i for i, doc in enumerate(docs, 1) if doc.get("url")}
+    valid = {i for i, doc in enumerate(docs, 1) if is_citable(doc)}
     invalid = set()
 
     def replace(match):
@@ -57,10 +96,19 @@ def answer_exact_prerequisites(question, docs):
         statement = f"The collected {term} record for {code} contains prerequisite data, but the logical relationship has not been verified. Please check the official listing or the department."
     else:
         statement = f"The {term} record for {code} lists prerequisites: {format_rule(rule) or format_requirement(rule)}."
+    cite = f" [{i}]" if doc.get("url") else ""
+    prep = doc.get("recommended_preparation")
+    if prep and rule in (None, []):
+        statement += f" The listing gives recommended preparation (not a formal prerequisite): {str(prep).rstrip('.')}."
     if doc.get("historical"):
-        statement += " This is historical information; current prerequisites and future availability are not confirmed."
-    if doc.get("url"):
-        statement += f" [{i}]"
+        statement += (f" {code} is not listed in the collected {format_term(doc.get('requested_term'))} "
+                      "records, so this is historical information; current prerequisites and "
+                      "future availability are not confirmed.")
+    statement += cite
+    from backend.course_schedule import prerequisite_change
+    change = prerequisite_change(code, doc.get("term_code"))
+    if change:
+        statement += f"\n\n{change}{cite}"
     return statement
 
 
@@ -75,7 +123,7 @@ def requires_source_citations(question, docs):
 def citation_coverage(answer, docs, required=False):
     """Check citation presence/validity, not whether claims are entailed."""
     cited = {int(x) for x in CITATION.findall(answer)}
-    valid = {i for i, doc in enumerate(docs, 1) if doc.get("url")}
+    valid = {i for i, doc in enumerate(docs, 1) if is_citable(doc)}
     return {
         "citations_required": bool(required),
         "missing_citations": bool(required and not (cited & valid)),

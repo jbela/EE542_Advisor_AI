@@ -112,6 +112,9 @@ def _course_record(doc, method="exact"):
         "retrieval_method": method,
         "prerequisite_verification": verification,
         "prerequisites_structured": doc.get("prerequisites"),
+        "recommended_preparation": doc.get("recommended_preparation"),
+        "sections": doc.get("sections"),
+        "collected_at": doc.get("collected_at"),
     }
 
 def normalize(doc):

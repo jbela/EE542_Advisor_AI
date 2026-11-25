@@ -30,6 +30,38 @@ class QualityHelpers(unittest.TestCase):
         self.assertIn('[1]', answer)
         self.assertIn('Cloud applications', answer)
 
+    def test_discovery_lists_prerequisites_when_asked(self):
+        verified = dict(doc(), catalog_record={
+            'term_code': '20271',
+            'prerequisites': {'operator': 'SINGLE', 'courses': ['EE 538']}})
+        unverified = dict(doc('EE 512', 'Cloud Signal Methods', 'Cloud computing for signals.', 2),
+                          catalog_record={'term_code': '20271', 'prerequisites': {
+                              'operator': 'UNVERIFIED', 'groups': [
+                                  {'operator': 'SINGLE', 'courses': ['EE 503']},
+                                  {'operator': 'UNVERIFIED', 'courses': ['EE 441', 'EE 510']}]}})
+        missing = dict(doc('EE 541', 'Cloud Deep Learning', 'Cloud computing with GPUs.', 3),
+                       catalog_record={'term_code': '20271', 'prerequisites': None})
+        answer = course_discovery_answer(
+            'What cloud computing courses are there and what are their prerequisites?',
+            [verified, unverified, missing])
+        self.assertIn('Spring 2027 listing): EE 538* [1]', answer)
+        self.assertIn('EE 503, EE 441, EE 510; the exact AND/OR logic is not verified', answer)
+        self.assertIn('does not mean none are required', answer)
+
+    def test_discovery_omits_prerequisites_when_not_asked(self):
+        d = dict(doc(), catalog_record={'term_code': '20271', 'prerequisites': None})
+        answer = course_discovery_answer('Which classes cover cloud computing?', [d])
+        self.assertNotIn('prerequisites', answer.lower())
+
+    def test_syllabus_page_without_url_is_citable(self):
+        syllabus = {'source_type': 'syllabus', 'document_id': 'syllabus_ee510_20263_unspecified',
+                    'page_number': 2, 'url': None, 'retrieval_method': 'hybrid'}
+        no_page = dict(syllabus, page_number=None)
+        cleaned, invalid = check_citations('Not listed [1]. Other [2].', [syllabus, no_page])
+        self.assertIn('[1]', cleaned)
+        self.assertEqual(invalid, [2])
+        self.assertFalse(citation_coverage('Not listed [1].', [syllabus], required=True)['missing_citations'])
+
     def test_no_relevant_discovery_returns_none(self):
         self.assertIsNone(course_discovery_answer('Which courses teach robotics?', [doc()]))
 

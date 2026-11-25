@@ -3,7 +3,8 @@ import re
 
 from backend.rag_service import format_term
 
-_STOP = set('which what where when how can do does is are the a an i me my we to for of in on with about and or class classes course courses ee usc interested interest learn study cover covers explore explores teach teaches related recommend recommendations some available best should take'.split())
+_STOP = set('which what where when how can do does is are the a an i me my we to for of in on with about and or class classes course courses ee usc interested interest learn study cover covers explore explores teach teaches related recommend recommendations some available best should take there their them they need prerequisite prerequisites prereq prereqs requirements required'.split())
+_PREREQ_Q = re.compile(r'\b(?:prereq(?:uisite)?s?|pre-reqs?|requirements?|what do i need)\b', re.I)
 _CODE = re.compile(r'\b[A-Z]{2,5}\s*-?\s*\d{3}[A-Z]?\b', re.I)
 _CITE = re.compile(r'\[(\d+)\]')
 
@@ -19,6 +20,42 @@ def _description(text):
         return match.group(1).strip()
     # For indexed prose chunks, avoid manufacturing a course description.
     return ''
+
+
+def _catalog_prerequisites(doc):
+    """Describe the listed prerequisites from the exact-term catalog record.
+
+    Only verified or single-course rules are stated as definite logic; other
+    listed courses are shown without inventing AND/OR relationships.
+    """
+    from backend.prerequisite_service import format_rule
+
+    record = doc.get('catalog_record')
+    if not isinstance(record, dict):
+        return 'prerequisites could not be checked (no exact-term listing)'
+    term = format_term(record.get('term_code'))
+    rule = record.get('prerequisites')
+    if rule is None:
+        return f'prerequisites not specified in the {term} listing (this does not mean none are required)'
+    if rule == []:
+        return f'no prerequisites listed in the {term} listing'
+    formatted = format_rule(rule)
+    if formatted:
+        return f'prerequisites ({term} listing): {formatted}'
+    codes = []
+
+    def collect(node):
+        if isinstance(node, dict):
+            for c in node.get('courses') or []:
+                if isinstance(c, str) and c not in codes:
+                    codes.append(c)
+            for g in node.get('groups') or []:
+                collect(g)
+    collect(rule)
+    if not codes:
+        return f'prerequisite data in the {term} listing could not be interpreted'
+    return (f'prerequisites ({term} listing) involve {", ".join(codes)}; '
+            'the exact AND/OR logic is not verified, so check the official listing')
 
 
 def course_discovery_answer(question, docs, limit=5):
@@ -52,6 +89,7 @@ def course_discovery_answer(question, docs, limit=5):
     options.sort(key=lambda x: (-x[0], x[1]))
     if not options:
         return None
+    want_prereqs = bool(_PREREQ_Q.search(question))
     lines = ['These collected USC course descriptions are relevant to your interests:']
     for _, i, code, title, desc, doc in options[:limit]:
         name = re.sub(r'^\s*' + re.escape(code) + r'\s*[-:–—]?\s*', '', title, flags=re.I).strip()
@@ -59,7 +97,10 @@ def course_discovery_answer(question, docs, limit=5):
         excerpt = re.split(r'(?<=[.!?])\s+', desc)[0].strip()
         if len(excerpt) > 210:
             excerpt = excerpt[:207].rsplit(' ', 1)[0] + '...'
-        lines.append(f'- **{code} — {name}** [${i}]: {excerpt}'.replace(f'[${i}]', f'[{i}]'))
+        line = f'- **{code} — {name}** [{i}]: {excerpt}'
+        if want_prereqs:
+            line += f'\n  - *{_catalog_prerequisites(doc)}* [{i}]'
+        lines.append(line)
     lines.append('These are exploratory matches, not a verified degree plan or an enrollment guarantee.')
     return '\n'.join(lines)
 
@@ -126,8 +167,9 @@ def cite_safe_policy_excerpts(docs, limit=2):
     """Conservative fallback if generation cannot pass citation validation."""
     lines = []
     seen = set()
+    from backend.answer_quality import is_citable
     for i, d in enumerate(docs, 1):
-        if not d.get('url'):
+        if not is_citable(d):
             continue
         raw = re.sub(r'\s+', ' ', (d.get('text') or '')).strip()
         if len(raw) < 25:

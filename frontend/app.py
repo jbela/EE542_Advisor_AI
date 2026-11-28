@@ -833,7 +833,6 @@ for message_index, message in enumerate(messages):
                             key=f"{state_key}_button",
                             on_click=toggle_answer,
                             args=(state_key,),
-                            help="View advising update",
                         )
 
                 # Show notice details BELOW the source row.

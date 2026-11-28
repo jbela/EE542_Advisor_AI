@@ -108,9 +108,13 @@ def _course_record(doc, method="exact"):
         "requested_term": requested,
         "historical": historical,
         "requested_term_checked": checked,
+        "availability_status": doc.get("availability_status"),
         "retrieval_method": method,
         "prerequisite_verification": verification,
         "prerequisites_structured": doc.get("prerequisites"),
+        "recommended_preparation": doc.get("recommended_preparation"),
+        "sections": doc.get("sections"),
+        "collected_at": doc.get("collected_at"),
     }
 
 def normalize(doc):
@@ -143,6 +147,17 @@ def normalize(doc):
 
         text = notice + "\n\n" + text
 
+    catalog = doc.get("catalog_record")
+    if method == "semantic_bge" and isinstance(catalog, dict):
+        # Term is confirmed by exact record lookup, not the BGE score.
+        fields = [f"Collected listing: {format_term(catalog['term_code'])}"]
+        for label, key in (("Prerequisites", "prerequisites"),
+                           ("Restrictions", "restrictions")):
+            value = catalog.get(key)
+            if value not in (None, "", []):
+                fields.append(f"{label}: {format_requirement(value)}")
+        text = text[:max(0, MAX_CHARS - len("\n".join(fields)) - 2)] + "\n" + "\n".join(fields)
+
     return {
         "id": doc.get("chunk_id") or doc.get("document_id"),
         "document_id": doc.get("document_id"),
@@ -161,6 +176,7 @@ def normalize(doc):
         "instructor": doc.get("instructor"),
         "page_number": doc.get("page_number"),
         "grading_fact": doc.get("grading_fact"),
+        "catalog_record": doc.get("catalog_record") if method == "semantic_bge" else None,
     }
 
 def normalize_special(doc):
@@ -246,6 +262,7 @@ def normalize_special(doc):
             "requested_term": requested,
             "historical": bool(doc.get("historical", False)),
             "requested_term_checked": checked,
+            "availability_status": status,
             "retrieval_method": method,
         }
 
@@ -307,12 +324,6 @@ def get_context(question, term_code=DEFAULT_TERM, top_k=5):
             item = normalize(doc)
 
             if method in ("hybrid", "semantic_bge"):
-                item["requested_term"] = str(
-                    doc.get("requested_term")
-                    or term_code
-                    or DEFAULT_TERM
-                )
-
                 item["requested_term"] = str(
                     doc.get("requested_term")
                     or term_code

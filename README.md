@@ -231,6 +231,29 @@ The backend runs at:
 
 http://127.0.0.1:8000
 
+On startup the backend loads the retrieval models and the LLM in the
+background so the first question is not slow. LLM settings can be changed
+with environment variables (defaults shown):
+
+| Variable | Default | Purpose |
+|---|---|---|
+| `OLLAMA_MODEL` | `qwen2.5:3b` | Model used for generated answers |
+| `OLLAMA_URL` | `http://127.0.0.1:11434/api/chat` | Ollama chat endpoint |
+| `OLLAMA_KEEP_ALIVE` | `30m` | How long the model stays loaded between questions |
+| `OLLAMA_TEMPERATURE` | `0` | Deterministic answers for repeatable runs |
+| `OLLAMA_NUM_PREDICT` | `320` | Maximum answer length in tokens |
+| `OLLAMA_RETRY_NUM_PREDICT` | `280` | Maximum length of the citation-repair retry |
+| `OLLAMA_TIMEOUT` | `180` | LLM request timeout in seconds |
+| `TG_WARMUP` | `1` | Set to `0` to skip the startup warm-up |
+
+To measure LLM latency on a machine (for example a GPU instance):
+
+```powershell
+py tests/benchmark_llm_latency.py qwen2.5:3b qwen2.5:7b --runs 3
+```
+
+Results are written to `reports/llm_latency.csv`.
+
 ### 8. Start the frontend
 
 In another PowerShell terminal:

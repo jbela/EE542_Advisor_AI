@@ -1,6 +1,7 @@
 import uuid
 import os
 import base64
+import re
 from html import escape
 from pathlib import Path
 from urllib.parse import urlparse
@@ -267,6 +268,80 @@ st.markdown(
 )
 
 
+def display_source_key(source, position):
+    """Use one identity for both citation numbers and visible source chips."""
+    if not isinstance(source, dict):
+        return None
+    source_type = source.get("source_type")
+    if source_type == "advisor_email":
+        return (
+            "advisor_email",
+            source.get("document_id") or source.get("id") or position,
+        )
+    if source_type == "syllabus":
+        return (
+            "syllabus",
+            source.get("document_id") or source.get("source_file") or (
+                str(source.get("course_code") or "Syllabus"),
+                str(source.get("term_code") or ""),
+                str(source.get("title") or "Course syllabus"),
+            ),
+        )
+    url = source.get("url")
+    if not isinstance(url, str):
+        return None
+    try:
+        parsed = urlparse(url)
+        if parsed.scheme not in ("http", "https") or not parsed.hostname:
+            return None
+    except ValueError:
+        return None
+    return (
+        parsed._replace(fragment="").geturl(),
+        str(source.get("title") or "USC source").strip(),
+    )
+
+
+def prepare_display_citations(answer, sources):
+    """Map passage citations onto deduplicated document chips.
+
+    Keep uncited retrieved documents visible. This changes presentation only;
+    it does not validate claim support. Preserve raw API and chat numbering.
+    """
+    if not isinstance(sources, list):
+        sources = []
+    unique_sources = []
+    source_numbers = {}
+    citation_numbers = {}
+    for original_number, source in enumerate(sources, start=1):
+        key = display_source_key(source, original_number)
+        if key is None:
+            continue
+        if key not in source_numbers:
+            source_numbers[key] = len(unique_sources) + 1
+            unique_sources.append(source)
+        citation_numbers[original_number] = source_numbers[key]
+
+    def rewrite_group(match):
+        mapped = []
+        for number in re.findall(r"\[(\d+)\]", match.group()):
+            display_number = citation_numbers.get(int(number))
+            if display_number is not None and display_number not in mapped:
+                mapped.append(display_number)
+        return "".join(f"[{number}]" for number in mapped)
+
+    # Protect code and Markdown links; only rewrite numeric citation runs.
+    protected = re.compile(
+        r"(```[\s\S]*?```|`[^`\n]*`|!?\[[^\]\n]*\]\([^\n)]*\))"
+    )
+    parts = protected.split(answer)
+    for index in range(0, len(parts), 2):
+        parts[index] = re.sub(
+            r"\[\d+\](?:[ \t]*\[\d+\])*", rewrite_group, parts[index]
+        )
+    return "".join(parts), unique_sources
+
+
 def toggle_answer(state_key):
     st.session_state[state_key] = not st.session_state.get(
         state_key, False
@@ -376,25 +451,12 @@ API_URL = os.getenv(
 
 
 def get_api_response(question: str) -> dict:
-    payload = {"question": question}
-
-    if st.session_state.get("use_advising_context"):
-        term_codes = {
-            "Spring 2027": "20271",
-            "Fall 2026": "20263",
-        }
-
-        payload.update({
-            "term_code": term_codes[
-                st.session_state["advising_term"]
-            ],
-            "department": st.session_state["advising_department"],
-            "audience": st.session_state["advising_audience"],
-            "on_date": st.session_state["advising_date"].isoformat(),
-            "include_demo_updates": st.session_state.get(
-                "include_demo_notices", False
-            ),
-        })
+    payload = {
+        "question": question,
+        "include_demo_updates": (
+            os.getenv("ALLOW_ADVISOR_EMAIL_DEMO") == "1"
+        ),
+    }
     try:
         response = requests.post(
             API_URL,
@@ -481,44 +543,6 @@ with st.sidebar:
     st.caption("Ellie, Jia, Isabel")
 
     st.divider()
-
-    with st.expander("Advising context"):
-        st.checkbox(
-            "Use advising context",
-            key="use_advising_context",
-        )
-
-        st.selectbox(
-            "Department",
-            ["ECE", "CS"],
-            key="advising_department",
-        )
-
-        st.selectbox(
-            "Student group",
-            ["Continuing MS students", "Undergraduate students"],
-            key="advising_audience",
-        )
-
-        st.selectbox(
-            "Semester",
-            ["Spring 2027", "Fall 2026"],
-            key="advising_term",
-        )
-
-        st.date_input(
-            "Date you are asking about",
-            value=datetime.now(APP_TIMEZONE).date(),
-            key="advising_date",
-        )
-
-        st.checkbox(
-            "Include demo notices",
-            key="include_demo_notices",
-        )
-
-        if st.session_state.get("include_demo_notices"):
-            st.caption("Demo notices are fictional test data.")
 
 
 # ----------------------------------
@@ -635,6 +659,9 @@ for message_index, message in enumerate(messages):
         content = message["content"]
 
         if message["role"] == "assistant":
+            content, sources = prepare_display_citations(
+                content, message.get("sources")
+            )
             display_assistant_answer(
                 content,
                 state_key=(
@@ -646,7 +673,6 @@ for message_index, message in enumerate(messages):
             st.markdown(content)
 
         if message["role"] == "assistant":
-            sources = message.get("sources") or []
             status = message.get("status", "unknown")
 
             if not isinstance(sources, list):
@@ -654,42 +680,14 @@ for message_index, message in enumerate(messages):
 
             source_chips = []
             advisor_sources = []
-            seen_sources = set()
 
             for i, source in enumerate(sources, start=1):
                 if not isinstance(source, dict):
                     continue
 
                 if source.get("source_type") == "advisor_email":
-                    source_key = (
-                        "advisor_email",
-                        source.get("document_id") or source.get("id"),
-                    )
-
-                    if source_key in seen_sources:
-                        continue
-
-                    seen_sources.add(source_key)
                     advisor_sources.append((i, source))
-                    continue
-
-                    seen_sources.add(source_key)
-
-                    label = (
-                        "Advisor (Demo)"
-                        if source.get("is_demo")
-                        else "Advisor"
-                    )
-
-                    title = str(source.get("title") or "Advisor update")
-                    sent = str(source.get("email_date") or "")
-                    tooltip = f"{title} | {sent}"
-
-                    source_chips.append(
-                        f'<span class="usc-source-chip" '
-                        f'title="{escape(tooltip, quote=True)}">'
-                        f'{escape(label)}</span>'
-                    )
+                    source_chips.append(("advisor", (i, source)))
                     continue
 
                 # Syllabi: one non-clickable citation per document.
@@ -702,18 +700,6 @@ for message_index, message in enumerate(messages):
                     )
                     term = str(source.get("term_code") or "")
                     instructor = source.get("instructor")
-
-                    source_key = (
-                        "syllabus",
-                        source.get("document_id")
-                        or source.get("source_file")
-                        or (course, term, title),
-                    )
-
-                    if source_key in seen_sources:
-                        continue
-
-                    seen_sources.add(source_key)
 
                     seasons = {
                         "1": "Spring",
@@ -744,11 +730,11 @@ for message_index, message in enumerate(messages):
                         label += f" | Section {section}"
 
 
-                    source_chips.append(
+                    source_chips.append(("html",
                         f'<span class="usc-source-chip usc-syllabus-chip" '
                         f'title="{escape(title, quote=True)}">'
                         f'{escape(label)}</span>'
-                    )
+                    ))
 
                     continue
 
@@ -774,30 +760,20 @@ for message_index, message in enumerate(messages):
                     source.get("title") or f"Source {i}"
                 )
 
-                source_key = (
-                    parsed._replace(fragment="").geturl(),
-                    title.strip(),
-                )
-
-                if source_key in seen_sources:
-                    continue
-
-                seen_sources.add(source_key)
-
                 label = (
                     title[:21] + "..."
                     if len(title) > 22
                     else title
                 )
 
-                source_chips.append(
+                source_chips.append(("html",
                     f'<a class="usc-source-chip" '
                     f'href="{escape(url, quote=True)}" '
                     f'title="{escape(title, quote=True)}" '
                     f'target="_blank" '
                     f'rel="noopener noreferrer">'
                     f'&#8599; {escape(label)}</a>'
-                )
+                ))
 
             if source_chips or advisor_sources:
                 row_key = (
@@ -816,10 +792,12 @@ for message_index, message in enumerate(messages):
                         width="content",
                     )
 
-                    for chip in source_chips:
-                        st.html(chip, width="content")
+                    for chip_type, chip in source_chips:
+                        if chip_type == "html":
+                            st.html(chip, width="content")
+                            continue
 
-                    for source_index, source in advisor_sources:
+                        source_index, source = chip
                         state_key = (
                             f"advisor_notice_"
                             f"{st.session_state.active_chat_id}_"
@@ -859,7 +837,10 @@ for message_index, message in enumerate(messages):
                             or "Notice content is unavailable."
                         )
 
-            elif status not in ("demo", "error"):
+            elif (
+                status not in ("demo", "error")
+                and message.get("sources")
+            ):
                 st.caption(
                     "No supporting sources available yet."
                 )
@@ -896,7 +877,7 @@ if prompt:
     with st.chat_message("user", avatar=USER_AVATAR):
         st.markdown(prompt)
 
-    with st.spinner("USC Advisor AI is thinking..."):
+    with st.spinner("USC Trojan Guide is thinking..."):
         result = get_api_response(prompt)
 
     messages.append({

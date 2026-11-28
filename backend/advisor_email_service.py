@@ -99,3 +99,125 @@ def get_email_context(
         })
 
     return documents
+
+def get_demo_advising_response(
+    question,
+    *,
+    term_code="20271",
+    department=None,
+    audience=None,
+    on_date=None,
+):
+    """Return a scoped demo answer, or None for other question intents.
+
+    A matched request with no applicable evidence returns (answer, None),
+    so the API can decline without citing unrelated retrieved passages.
+    """
+    from datetime import datetime
+
+    # Narrow advising-hours intent, without affecting normal RAG.
+    match = re.fullmatch(
+        r"(?:what (?:are|were|will be) (?:the )?)?"
+        r"(?:(?P<department>ece|cs) )?advising (?:walk-in )?hours"
+        r"(?: on (?P<day>[a-z]+ \d{1,2},? \d{4}|\d{4}-\d{2}-\d{2}))?"
+        r"(?: in spring 2027)?\s*\??",
+        question.strip(),
+        re.IGNORECASE,
+    )
+
+    if not match:
+        return None
+
+    # The explicit question takes precedence over sidebar defaults.
+    target_department = (
+        match.group("department") or department or "ECE"
+    ).strip().upper()
+    date_text = match.group("day")
+    target_date = on_date
+
+    if date_text:
+        target_date = None
+
+        for fmt in (
+            "%B %d %Y",
+            "%b %d %Y",
+            "%Y-%m-%d",
+        ):
+            try:
+                target_date = datetime.strptime(
+                    date_text.replace(",", ""), fmt
+                ).date()
+                break
+            except ValueError:
+                continue
+
+    if not target_date:
+        return (
+            "Please provide a valid calendar date so I can check "
+            f"{target_department} advising hours.",
+            None,
+        )
+
+    date_label = (
+        f"{target_date:%B} {target_date.day}, {target_date.year}"
+    )
+    unavailable = (
+        f"I couldn't verify {target_department} advising hours for "
+        f"{date_label} from the available sources. Please contact "
+        f"{target_department} advising to confirm.",
+        None,
+    )
+
+    # Only the scoped ECE notice is available in this presentation PoC.
+    # Missing/inapplicable evidence must not fall through to unrelated RAG
+    # passages or manufacture a claim that advising is closed.
+    if (
+        term_code != "20271"
+        or target_department != "ECE"
+        or (audience and audience.casefold() != "continuing ms students")
+    ):
+        return unavailable
+
+    docs = get_email_context(
+        question,
+        department="ECE",
+        audience="Continuing MS students",
+        term="Spring 2027",
+        on_date=target_date.isoformat(),
+        include_demo=True,
+    )
+
+    docs = [doc for doc in docs if doc.get("is_demo") is True]
+
+    if len(docs) != 1:
+        return unavailable
+
+    doc = docs[0]
+
+    # Render the approved notice directly instead of asking the
+    # LLM to paraphrase and potentially introduce errors.
+    notice = " ".join(doc["notice_text"].split())
+
+    notice = re.sub(
+        r"^DEMO ONLY\.\s*",
+        "",
+        notice,
+        flags=re.IGNORECASE,
+    )
+
+    notice = re.sub(
+        r"^This notice replaces [^.]+\.\s*",
+        "",
+        notice,
+        flags=re.IGNORECASE,
+    )
+
+    if not notice:
+        return unavailable
+
+    answer = (
+        f"{notice} [1]\n\n"
+        "*Demo only — fictional advising notice.*"
+    )
+
+    return answer, doc

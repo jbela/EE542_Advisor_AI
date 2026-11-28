@@ -222,6 +222,45 @@ st.markdown(
             outline: 2px solid var(--usc-gold) !important;
             outline-offset: 3px;
         }
+
+        /* Match regular source chips and Advisor buttons. */
+        [class*="st-key-source_row_"] .usc-source-chip:not(.usc-syllabus-chip),
+        [class*="st-key-source_row_"] button {
+            box-sizing: border-box !important;
+            display: inline-flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            height: 28px !important;
+            min-height: 28px !important;
+            padding: 0 10px !important;
+            border: 1px solid #E8E0D7 !important;
+            border-radius: 999px !important;
+            background: #FFFFFF !important;
+            color: #990000 !important;
+            font-size: 12px !important;
+            font-weight: 400 !important;
+            line-height: 1 !important;
+            box-shadow: none !important;
+        }
+
+        [class*="st-key-source_row_"] button p {
+            margin: 0 !important;
+            padding: 0 !important;
+            font-size: 12px !important;
+            font-weight: 400 !important;
+            line-height: 1 !important;
+            color: #990000 !important;
+        }
+
+        [class*="st-key-source_row_"] button:hover {
+            background: #FFF5F0 !important;
+            border-color: #990000 !important;
+        }
+
+        [class*="st-key-source_row_"] button:focus-visible {
+            outline: 2px solid #FFCC00 !important;
+            outline-offset: 2px;
+        }
     </style>
     """,
     unsafe_allow_html=True,
@@ -337,10 +376,29 @@ API_URL = os.getenv(
 
 
 def get_api_response(question: str) -> dict:
+    payload = {"question": question}
+
+    if st.session_state.get("use_advising_context"):
+        term_codes = {
+            "Spring 2027": "20271",
+            "Fall 2026": "20263",
+        }
+
+        payload.update({
+            "term_code": term_codes[
+                st.session_state["advising_term"]
+            ],
+            "department": st.session_state["advising_department"],
+            "audience": st.session_state["advising_audience"],
+            "on_date": st.session_state["advising_date"].isoformat(),
+            "include_demo_updates": st.session_state.get(
+                "include_demo_notices", False
+            ),
+        })
     try:
         response = requests.post(
             API_URL,
-            json={"question": question},
+            json=payload,
             timeout=130,
         )
         response.raise_for_status()
@@ -420,7 +478,47 @@ with st.sidebar:
 
     st.divider()
     st.caption("EE542 Final Project · Fall 2026")
-    st.caption("Jia, Ellie, Isabel")
+    st.caption("Ellie, Jia, Isabel")
+
+    st.divider()
+
+    with st.expander("Advising context"):
+        st.checkbox(
+            "Use advising context",
+            key="use_advising_context",
+        )
+
+        st.selectbox(
+            "Department",
+            ["ECE", "CS"],
+            key="advising_department",
+        )
+
+        st.selectbox(
+            "Student group",
+            ["Continuing MS students", "Undergraduate students"],
+            key="advising_audience",
+        )
+
+        st.selectbox(
+            "Semester",
+            ["Spring 2027", "Fall 2026"],
+            key="advising_term",
+        )
+
+        st.date_input(
+            "Date you are asking about",
+            value=datetime.now(APP_TIMEZONE).date(),
+            key="advising_date",
+        )
+
+        st.checkbox(
+            "Include demo notices",
+            key="include_demo_notices",
+        )
+
+        if st.session_state.get("include_demo_notices"):
+            st.caption("Demo notices are fictional test data.")
 
 
 # ----------------------------------
@@ -555,12 +653,44 @@ for message_index, message in enumerate(messages):
                 sources = []
 
             source_chips = []
+            advisor_sources = []
             seen_sources = set()
 
             for i, source in enumerate(sources, start=1):
                 if not isinstance(source, dict):
                     continue
 
+                if source.get("source_type") == "advisor_email":
+                    source_key = (
+                        "advisor_email",
+                        source.get("document_id") or source.get("id"),
+                    )
+
+                    if source_key in seen_sources:
+                        continue
+
+                    seen_sources.add(source_key)
+                    advisor_sources.append((i, source))
+                    continue
+
+                    seen_sources.add(source_key)
+
+                    label = (
+                        "Advisor (Demo)"
+                        if source.get("is_demo")
+                        else "Advisor"
+                    )
+
+                    title = str(source.get("title") or "Advisor update")
+                    sent = str(source.get("email_date") or "")
+                    tooltip = f"{title} | {sent}"
+
+                    source_chips.append(
+                        f'<span class="usc-source-chip" '
+                        f'title="{escape(tooltip, quote=True)}">'
+                        f'{escape(label)}</span>'
+                    )
+                    continue
 
                 # Syllabi: one non-clickable citation per document.
                 if source.get("source_type") == "syllabus":
@@ -669,18 +799,66 @@ for message_index, message in enumerate(messages):
                     f'&#8599; {escape(label)}</a>'
                 )
 
-            if source_chips:
-                chips_html = "".join(source_chips)
-
-                st.markdown(
-                    '<div class="usc-sources-row">'
-                    '<span class="usc-sources-label">'
-                    'Sources'
-                    '</span>'
-                    f'{chips_html}'
-                    '</div>',
-                    unsafe_allow_html=True,
+            if source_chips or advisor_sources:
+                row_key = (
+                    f"source_row_"
+                    f"{st.session_state.active_chat_id}_{message_index}"
                 )
+
+                with st.container(
+                    key=row_key,
+                    horizontal=True,
+                    vertical_alignment="center",
+                    gap="small",
+                ):
+                    st.html(
+                        '<span class="usc-sources-label">Sources</span>',
+                        width="content",
+                    )
+
+                    for chip in source_chips:
+                        st.html(chip, width="content")
+
+                    for source_index, source in advisor_sources:
+                        state_key = (
+                            f"advisor_notice_"
+                            f"{st.session_state.active_chat_id}_"
+                            f"{message_index}_{source_index}"
+                        )
+
+                        is_open = st.session_state.get(state_key, False)
+
+                        st.button(
+                            "▴ Advisor update" if is_open else "▾ Advisor update",
+                            key=f"{state_key}_button",
+                            on_click=toggle_answer,
+                            args=(state_key,),
+                            help="View advising update",
+                        )
+
+                # Show notice details BELOW the source row.
+                for source_index, source in advisor_sources:
+                    state_key = (
+                        f"advisor_notice_"
+                        f"{st.session_state.active_chat_id}_"
+                        f"{message_index}_{source_index}"
+                    )
+
+                    if st.session_state.get(state_key, False):
+                        title = (
+                            source.get("notice_title")
+                            or "Advising update"
+                        )
+
+                        if source.get("is_demo"):
+                            st.caption("DEMO · Fictional test notice")
+
+                        st.markdown(f"**{escape(str(title))}**")
+
+                        st.write(
+                            source.get("notice_text")
+                            or "Notice content is unavailable."
+                        )
 
             elif status not in ("demo", "error"):
                 st.caption(

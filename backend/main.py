@@ -3,6 +3,8 @@ import os
 import httpx
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel, Field
+from datetime import date
+from backend.advisor_email_service import get_email_context
 import re
 
 from backend.rag_service import get_context, format_term
@@ -20,6 +22,11 @@ URL = os.getenv("OLLAMA_URL", "http://127.0.0.1:11434/api/chat")
 class Question(BaseModel):
     question: str = Field(min_length=1, max_length=2000)
     term_code: str = "20271"
+
+    department: str | None = None
+    audience: str | None = None
+    on_date: date | None = None
+    include_demo_updates: bool = False
 
 
 @app.get("/health")
@@ -48,8 +55,35 @@ def _response_sources(docs):
             "section_label": doc.get("section_label"),
             "source_file": doc.get("source_file"),
             "page_number": doc.get("page_number"),
+            "sender": doc.get("sender"),
+            "email_date": doc.get("email_date"),
+            "effective_from": doc.get("effective_from"),
+            "effective_until": doc.get("effective_until"),
+            "is_demo": doc.get("is_demo", False),
+            "notice_title": doc.get("notice_title"),
+            "notice_text": doc.get("notice_text"),
+            "department": doc.get("department"),
+            "audience": doc.get("audience"),
         }
         for doc in docs
+    ]
+
+def _cited_documents(answer, docs):
+    cited_numbers = set()
+
+    for group in re.findall(
+        r"\[(\d+(?:\s*,\s*\d+)*)\]",
+        answer,
+    ):
+        cited_numbers.update(
+            int(number)
+            for number in re.findall(r"\d+", group)
+        )
+
+    return [
+        doc
+        for number, doc in enumerate(docs, start=1)
+        if number in cited_numbers
     ]
 
 @app.post("/ask")
@@ -102,8 +136,55 @@ async def ask(data: Question):
             "sources": [],
             "status": "review_required",
         }
+
+    email_docs = []
+
+    context_values = (
+        data.department,
+        data.audience,
+        data.on_date,
+    )
+
+    if any(value is not None for value in context_values):
+        if not all(context_values):
+            raise HTTPException(
+                status_code=422,
+                detail="Department, audience and on_date are all required.",
+            )
+
+    if data.include_demo_updates:
+        if os.getenv("ALLOW_ADVISOR_EMAIL_DEMO") != "1":
+            raise HTTPException(
+                status_code=403,
+                detail="Advisor email demo mode is disabled on this server.",
+            )
+
+        if not all(context_values):
+            raise HTTPException(
+                status_code=422,
+                detail="Demo updates require explicit student context.",
+            )
+
     try:
-        docs = get_context(data.question, term_code=data.term_code, top_k=5)
+        docs = get_context(
+            data.question,
+            term_code=data.term_code,
+            top_k=5,
+        )
+
+        # Keep course-specific questions on their existing retrieval path.
+        if all(context_values) and not course_codes:
+            email_docs = get_email_context(
+                data.question,
+                department=data.department,
+                audience=data.audience,
+                term=format_term(requested_term or data.term_code),
+                on_date=data.on_date.isoformat(),
+                include_demo=data.include_demo_updates,
+            )
+
+        docs = email_docs + docs
+
     except (FileNotFoundError, RuntimeError, ValueError) as exc:
         raise HTTPException(
             status_code=503,
@@ -338,6 +419,27 @@ async def ask(data: Question):
                 "A missing prerequisite field does not mean that a course "
                 "has no prerequisites. "
 
+                "Advisor email notices apply only to their stated "
+                "department, audience, semester and date range. "
+                "Use a specific applicable notice when it establishes "
+                "an exception to a general schedule. Do not infer that "
+                "unrelated policies have changed. "
+                "If sources conflict without a clear scoped exception, "
+                "explain the conflict and recommend confirmation. "
+                "For a notice marked as demo, explicitly label the answer "
+                "as a demo scenario, not an actual USC announcement. "
+                "Interpret date ranges as inclusive unless the source "
+                "explicitly states otherwise. If a notice states that "
+                "a service is available throughout a date range, a date "
+                "inside that range is covered, subject to any stated "
+                "exceptions. The exact queried date does not need to be "
+                "listed separately. "
+                "For example, January 12 is within January 11–15. "
+                "Do not interpret the absence of an individually listed "
+                "date as evidence that the service is unavailable. "
+                "Make the final answer consistent with the source facts "
+                "you have just stated. "
+
             ),
         },
         {
@@ -363,10 +465,16 @@ async def ask(data: Question):
     except (httpx.HTTPError, KeyError, ValueError) as exc:
         raise HTTPException(status_code=502, detail="LLM service failed") from exc
 
-    sources = _response_sources(docs)
+    cited_docs = _cited_documents(answer, docs)
+    sources = _response_sources(cited_docs)
+
     return {
         "answer": answer,
         "sources": sources,
         # Citation presence alone is not proof that the answer is supported.
-        "status": "review_required",
+        "status": (
+            "demo"
+            if any(doc.get("is_demo") for doc in email_docs)
+            else "review_required"
+        ),
     }

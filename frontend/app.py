@@ -1,6 +1,7 @@
 import uuid
 import os
 import base64
+import re
 from html import escape
 from pathlib import Path
 from urllib.parse import urlparse
@@ -222,10 +223,123 @@ st.markdown(
             outline: 2px solid var(--usc-gold) !important;
             outline-offset: 3px;
         }
+
+        /* Match regular source chips and Advisor buttons. */
+        [class*="st-key-source_row_"] .usc-source-chip:not(.usc-syllabus-chip),
+        [class*="st-key-source_row_"] button {
+            box-sizing: border-box !important;
+            display: inline-flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            height: 28px !important;
+            min-height: 28px !important;
+            padding: 0 10px !important;
+            border: 1px solid #E8E0D7 !important;
+            border-radius: 999px !important;
+            background: #FFFFFF !important;
+            color: #990000 !important;
+            font-size: 12px !important;
+            font-weight: 400 !important;
+            line-height: 1 !important;
+            box-shadow: none !important;
+        }
+
+        [class*="st-key-source_row_"] button p {
+            margin: 0 !important;
+            padding: 0 !important;
+            font-size: 12px !important;
+            font-weight: 400 !important;
+            line-height: 1 !important;
+            color: #990000 !important;
+        }
+
+        [class*="st-key-source_row_"] button:hover {
+            background: #FFF5F0 !important;
+            border-color: #990000 !important;
+        }
+
+        [class*="st-key-source_row_"] button:focus-visible {
+            outline: 2px solid #FFCC00 !important;
+            outline-offset: 2px;
+        }
     </style>
     """,
     unsafe_allow_html=True,
 )
+
+
+def display_source_key(source, position):
+    """Use one identity for both citation numbers and visible source chips."""
+    if not isinstance(source, dict):
+        return None
+    source_type = source.get("source_type")
+    if source_type == "advisor_email":
+        return (
+            "advisor_email",
+            source.get("document_id") or source.get("id") or position,
+        )
+    if source_type == "syllabus":
+        return (
+            "syllabus",
+            source.get("document_id") or source.get("source_file") or (
+                str(source.get("course_code") or "Syllabus"),
+                str(source.get("term_code") or ""),
+                str(source.get("title") or "Course syllabus"),
+            ),
+        )
+    url = source.get("url")
+    if not isinstance(url, str):
+        return None
+    try:
+        parsed = urlparse(url)
+        if parsed.scheme not in ("http", "https") or not parsed.hostname:
+            return None
+    except ValueError:
+        return None
+    return (
+        parsed._replace(fragment="").geturl(),
+        str(source.get("title") or "USC source").strip(),
+    )
+
+
+def prepare_display_citations(answer, sources):
+    """Map passage citations onto deduplicated document chips.
+
+    Keep uncited retrieved documents visible. This changes presentation only;
+    it does not validate claim support. Preserve raw API and chat numbering.
+    """
+    if not isinstance(sources, list):
+        sources = []
+    unique_sources = []
+    source_numbers = {}
+    citation_numbers = {}
+    for original_number, source in enumerate(sources, start=1):
+        key = display_source_key(source, original_number)
+        if key is None:
+            continue
+        if key not in source_numbers:
+            source_numbers[key] = len(unique_sources) + 1
+            unique_sources.append(source)
+        citation_numbers[original_number] = source_numbers[key]
+
+    def rewrite_group(match):
+        mapped = []
+        for number in re.findall(r"\[(\d+)\]", match.group()):
+            display_number = citation_numbers.get(int(number))
+            if display_number is not None and display_number not in mapped:
+                mapped.append(display_number)
+        return "".join(f"[{number}]" for number in mapped)
+
+    # Protect code and Markdown links; only rewrite numeric citation runs.
+    protected = re.compile(
+        r"(```[\s\S]*?```|`[^`\n]*`|!?\[[^\]\n]*\]\([^\n)]*\))"
+    )
+    parts = protected.split(answer)
+    for index in range(0, len(parts), 2):
+        parts[index] = re.sub(
+            r"\[\d+\](?:[ \t]*\[\d+\])*", rewrite_group, parts[index]
+        )
+    return "".join(parts), unique_sources
 
 
 def toggle_answer(state_key):
@@ -337,10 +451,16 @@ API_URL = os.getenv(
 
 
 def get_api_response(question: str) -> dict:
+    payload = {
+        "question": question,
+        "include_demo_updates": (
+            os.getenv("ALLOW_ADVISOR_EMAIL_DEMO") == "1"
+        ),
+    }
     try:
         response = requests.post(
             API_URL,
-            json={"question": question},
+            json=payload,
             timeout=130,
         )
         response.raise_for_status()
@@ -420,7 +540,9 @@ with st.sidebar:
 
     st.divider()
     st.caption("EE542 Final Project · Fall 2026")
-    st.caption("Jia, Ellie, Isabel")
+    st.caption("Ellie, Jia, Isabel")
+
+    st.divider()
 
 
 # ----------------------------------
@@ -537,6 +659,9 @@ for message_index, message in enumerate(messages):
         content = message["content"]
 
         if message["role"] == "assistant":
+            content, sources = prepare_display_citations(
+                content, message.get("sources")
+            )
             display_assistant_answer(
                 content,
                 state_key=(
@@ -548,19 +673,22 @@ for message_index, message in enumerate(messages):
             st.markdown(content)
 
         if message["role"] == "assistant":
-            sources = message.get("sources") or []
             status = message.get("status", "unknown")
 
             if not isinstance(sources, list):
                 sources = []
 
             source_chips = []
-            seen_sources = set()
+            advisor_sources = []
 
             for i, source in enumerate(sources, start=1):
                 if not isinstance(source, dict):
                     continue
 
+                if source.get("source_type") == "advisor_email":
+                    advisor_sources.append((i, source))
+                    source_chips.append(("advisor", (i, source)))
+                    continue
 
                 # Syllabi: one non-clickable citation per document.
                 if source.get("source_type") == "syllabus":
@@ -572,18 +700,6 @@ for message_index, message in enumerate(messages):
                     )
                     term = str(source.get("term_code") or "")
                     instructor = source.get("instructor")
-
-                    source_key = (
-                        "syllabus",
-                        source.get("document_id")
-                        or source.get("source_file")
-                        or (course, term, title),
-                    )
-
-                    if source_key in seen_sources:
-                        continue
-
-                    seen_sources.add(source_key)
 
                     seasons = {
                         "1": "Spring",
@@ -614,11 +730,11 @@ for message_index, message in enumerate(messages):
                         label += f" | Section {section}"
 
 
-                    source_chips.append(
+                    source_chips.append(("html",
                         f'<span class="usc-source-chip usc-syllabus-chip" '
                         f'title="{escape(title, quote=True)}">'
                         f'{escape(label)}</span>'
-                    )
+                    ))
 
                     continue
 
@@ -644,45 +760,87 @@ for message_index, message in enumerate(messages):
                     source.get("title") or f"Source {i}"
                 )
 
-                source_key = (
-                    parsed._replace(fragment="").geturl(),
-                    title.strip(),
-                )
-
-                if source_key in seen_sources:
-                    continue
-
-                seen_sources.add(source_key)
-
                 label = (
                     title[:21] + "..."
                     if len(title) > 22
                     else title
                 )
 
-                source_chips.append(
+                source_chips.append(("html",
                     f'<a class="usc-source-chip" '
                     f'href="{escape(url, quote=True)}" '
                     f'title="{escape(title, quote=True)}" '
                     f'target="_blank" '
                     f'rel="noopener noreferrer">'
                     f'&#8599; {escape(label)}</a>'
+                ))
+
+            if source_chips or advisor_sources:
+                row_key = (
+                    f"source_row_"
+                    f"{st.session_state.active_chat_id}_{message_index}"
                 )
 
-            if source_chips:
-                chips_html = "".join(source_chips)
+                with st.container(
+                    key=row_key,
+                    horizontal=True,
+                    vertical_alignment="center",
+                    gap="small",
+                ):
+                    st.html(
+                        '<span class="usc-sources-label">Sources</span>',
+                        width="content",
+                    )
 
-                st.markdown(
-                    '<div class="usc-sources-row">'
-                    '<span class="usc-sources-label">'
-                    'Sources'
-                    '</span>'
-                    f'{chips_html}'
-                    '</div>',
-                    unsafe_allow_html=True,
-                )
+                    for chip_type, chip in source_chips:
+                        if chip_type == "html":
+                            st.html(chip, width="content")
+                            continue
 
-            elif status not in ("demo", "error"):
+                        source_index, source = chip
+                        state_key = (
+                            f"advisor_notice_"
+                            f"{st.session_state.active_chat_id}_"
+                            f"{message_index}_{source_index}"
+                        )
+
+                        is_open = st.session_state.get(state_key, False)
+
+                        st.button(
+                            "▴ Advisor update" if is_open else "▾ Advisor update",
+                            key=f"{state_key}_button",
+                            on_click=toggle_answer,
+                            args=(state_key,),
+                        )
+
+                # Show notice details BELOW the source row.
+                for source_index, source in advisor_sources:
+                    state_key = (
+                        f"advisor_notice_"
+                        f"{st.session_state.active_chat_id}_"
+                        f"{message_index}_{source_index}"
+                    )
+
+                    if st.session_state.get(state_key, False):
+                        title = (
+                            source.get("notice_title")
+                            or "Advising update"
+                        )
+
+                        if source.get("is_demo"):
+                            st.caption("DEMO · Fictional test notice")
+
+                        st.markdown(f"**{escape(str(title))}**")
+
+                        st.write(
+                            source.get("notice_text")
+                            or "Notice content is unavailable."
+                        )
+
+            elif (
+                status not in ("demo", "error")
+                and message.get("sources")
+            ):
                 st.caption(
                     "No supporting sources available yet."
                 )

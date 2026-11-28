@@ -7,6 +7,8 @@ import httpx
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel, Field
 import re
+from datetime import date
+from backend.advisor_email_service import get_demo_advising_response
 
 from backend.rag_service import get_context, format_term
 from backend.prerequisite_service import assess_prerequisite_scenario
@@ -102,6 +104,11 @@ class Question(BaseModel):
     question: str = Field(min_length=1, max_length=2000)
     term_code: str = "20271"
 
+    department: str | None = None
+    audience: str | None = None
+    on_date: date | None = None
+    include_demo_updates: bool = False
+
 
 @app.get("/health")
 def health():
@@ -127,6 +134,15 @@ def _response_sources(docs):
             "section_label": doc.get("section_label"),
             "source_file": doc.get("source_file"),
             "page_number": doc.get("page_number"),
+            "sender": doc.get("sender"),
+            "email_date": doc.get("email_date"),
+            "effective_from": doc.get("effective_from"),
+            "effective_until": doc.get("effective_until"),
+            "is_demo": doc.get("is_demo", False),
+            "notice_title": doc.get("notice_title"),
+            "notice_text": doc.get("notice_text"),
+            "department": doc.get("department"),
+            "audience": doc.get("audience"),
         }
         for doc in docs
     ]
@@ -137,6 +153,39 @@ async def ask(data: Question):
     question = data.question
     course_codes = extract_course_codes(question)
     requested_term = extract_semester(question)
+    if data.include_demo_updates:
+        if os.getenv("ALLOW_ADVISOR_EMAIL_DEMO") != "1":
+            raise HTTPException(
+                status_code=403,
+                detail="Advisor email demo mode is disabled.",
+            )
+
+        if not course_codes:
+            result = get_demo_advising_response(
+                question,
+                term_code=requested_term or data.term_code,
+                department=data.department,
+                audience=data.audience,
+                on_date=data.on_date,
+            )
+
+            if result is not None:
+                answer, doc = result
+                has_evidence = doc is not None
+
+                return {
+                    "answer": answer,
+                    "sources": _response_sources([doc]) if has_evidence else [],
+                    "status": "demo" if has_evidence else "review_required",
+                    "decision_status": (
+                        "evidence_available" if has_evidence
+                        else "evidence_unavailable"
+                    ),
+                    "invalid_citations": [],
+                    "citations_required": has_evidence,
+                    "missing_citations": False,
+                    "cited_source_count": int(has_evidence),
+                }
     comparison_requested = bool(re.search(
         r"\b(compare|comparison|differences?|versus|vs\.?)\b",
         question, re.IGNORECASE,
